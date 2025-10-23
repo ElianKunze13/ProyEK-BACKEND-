@@ -1,12 +1,12 @@
-package com.example.demo.authsecurity.service;
+package edu.ies63.prog2.mascotas.authsecurity.service;
 
 
-import com.example.demo.authsecurity.dto.AuthRequest;
-import com.example.demo.authsecurity.dto.AuthResponse;
-import com.example.demo.dto.UsuarioDto;
-import com.example.demo.mapper.UsuarioMapper;
-import com.example.demo.model.Usuario;
-import com.example.demo.repository.UsuarioRepository;
+import edu.ies63.prog2.mascotas.authsecurity.dto.AuthRequest;
+import edu.ies63.prog2.mascotas.authsecurity.dto.AuthResponse;
+import edu.ies63.prog2.mascotas.dto.UsuarioDto;
+import edu.ies63.prog2.mascotas.mapper.UsuarioMapper;
+import edu.ies63.prog2.mascotas.model.Usuario;
+import edu.ies63.prog2.mascotas.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;

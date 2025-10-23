@@ -1,4 +1,4 @@
-package com.example.demo.authsecurity.service;
+package edu.ies63.prog2.mascotas.authsecurity.service;
 
 import edu.ies63.prog2.mascotas.model.Usuario;
 import edu.ies63.prog2.mascotas.repository.UsuarioRepository;

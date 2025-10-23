@@ -1,6 +1,7 @@
-package com.example.demo.authsecurity.service;
+package edu.ies63.prog2.mascotas.authsecurity.service;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;

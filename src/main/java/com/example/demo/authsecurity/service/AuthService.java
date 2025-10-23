@@ -1,9 +1,9 @@
-package com.example.demo.authsecurity.service;
+package edu.ies63.prog2.mascotas.authsecurity.service;
 
 
-import com.example.demo.authsecurity.dto.AuthRequest;
-import com.example.demo.authsecurity.dto.AuthResponse;
-import com.example.demo.dto.UsuarioDto;
+ import edu.ies63.prog2.mascotas.authsecurity.dto.AuthRequest;
+ import edu.ies63.prog2.mascotas.authsecurity.dto.AuthResponse;
+ import edu.ies63.prog2.mascotas.dto.UsuarioDto;
 
 public interface AuthService {
   AuthResponse register(UsuarioDto request);

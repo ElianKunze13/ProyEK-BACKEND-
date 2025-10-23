@@ -1,6 +1,6 @@
-package com.example.demo.config;
+package edu.ies63.prog2.mascotas.config;
 
-import com.example.demo.authsecurity.JwtAuthFilter;
+import edu.ies63.prog2.mascotas.authsecurity.JwtAuthFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -127,7 +127,7 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfig() {
     CorsConfiguration config = new CorsConfiguration();
-    config.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:9080", "https://localhost:9443", "http://localhost:3000"));
+    config.setAllowedOrigins(List.of("http://localhost:4200","http://localhost:8080"));
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("*"));
     config.setAllowCredentials(true);

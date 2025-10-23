@@ -1,6 +1,6 @@
-package com.example.demo.authsecurity;
+package edu.ies63.prog2.mascotas.authsecurity;
 
-import com.example.demo.authsecurity.service.JwtService;
+import edu.ies63.prog2.mascotas.authsecurity.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
