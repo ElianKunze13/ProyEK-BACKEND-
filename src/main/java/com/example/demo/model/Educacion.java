@@ -15,6 +15,9 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Educacion {
+
+    /// educacion serian cursos, talleres o carreras estudiadas (tecnicaturas, campamentos)
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -29,6 +32,8 @@ public class Educacion {
 
     @Enumerated(EnumType.STRING)
     private Nivel nivel;
+
+    //incluir imagen de certificado o pdf
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")

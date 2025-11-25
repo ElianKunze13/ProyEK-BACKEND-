@@ -12,6 +12,10 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Habilidad {
+
+    /// habilidades serian capacidades blandas
+    /// (comunicacion, trabajo en equipo, adaptabilidad, rapidez de aprendisaje, trabajo bajo presion)
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

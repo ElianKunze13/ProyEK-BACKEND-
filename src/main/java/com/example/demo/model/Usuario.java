@@ -35,6 +35,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class Usuario {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -55,7 +56,7 @@ public class Usuario {
     @NotBlank
     private String password;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    /*@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Conocimiento> conocimientos = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -66,7 +67,7 @@ public class Usuario {
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Experiencia> experiencias = new ArrayList<>();
-
+*/
 
     /* private  boolean active=true;
 

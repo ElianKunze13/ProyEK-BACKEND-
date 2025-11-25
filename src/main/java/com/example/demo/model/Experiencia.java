@@ -16,6 +16,8 @@ import java.time.LocalDate;
 @Builder
 public class Experiencia {
 
+    /// experiencia serian proyectos o aportes realizados (porfolio, apps, codigo abierto)
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -32,6 +34,10 @@ public class Experiencia {
     @NotEmpty
     @Size(min=5, max=300, message = "La descripción debe tener entre 5 y 301 caracteres")
     private String descripcion;
+
+    // incluir tags con tecnologias utilizadas(Angular, bootstrap, etc.)
+
+    // incluir nota en que se trabajo particularmente en caso de ser  un proyecto colaborativo
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
