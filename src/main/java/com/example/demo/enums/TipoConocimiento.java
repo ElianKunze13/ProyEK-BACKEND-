@@ -6,7 +6,6 @@ public enum TipoConocimiento {
     BACKEND,
     BASE_DE_DATOS,
     TESTING,
-    DEVOPS,
     INTELIGENCIA_ARTIFICIAL,
     OTROS
 }

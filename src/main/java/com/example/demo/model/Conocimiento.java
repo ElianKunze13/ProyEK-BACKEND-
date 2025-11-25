@@ -36,7 +36,7 @@ public class Conocimiento {
     private TipoConocimiento tipoConocimiento;
 
     //conocimiento tendra icono
-    //estaran agrupados por su tipo (frontend, backend, test, AI)
+    //estaran agrupados en listas por su tipo (frontend, backend, test, AI)
 
     @OneToMany(mappedBy = "Conocimiento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Imagen> imagenes = new ArrayList<>();

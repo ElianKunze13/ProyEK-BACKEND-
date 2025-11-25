@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
 
+import com.example.demo.enums.TecnologiaUsada;
+import com.example.demo.enums.TipoExperiencia;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -26,21 +28,22 @@ public class Experiencia {
     @Size(min = 3, max = 145, message = "Nombre debe tener entre 3 y 20 caracteres")
     private String titulo;
 
-    @Column(name="fechaYHora")
+    @Column(name = "fechaYHora")
     @NotNull
     private LocalDate fechaHora;
 
     @NotNull
     @NotEmpty
-    @Size(min=5, max=300, message = "La descripción debe tener entre 5 y 301 caracteres")
-    private String descripcion;
+    @Size(min = 5, max = 300, message = "La descripción debe tener entre 5 y 301 caracteres")
+    private String descripcion;    // incluir en descripcion aporte personal en caso de ser un proyecto colaborativo
 
-    // incluir tags con tecnologias utilizadas(Angular, bootstrap, etc.)
-
-    // incluir nota en que se trabajo particularmente en caso de ser  un proyecto colaborativo
+    private TipoExperiencia tipoExperiencia;
+    // incluir las tecnologias y tipo de experiencia como tags
+    private TecnologiaUsada tecnologiaUsada;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
+
 
 }

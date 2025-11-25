@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ConocimientoRepository extends JpaRepository<Conocimiento, Integer> {
+    //definir consultas JPQL para traer lista de conocimientos
+    // segun su tipo (FRONTEND, BACKEND, BASE_DATOS, ETC.)
 }
