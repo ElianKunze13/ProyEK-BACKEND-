@@ -9,6 +9,7 @@ public interface UsuarioService {
 
 
     UsuarioDto getById(Integer id);
+    UsuarioDto getByUsername(String username);
 
     UsuarioDto create(UsuarioDto usuarioDto);
 
