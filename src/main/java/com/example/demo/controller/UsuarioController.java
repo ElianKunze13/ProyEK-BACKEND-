@@ -21,6 +21,11 @@ public class UsuarioController {
         ResponseEntity responseEntity = ResponseEntity.ok(usuarioService.getById(id));
         return responseEntity;
     }
+    @GetMapping("/username")
+    ResponseEntity<UsuarioDto> getUsuarioByUsername(String username) {
+        ResponseEntity responseEntity = ResponseEntity.ok(usuarioService.getByUsername(username));
+        return responseEntity;
+    }
 
     // POST /usuarios
     @PostMapping

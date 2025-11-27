@@ -1,4 +1,4 @@
-package edu.ies63.prog2.mascotas.authsecurity.dto;
+package com.example.demo.authsecurity.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

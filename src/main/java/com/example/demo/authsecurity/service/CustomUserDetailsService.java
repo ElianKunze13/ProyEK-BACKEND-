@@ -1,7 +1,7 @@
-package edu.ies63.prog2.mascotas.authsecurity.service;
+package com.example.demo.authsecurity.service;
 
-import edu.ies63.prog2.mascotas.model.Usuario;
-import edu.ies63.prog2.mascotas.repository.UsuarioRepository;
+import com.example.demo.model.Usuario;
+import com.example.demo.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;

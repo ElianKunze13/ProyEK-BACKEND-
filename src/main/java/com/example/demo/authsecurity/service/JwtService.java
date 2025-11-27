@@ -1,4 +1,4 @@
-package edu.ies63.prog2.mascotas.authsecurity.service;
+package com.example.demo.authsecurity.service;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.SignatureAlgorithm;
