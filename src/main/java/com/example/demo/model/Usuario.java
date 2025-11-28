@@ -48,14 +48,13 @@ public class Usuario implements UserDetails, Source {
     private String username;
 
     @NotNull
-    @NotBlank
     private String password;
-    @Enumerated(EnumType.STRING)
-    @NotNull(message = "Rol no puede ser nulo")
+
+
     private Role rol;
 
     // Relaciones que faltan:
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+   /* @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Habilidad> habilidades = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -65,7 +64,7 @@ public class Usuario implements UserDetails, Source {
     private List<Experiencia> experiencias = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Educacion> educaciones = new ArrayList<>();
+    private List<Educacion> educaciones = new ArrayList<>();*/
 
      private  boolean active=true;
 

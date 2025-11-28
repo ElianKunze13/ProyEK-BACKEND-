@@ -8,6 +8,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity(name = "Educacion")
 @Data
@@ -34,6 +37,8 @@ public class Educacion {
     private Nivel nivel;
 
     //incluir imagen de certificado o pdf
+    @OneToMany(mappedBy = "Educacion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Imagen> imagenes = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")

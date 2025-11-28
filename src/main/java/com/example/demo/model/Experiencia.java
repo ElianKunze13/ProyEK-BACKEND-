@@ -37,8 +37,8 @@ public class Experiencia {
     @Size(min = 5, max = 300, message = "La descripción debe tener entre 5 y 301 caracteres")
     private String descripcion;    // incluir en descripcion aporte personal en caso de ser un proyecto colaborativo
 
-    private TipoExperiencia tipoExperiencia;
-    // incluir las tecnologias y tipo de experiencia como tags
+
+    private TipoExperiencia tipoExperiencia; //incluir tecnologias y tipo de experiencia como tags
     private TecnologiaUsada tecnologiaUsada;
 
     @ManyToOne(fetch = FetchType.LAZY)

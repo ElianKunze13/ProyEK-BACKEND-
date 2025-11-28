@@ -6,8 +6,6 @@ import java.util.List;
 
 public interface UsuarioService {
 
-
-
     UsuarioDto getById(Integer id);
     UsuarioDto getByUsername(String username);
 

@@ -9,7 +9,7 @@ public enum TecnologiaUsada {
     JAVA,
     JAVASCRIPT,
     TYPESCRIPT,
-    BOOTSTRAT,
+    BOOTSTRAP,
     TAILWIND,
     PYTHON,
     PHP,

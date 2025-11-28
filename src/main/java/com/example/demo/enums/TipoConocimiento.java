@@ -4,8 +4,8 @@ public enum TipoConocimiento {
 
     FRONTEND,
     BACKEND,
-    BASE_DE_DATOS,
+    BASE_DATOS,
     TESTING,
-    INTELIGENCIA_ARTIFICIAL,
+    IA,
     OTROS
 }

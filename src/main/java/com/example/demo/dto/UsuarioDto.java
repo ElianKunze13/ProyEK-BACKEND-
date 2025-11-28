@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.example.demo.enums.Role;
 import com.example.demo.model.Conocimiento;
 import com.example.demo.model.Educacion;
 import com.example.demo.model.Experiencia;
@@ -22,8 +23,8 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class UsuarioDto {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+   
     private Integer id;
 
     @NotNull(message = "Nombre no puede ser nulo")
@@ -41,18 +42,11 @@ public class UsuarioDto {
     @NotNull
     @NotBlank
     private String password;
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Rol no puede ser nulo")
+    private Role rol;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Conocimiento> conocimientos = new ArrayList<>();
-
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Habilidad> habilidades = new ArrayList<>();
-
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Educacion> educaciones = new ArrayList<>();
-
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Experiencia> experiencias = new ArrayList<>();
+    private  boolean active=true;
 
 
 }
