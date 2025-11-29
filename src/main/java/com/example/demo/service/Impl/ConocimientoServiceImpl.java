@@ -30,7 +30,10 @@ public class ConocimientoServiceImpl implements ConocimientoService {
 
     @Override
     public void deleteConocimientoById(Integer id) {
+        log.info("Eliminando conocimiento con ID: {}", id);
         conocimientoRepository.deleteById(id);
+        log.info("Conocimiento eliminado exitosamente");
+
     }
 
     @Override

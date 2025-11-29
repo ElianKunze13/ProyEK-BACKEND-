@@ -1,8 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.ConocimientoDto;
-import com.example.demo.dto.EducacionDto;
-import com.example.demo.model.Conocimiento;
+
 
 import java.util.List;
 
