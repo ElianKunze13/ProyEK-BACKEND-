@@ -5,9 +5,8 @@ import com.example.demo.dto.ImagenDto;
 import java.util.List;
 
 public interface ImagenService {
-    ImagenDto saveImagen(ImagenDto imagenDto);
 
-    ImagenDto actualizarImagenPorId(Integer id, ImagenDto imagenDto);
+    ImagenDto saveImagen(ImagenDto imagenDto);
 
     void deleteImagenPorId(Integer id);
 

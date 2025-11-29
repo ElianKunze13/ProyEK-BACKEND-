@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.ConocimientoDto;
+import com.example.demo.dto.EducacionDto;
 import com.example.demo.model.Conocimiento;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface ConocimientoService {
     List<ConocimientoDto> filtrarBD();
     List<ConocimientoDto> filtrarTesting();
     List<ConocimientoDto> filtrarOtros();
+
+    ConocimientoDto actualizarConocimientoPorId(Integer id, ConocimientoDto conocimientoDto);
 }

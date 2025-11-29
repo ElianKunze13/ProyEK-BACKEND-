@@ -10,8 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Slf4j
 @Service
@@ -53,8 +52,22 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UsuarioDto update(UsuarioDto usuarioDto) {
-        return null;
+    public UsuarioDto update(Integer id, UsuarioDto usuarioDto) {
+        log.info("Actualizando usuario con id: "+ id);
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado " + id)); // lanza un error de usuario no encontrado
+
+        // Actualizamos solo campos permitidos
+        usuario.setNombre(usuarioDto.getNombre());
+        usuario.setTelefono(usuarioDto.getTelefono());
+        usuario.setUsername(usuarioDto.getUsername());
+        usuario.setPassword(usuarioDto.getPassword());
+        usuario.setActive(usuarioDto.isActive());
+
+        Usuario updated = usuarioRepository.save(usuario);
+        return usuarioMapper.toDto(updated);
+
+
     }
 
 

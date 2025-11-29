@@ -39,7 +39,7 @@ public class UsuarioController {
     // PUT /usuarios/{id}
     @PutMapping("/{id}")
     ResponseEntity<UsuarioDto> updateUsuario(@PathVariable Integer id, @RequestBody UsuarioDto usuarioDto) {
-        ResponseEntity responseEntity = ResponseEntity.ok(usuarioService.update(usuarioDto));
+        ResponseEntity responseEntity = ResponseEntity.ok(usuarioService.update(id,usuarioDto));
         return responseEntity;
     }
 

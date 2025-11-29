@@ -11,7 +11,7 @@ public interface UsuarioService {
 
     UsuarioDto create(UsuarioDto usuarioDto);
 
-    UsuarioDto update(UsuarioDto usuarioDto);
+    UsuarioDto update(Integer id, UsuarioDto usuarioDto);
 
 
 }

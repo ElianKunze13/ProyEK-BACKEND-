@@ -8,6 +8,6 @@ import org.mapstruct.Mapper;
 public interface HabilidadMapper {
 
     HabilidadDto toHabilidadDto(Habilidad habilidad);
-    Habilidad toHabilidadDto(HabilidadDto habilidadDto);
+    Habilidad toHabilidad(HabilidadDto habilidadDto);
 
 }

@@ -7,5 +7,5 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface EducacionMapper {
     EducacionDto toEducacionDto(Educacion educacion);
-Educacion toEducacionDto(EducacionDto educacionDto);
+Educacion toEducacion(EducacionDto educacionDto);
 }
