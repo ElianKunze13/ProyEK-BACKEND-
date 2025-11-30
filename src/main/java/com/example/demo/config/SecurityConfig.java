@@ -1,6 +1,6 @@
-package edu.ies63.prog2.mascotas.config;
+package com.example.demo.config;
 
-import edu.ies63.prog2.mascotas.authsecurity.JwtAuthFilter;
+import com.example.demo.authsecurity.JwtAuthFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

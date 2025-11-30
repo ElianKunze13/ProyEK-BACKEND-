@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -32,13 +33,17 @@ public class Conocimiento {
     @Size(min = 3, max = 145, message = "Nombre debe tener entre 3 y 20 caracteres")
     private String nombre;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
     private Nivel nivel;
 
     //estaran agrupados en listas por su tipo (frontend, backend, test, AI)
+    @NotNull
+    @Enumerated(EnumType.STRING)
     private TipoConocimiento tipoConocimiento;
 
     //conocimiento tendra imagen de icono
-    @OneToMany(mappedBy = "Conocimiento", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "conocimiento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Imagen> imagenes = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

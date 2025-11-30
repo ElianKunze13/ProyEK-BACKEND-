@@ -19,11 +19,11 @@ public class Imagen {
     @NonNull
     private String alt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "conocimiento_id")
     private Conocimiento conocimiento;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "educacion_id")
     private Educacion educacion;
 }

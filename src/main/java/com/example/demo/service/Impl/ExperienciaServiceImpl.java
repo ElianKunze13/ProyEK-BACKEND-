@@ -49,7 +49,7 @@ public class ExperienciaServiceImpl implements ExperienciaService {
     }
 
     @Override
-    public void deleteExperienciaporId(Integer id) {
+    public void deleteExperienciaPorId(Integer id) {
         experienciaRepository.deleteById(id);
     }
 

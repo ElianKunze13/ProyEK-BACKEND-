@@ -16,7 +16,7 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     // GET /usuarios/{id}
-    @GetMapping("/{id}")
+    @GetMapping("/traerPor/{id}")
     ResponseEntity<UsuarioDto> getUsuarioById(@PathVariable Integer id) {
         ResponseEntity responseEntity = ResponseEntity.ok(usuarioService.getById(id));
         return responseEntity;
@@ -28,7 +28,7 @@ public class UsuarioController {
     }
 
     // POST /usuarios
-    @PostMapping
+    @PostMapping("/guardarUsuario")
     ResponseEntity<UsuarioDto> saveUsuario(@RequestBody UsuarioDto usuarioDto) {
         ResponseEntity responseEntity = ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -37,7 +37,7 @@ public class UsuarioController {
     }
 
     // PUT /usuarios/{id}
-    @PutMapping("/{id}")
+    @PutMapping("/usuario/{id}")
     ResponseEntity<UsuarioDto> updateUsuario(@PathVariable Integer id, @RequestBody UsuarioDto usuarioDto) {
         ResponseEntity responseEntity = ResponseEntity.ok(usuarioService.update(id,usuarioDto));
         return responseEntity;

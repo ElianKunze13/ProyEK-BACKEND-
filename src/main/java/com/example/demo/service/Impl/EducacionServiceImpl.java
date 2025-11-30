@@ -4,6 +4,7 @@ import com.example.demo.dto.EducacionDto;
 import com.example.demo.mapper.EducacionMapper;
 import com.example.demo.model.Conocimiento;
 import com.example.demo.model.Educacion;
+import com.example.demo.model.Imagen;
 import com.example.demo.repository.EducacionRepository;
 import com.example.demo.service.EducacionService;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j // remplaza el  Sout
 @Service // indica que es un servicio
@@ -31,16 +33,33 @@ public class EducacionServiceImpl implements EducacionService {
     @Override
     public EducacionDto actualizarEducacionPorId(Integer id, EducacionDto educacionDto) {
         log.info("Actualizando educaion con id: " + id);
-        Educacion educacionExistente = educacionRepository.findById(id).orElse(null);
-        if (educacionExistente != null) {
-            educacionExistente.setDescripcion(educacionDto.getDescripcion());
-            educacionExistente.setTipoEducacion(educacionDto.getTipoEducacion());
-            educacionExistente.setNivel(educacionDto.getNivel());
+        Educacion educacion = educacionRepository.findById(id).orElse(null);
 
-            Educacion educacionActualizada = educacionRepository.save(educacionExistente);
+        if (educacion != null) {
+            educacion.setDescripcion(educacionDto.getDescripcion());
+            educacion.setTipoEducacion(educacionDto.getTipoEducacion());
+            educacion.setNivel(educacionDto.getNivel());
+
+            // metodo especifico para actualizar fotos
+            if (educacionDto.getImagenes() != null && !educacionDto.getImagenes().isEmpty()) {
+                educacion.getImagenes().clear();//borra las fotos
+                List<Imagen> nuevaImagen = educacionDto.getImagenes().stream()
+                        .map(imagenDto -> {
+                            Imagen imagen = new Imagen();
+                            imagen.setUrl(imagenDto.getUrl());//establece url nueva
+                            imagen.setAlt(imagenDto.getAlt());//establece alt nueva
+                            imagen.setEducacion(educacion); // Establecer relación bidireccional
+                            return imagen;
+                        })
+                        .collect(Collectors.toList());
+                educacion.getImagenes().addAll(nuevaImagen);
+            }
+
+
+            Educacion educacionActualizada = educacionRepository.save(educacion);
             return educacionMapper.toEducacionDto(educacionActualizada);
         } else {
-            log.warn("Conocimiento no encontrado con id: " + id);
+            log.warn("Educacion no encontrado con id: " + id);
             return null;
         }
     }

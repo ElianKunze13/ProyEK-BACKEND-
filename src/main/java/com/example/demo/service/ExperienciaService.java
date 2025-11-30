@@ -10,7 +10,7 @@ public interface ExperienciaService {
 
     ExperienciaDto actualizarExperienciaPorId(Integer id, ExperienciaDto experienciaDto);
 
-    void deleteExperienciaporId(Integer id);
+    void deleteExperienciaPorId(Integer id);
 
     List<ExperienciaDto> getAllExperiencias();
 

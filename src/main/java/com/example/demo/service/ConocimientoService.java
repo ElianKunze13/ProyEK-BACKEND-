@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.ConocimientoDto;
+import com.example.demo.enums.TipoConocimiento;
 
 
 import java.util.List;
@@ -12,11 +13,11 @@ public interface ConocimientoService {
     void deleteConocimientoById(Integer id);
 
     //definir metodos para traer segun tipo de conocimiento
-    List<ConocimientoDto> filtrarFrontEnd ();
-    List<ConocimientoDto> filtrarBackEnd();
-    List<ConocimientoDto> filtrarBD();
-    List<ConocimientoDto> filtrarTesting();
-    List<ConocimientoDto> filtrarOtros();
+    List<ConocimientoDto> filtrarFrontEnd(TipoConocimiento tipoConocimiento);
+    List<ConocimientoDto> filtrarBackEnd(TipoConocimiento tipoConocimiento);
+    List<ConocimientoDto> filtrarBD(TipoConocimiento tipoConocimiento);
+    List<ConocimientoDto> filtrarTesting(TipoConocimiento tipoConocimiento);
+    List<ConocimientoDto> filtrarOtros(TipoConocimiento tipoConocimiento);
 
     ConocimientoDto actualizarConocimientoPorId(Integer id, ConocimientoDto conocimientoDto);
 }

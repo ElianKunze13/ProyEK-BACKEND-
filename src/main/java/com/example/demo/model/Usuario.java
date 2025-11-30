@@ -50,7 +50,8 @@ public class Usuario implements UserDetails, Source {
     @NotNull
     private String password;
 
-
+    @NotNull
+    @Enumerated(EnumType.STRING)
     private Role rol;
 
     // Relaciones que faltan:

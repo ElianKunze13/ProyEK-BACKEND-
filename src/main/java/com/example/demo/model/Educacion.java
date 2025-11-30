@@ -30,14 +30,16 @@ public class Educacion {
     @Size(min=5, max=300, message = "La descripción debe tener entre 5 y 301 caracteres")
     private String descripcion;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private TipoEducacion tipoEducacion;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private Nivel nivel;
 
     //incluir imagen de certificado o pdf
-    @OneToMany(mappedBy = "Educacion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "educacion", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Imagen> imagenes = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
