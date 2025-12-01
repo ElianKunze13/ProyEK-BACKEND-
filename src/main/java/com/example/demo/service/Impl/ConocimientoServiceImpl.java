@@ -1,9 +1,11 @@
 package com.example.demo.service.Impl;
 
 import com.example.demo.dto.ConocimientoDto;
+import com.example.demo.dto.EducacionDto;
 import com.example.demo.enums.TipoConocimiento;
 import com.example.demo.mapper.ConocimientoMapper;
 import com.example.demo.model.Conocimiento;
+import com.example.demo.model.Educacion;
 import com.example.demo.model.Imagen;
 import com.example.demo.repository.ConocimientoRepository;
 import com.example.demo.service.ConocimientoService;
@@ -36,6 +38,14 @@ public class ConocimientoServiceImpl implements ConocimientoService {
         log.info("Eliminando conocimiento con ID: {}", id);
         conocimientoRepository.deleteById(id);
         log.info("Conocimiento eliminado exitosamente");
+
+    }
+    @Override
+    public List<ConocimientoDto> getAllConocimientos() {
+        List<Conocimiento> todasLosConocimientos = conocimientoRepository.findAll();
+        return todasLosConocimientos.stream()
+                .map(conocimientoMapper::toConocimientoDto)
+                .toList();
 
     }
 

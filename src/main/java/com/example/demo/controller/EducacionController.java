@@ -32,7 +32,7 @@ public class EducacionController {
         return responseEntity;
     }
 
-    @PutMapping("/auth/modificar/educacion")
+    @PutMapping("/auth/modificar/educacion/{id}")
     ResponseEntity<EducacionDto> updateEducacion(@PathVariable Integer id, @RequestBody @Valid EducacionDto educacionDto) {
         try {
             EducacionDto educacionActualizada = educacionService.actualizarEducacionPorId(id, educacionDto);

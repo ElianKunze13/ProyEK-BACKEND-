@@ -16,17 +16,17 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     // GET /usuarios/{id}
-    @GetMapping("/traerPor/{id}")
+    @GetMapping("/auth/traerPor/{id}")
     ResponseEntity<UsuarioDto> getUsuarioById(@PathVariable Integer id) {
         ResponseEntity responseEntity = ResponseEntity.ok(usuarioService.getById(id));
         return responseEntity;
     }
-    @GetMapping("/username")
-    ResponseEntity<UsuarioDto> getUsuarioByUsername(String username) {
+    @GetMapping("/username/{username}")
+    ResponseEntity<UsuarioDto> getUsuarioByUsername(@PathVariable String username) {
 
         System.out.println("Buscando usuario con username: " + username);
-        ResponseEntity responseEntity = ResponseEntity.ok(usuarioService.getByUsername(username));
-        return responseEntity;
+        UsuarioDto usuario = usuarioService.getByUsername(username);
+        return ResponseEntity.ok(usuario);
     }
 
     // POST /usuarios

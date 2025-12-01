@@ -1,7 +1,9 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.ConocimientoDto;
+import com.example.demo.dto.EducacionDto;
 import com.example.demo.enums.TipoConocimiento;
+import com.example.demo.model.Conocimiento;
 import com.example.demo.service.ConocimientoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,11 @@ public class ConocimientoController {
     @Autowired
     private ConocimientoService conocimientoService;
 
+    @GetMapping("/todos/educaciones")
+    public ResponseEntity<List<ConocimientoDto>> getAllConocimientos(){
+        ResponseEntity responseEntity = ResponseEntity.ok(conocimientoService.getAllConocimientos());
+        return responseEntity;
+    }
     @GetMapping("/frontend")
     public ResponseEntity<List<ConocimientoDto>> getConocimientosFrontend(){
         List<ConocimientoDto> conFrontend =

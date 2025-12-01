@@ -48,7 +48,7 @@ public class MensajeController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/obtenerSMS/{id}")
+    @GetMapping("/obtenerMensaje/{id}")
     public ResponseEntity<MensajeDto> getMensajeById(@PathVariable Integer id) {
         MensajeDto mensaje = mensajeService.getMensajeById(id);
         return mensaje != null ? ResponseEntity.ok(mensaje) : ResponseEntity.notFound().build();

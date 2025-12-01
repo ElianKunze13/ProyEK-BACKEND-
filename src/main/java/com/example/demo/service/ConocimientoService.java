@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.ConocimientoDto;
+import com.example.demo.dto.EducacionDto;
 import com.example.demo.enums.TipoConocimiento;
 
 
@@ -11,6 +12,7 @@ public interface ConocimientoService {
     ConocimientoDto saveConocimiento(ConocimientoDto conocimientoDto);
 
     void deleteConocimientoById(Integer id);
+    List<ConocimientoDto> getAllConocimientos();
 
     //definir metodos para traer segun tipo de conocimiento
     List<ConocimientoDto> filtrarFrontEnd(TipoConocimiento tipoConocimiento);

@@ -2,6 +2,7 @@ package com.example.demo.repository;
 
 import com.example.demo.enums.TipoConocimiento;
 import com.example.demo.model.Conocimiento;
+import com.example.demo.model.Educacion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,8 @@ import java.util.List;
 
 @Repository
 public interface ConocimientoRepository extends JpaRepository<Conocimiento, Integer> {
+
+    List<Conocimiento> findAll();
     //definir consultas para traer lista de conocimientos
     // segun su tipo (FRONTEND, BACKEND, BASE_DATOS, ETC.)
 
