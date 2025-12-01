@@ -1,5 +1,6 @@
 package com.example.demo.authsecurity.service;
 
+import com.example.demo.model.Usuario;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -25,7 +26,14 @@ public class JwtService {
   private Key signingKey;
 
   public String generateToken(UserDetails user) {
-    return Jwts.builder()
+      Integer userId = null;
+
+      // 🔹 Verificamos si el usuario es de tipo Usuario para poder obtener el ID
+      if (user instanceof Usuario usuario) {
+          userId = usuario.getId();
+      }
+
+      return Jwts.builder()
         .subject(user.getUsername())
         .claim("roles", user.getAuthorities().stream()
             .map(auth -> auth.getAuthority())

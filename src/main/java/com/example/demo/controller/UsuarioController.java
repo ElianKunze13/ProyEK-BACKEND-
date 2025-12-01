@@ -23,6 +23,8 @@ public class UsuarioController {
     }
     @GetMapping("/username")
     ResponseEntity<UsuarioDto> getUsuarioByUsername(String username) {
+
+        System.out.println("Buscando usuario con username: " + username);
         ResponseEntity responseEntity = ResponseEntity.ok(usuarioService.getByUsername(username));
         return responseEntity;
     }

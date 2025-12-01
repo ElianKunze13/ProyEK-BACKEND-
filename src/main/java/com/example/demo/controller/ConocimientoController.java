@@ -55,7 +55,7 @@ public class ConocimientoController {
         return responseEntity;
     }
 
-    @PutMapping("/auth/modificar/conocimiento")
+    @PutMapping("/auth/modificar/conocimiento/{id}")
     ResponseEntity<ConocimientoDto> updateConocimiento(@PathVariable Integer id, @RequestBody @Valid ConocimientoDto conocimientoDto) {
         try {
             ConocimientoDto conocimientoActualizado = conocimientoService.actualizarConocimientoPorId(id, conocimientoDto);

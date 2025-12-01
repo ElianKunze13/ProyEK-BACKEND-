@@ -1,4 +1,4 @@
-package edu.ies63.prog2.mascotas.config;
+package com.example.demo.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
