@@ -46,6 +46,10 @@ public class UsuarioDto {
     @NotNull(message = "Rol no puede ser nulo")
     private Role rol;
 
+
+    @NotNull
+    @Size(min=5, max=500, message = "La descripción debe tener entre 5 y 301 caracteres")
+    private String descripcion;
     private  boolean active=true;
 
 

@@ -63,6 +63,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setUsername(usuarioDto.getUsername());
         usuario.setPassword(usuarioDto.getPassword());
         usuario.setActive(usuarioDto.isActive());
+        usuario.setDescripcion(usuarioDto.getDescripcion());
 
         Usuario updated = usuarioRepository.save(usuario);
         return usuarioMapper.toDto(updated);

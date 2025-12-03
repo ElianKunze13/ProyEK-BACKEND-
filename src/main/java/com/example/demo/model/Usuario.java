@@ -2,10 +2,7 @@ package com.example.demo.model;
 
 import com.example.demo.enums.Role;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -49,6 +46,10 @@ public class Usuario implements UserDetails, Source {
 
     @NotNull
     private String password;
+
+    @NotNull
+    @Size(min=5, max=500, message = "La descripción debe tener entre 5 y 301 caracteres")
+    private String descripcion;
 
     @NotNull
     @Enumerated(EnumType.STRING)
