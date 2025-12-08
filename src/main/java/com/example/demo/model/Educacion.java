@@ -20,10 +20,16 @@ import java.util.List;
 public class Educacion {
 
     /// educacion serian cursos, talleres o carreras estudiadas (tecnicaturas, campamentos)
+    /// va en seccion ESTUDIOS
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @NonNull
+    @Size(min = 3, max = 145, message = "Nombre debe tener entre 3 y 50 caracteres")
+    private String titulo;
+
 
     @NotNull
     @NotEmpty

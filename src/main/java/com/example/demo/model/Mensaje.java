@@ -13,6 +13,8 @@ import java.time.LocalDate;
 @Builder
 public class Mensaje {
 
+    /// va en seccion CONTACTOS
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

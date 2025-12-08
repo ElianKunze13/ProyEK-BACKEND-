@@ -24,6 +24,7 @@ public class Conocimiento {
 
     /// conocimientos serian las tecnologias usadas/aprendidas
     ///(html, css, java, angular, springboot, bootstrap, tailwind)
+    /// va en seccion HERRAMIENTAS
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

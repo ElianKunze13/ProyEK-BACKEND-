@@ -28,6 +28,8 @@ import java.util.Set;
 @Builder
 public class Usuario implements UserDetails, Source {
 
+    /// va en seccion SOBRE MI
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -35,9 +37,6 @@ public class Usuario implements UserDetails, Source {
     @NotNull(message = "Nombre no puede ser nulo")
     @Size(min = 3, max = 145, message = "Nombre debe tener entre 3 y 145 caracteres")
     private String nombre;
-
-    @Size(min = 10, max = 13, message = "Teléfono debe tener entre 10 y 13 caracteres")
-    private String telefono;
 
 
     @Email(message = "Debe ser un email válido")
@@ -54,6 +53,13 @@ public class Usuario implements UserDetails, Source {
     @NotNull
     @Enumerated(EnumType.STRING)
     private Role rol;
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Imagen> fotoUsuario = new ArrayList<>();
+
+
+
+
 
     // Relaciones que faltan:
    /* @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

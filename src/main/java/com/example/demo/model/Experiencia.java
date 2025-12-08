@@ -19,13 +19,14 @@ import java.time.LocalDate;
 public class Experiencia {
 
     /// experiencia serian proyectos o aportes realizados (porfolio, apps, codigo abierto)
+    /// va en seccion SOBRE MI
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @NonNull
-    @Size(min = 3, max = 145, message = "Nombre debe tener entre 3 y 20 caracteres")
+    @Size(min = 3, max = 145, message = "Nombre debe tener entre 3 y 50 caracteres")
     private String titulo;
 
     @Column(name = "fechaYHora")

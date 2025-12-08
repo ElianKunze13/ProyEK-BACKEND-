@@ -15,6 +15,7 @@ public class Habilidad {
 
     /// habilidades serian capacidades blandas
     /// (comunicacion, trabajo en equipo, adaptabilidad, rapidez de aprendisaje, trabajo bajo presion)
+    /// va en seccion SOBRE MI
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

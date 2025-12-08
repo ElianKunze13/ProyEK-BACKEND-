@@ -3,10 +3,8 @@ package com.example.demo.dto;
 import com.example.demo.enums.Nivel;
 import com.example.demo.enums.TipoEducacion;
 import com.example.demo.model.Imagen;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +16,8 @@ import java.util.List;
 public class EducacionDto {
 
     private Integer id;
+
+    private String titulo;
 
     private String descripcion;
 
