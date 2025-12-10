@@ -40,9 +40,7 @@ public class Educacion {
     @Enumerated(EnumType.STRING)
     private TipoEducacion tipoEducacion;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private Nivel nivel;
+
 
     //incluir imagen de certificado o pdf
     @OneToMany(mappedBy = "educacion", cascade = CascadeType.ALL, orphanRemoval = true)

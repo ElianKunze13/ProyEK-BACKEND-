@@ -23,7 +23,6 @@ public class EducacionDto {
 
     private TipoEducacion tipoEducacion;
 
-    private Nivel nivel;
 
     private List<Imagen> imagenes = new ArrayList<>();
 }

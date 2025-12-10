@@ -38,7 +38,6 @@ public class EducacionServiceImpl implements EducacionService {
         if (educacion != null) {
             educacion.setDescripcion(educacionDto.getDescripcion());
             educacion.setTipoEducacion(educacionDto.getTipoEducacion());
-            educacion.setNivel(educacionDto.getNivel());
 
             // metodo especifico para actualizar fotos
             if (educacionDto.getImagenes() != null && !educacionDto.getImagenes().isEmpty()) {
