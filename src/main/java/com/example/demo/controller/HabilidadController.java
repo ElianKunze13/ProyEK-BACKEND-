@@ -1,8 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.ExperienciaDto;
 import com.example.demo.dto.HabilidadDto;
-import com.example.demo.model.Habilidad;
 import com.example.demo.service.HabilidadService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

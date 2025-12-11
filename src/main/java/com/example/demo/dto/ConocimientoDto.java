@@ -24,8 +24,6 @@ public class ConocimientoDto {
 
     private Nivel nivel;
 
-    private TecnologiaUsada tecnologiaUsada;
-
     private TipoConocimiento tipoConocimiento;
 
     private List<Imagen> imagenes = new ArrayList<>();
