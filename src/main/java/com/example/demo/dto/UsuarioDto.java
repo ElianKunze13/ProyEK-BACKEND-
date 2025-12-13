@@ -46,7 +46,8 @@ public class UsuarioDto {
     @Size(min=5, max=500, message = "La descripción debe tener entre 5 y 301 caracteres")
     private String descripcion;
 
-    private List<Imagen> fotoUsuario = new ArrayList<>();
+    private List<ImagenDto> fotoUsuario = new ArrayList<>();
+    //private String fotoPerfilUrl; // Solo la URL de la foto principal
 
 
     private  boolean active=true;

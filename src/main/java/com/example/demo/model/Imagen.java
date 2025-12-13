@@ -39,4 +39,5 @@ public class Imagen {
     @JsonIgnore  // Evita que se serialice usuario
     private Usuario usuario;
 
+
 }

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ImagenDto {
+
     private String url;
     private String alt;
 }

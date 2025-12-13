@@ -9,4 +9,6 @@ public interface ImagenMapper {
 
     ImagenDto toImagenDto(Imagen Imagen);
     Imagen toImagen(ImagenDto imagenDto);
+
+
 }

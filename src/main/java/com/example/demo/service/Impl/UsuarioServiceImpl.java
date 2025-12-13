@@ -31,7 +31,12 @@ public class UsuarioServiceImpl implements UsuarioService {
         log.info("Buscando usuario con ID: {}", id);
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id " + id));
+        //Depuración
+        log.info("Usuario mapeado - fotoUsuario: {}", usuario.getFotoUsuario());
+        log.info("Es null? {}", usuario.getFotoUsuario() == null);
+        log.info("Es lista vacía? {}", usuario.getFotoUsuario().isEmpty());
         return usuarioMapper.toDto(usuario);
+
     }
 
     @Override
@@ -81,6 +86,20 @@ public class UsuarioServiceImpl implements UsuarioService {
                     .collect(Collectors.toList());
             usuario.getFotoUsuario().addAll(nuevaImagen);
         }
+        // Manejar la foto INDIVIDUAL
+        /*if (usuarioDto.getFotoPerfilUrl() != null && !usuarioDto.getFotoPerfilUrl().isEmpty()) {
+            // Limpiar fotos existentes si quieres solo una
+            usuario.getFotoUsuario().clear();
+
+            // Crear nueva imagen
+            Imagen nuevaImagen = Imagen.builder()
+                    .url(usuarioDto.getFotoPerfilUrl())
+                    .alt("Foto de perfil de " + usuarioDto.getNombre())
+                    .usuario(usuario)
+                    .build();
+
+            usuario.getFotoUsuario().add(nuevaImagen);
+        }*/
 
         Usuario updated = usuarioRepository.save(usuario);
         return usuarioMapper.toDto(updated);

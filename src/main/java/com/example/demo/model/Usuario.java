@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import com.example.demo.enums.Role;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -55,10 +56,10 @@ public class Usuario implements UserDetails, Source {
     private Role rol;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // Si usas @JsonBackReference en Imagen
     private List<Imagen> fotoUsuario = new ArrayList<>();
 
-
-
+    //private Imagen fotoUsuario;
 
 
     // Relaciones que faltan:
