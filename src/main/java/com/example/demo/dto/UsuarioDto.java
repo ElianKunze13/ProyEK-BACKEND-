@@ -37,14 +37,17 @@ public class UsuarioDto {
     @NotBlank
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    @NotNull(message = "Rol no puede ser nulo")
-    private Role rol;
-
+   /* @NotNull
+    @Size(min=5, max=500, message = "introduccion debe tener entre 5 y 301 caracteres")
+    private String introduccion;*/
 
     @NotNull
     @Size(min=5, max=500, message = "La descripción debe tener entre 5 y 301 caracteres")
     private String descripcion;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Rol no puede ser nulo")
+    private Role rol;
 
     private List<ImagenDto> fotoUsuario = new ArrayList<>();
     //private String fotoPerfilUrl; // Solo la URL de la foto principal

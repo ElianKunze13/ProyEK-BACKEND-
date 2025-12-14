@@ -27,7 +27,7 @@ public class MensajeServiceImpl implements MensajeService {
     @Autowired
     private EmailService emailService;
 
-    @Override
+    /*@Override
     @Transactional
     public MensajeDto enviarMensaje(MensajeDto mensajeDto) {
         log.info("Enviando mensaje de contacto de: {}", mensajeDto.getEmail());
@@ -41,7 +41,38 @@ public class MensajeServiceImpl implements MensajeService {
 
         log.info("Mensaje enviado exitosamente. ID: {}", mensajeGuardado.getId());
         return mensajeMapper.toMensajeDto(mensajeGuardado);
+    }*/
+
+    @Override
+    @Transactional
+    public MensajeDto enviarMensaje(MensajeDto mensajeDto) {
+        log.info("=== INICIO ENVÍO MENSAJE ===");
+        log.info("Enviando mensaje de contacto de: {}", mensajeDto.getEmail());
+        log.info("Datos recibidos: Nombre={}, Email={}");
+
+        try {
+            // Convertir DTO a Entidad y guardar
+            Mensaje mensaje = mensajeMapper.toMensaje(mensajeDto);
+            log.info("Mensaje convertido a entidad: {}", mensaje);
+
+            Mensaje mensajeGuardado = mensajeRepository.save(mensaje);
+            log.info("Mensaje guardado en BD con ID: {}", mensajeGuardado.getId());
+
+            // Enviar email de notificación
+            log.info("Intentando enviar email...");
+            emailService.enviarMensajeContacto(mensajeGuardado);
+            log.info("Email enviado exitosamente");
+
+            log.info("Mensaje enviado exitosamente. ID: {}", mensajeGuardado.getId());
+            return mensajeMapper.toMensajeDto(mensajeGuardado);
+
+        } catch (Exception e) {
+            log.error("ERROR al procesar mensaje: ", e);
+            throw e; // Re-lanzar para que el controller maneje el error
+        }
     }
+
+    /*------------------------------------------*/
 
     @Override
     public List<MensajeDto> getAllMensajes() {

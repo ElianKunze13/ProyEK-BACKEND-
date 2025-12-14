@@ -30,6 +30,7 @@ public class Mensaje {
     private String mensaje;
 
     @Column(name = "fecha_creacion")
+    //atributo fechaCeacion debe ser fecha actual
     private LocalDate fechaCreacion;
 
     @PrePersist
