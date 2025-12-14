@@ -47,9 +47,9 @@ public class Usuario implements UserDetails, Source {
     @NotNull
     private String password;
 
-    /*@NotNull
-    @Size(min=5, max=500, message = "introduccion debe tener entre 5 y 301 caracteres")
-    private String introduccion;*/
+    @NotNull
+    @Size(min=5, max=500, message = "La introduccion debe tener entre 5 y 301 caracteres")
+    private String introduccion;
 
     @NotNull
     @Size(min=5, max=500, message = "La descripción debe tener entre 5 y 301 caracteres")

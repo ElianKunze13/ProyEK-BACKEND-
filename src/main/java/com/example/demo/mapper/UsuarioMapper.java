@@ -14,12 +14,13 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring",uses = {ImagenMapper.class})
 public interface UsuarioMapper {
 
-    @Mapping(target = "fotoUsuario", expression = "java(mapFotoUsuario(usuario.getFotoUsuario()))")
+    @Mapping(target = "fotoUsuario", source = "fotoUsuario")
     UsuarioDto toDto(Usuario usuario);
 
-    @Mapping(target = "fotoUsuario", expression = "java(mapFotoUsuarioEntity(usuarioDto.getFotoUsuario()))")
+    @Mapping(target = "fotoUsuario", source = "fotoUsuario")
     Usuario toEntity(UsuarioDto usuarioDto);
 
+    /*
     // Método por defecto para mapear lista de Imagen a ImagenDto
     default List<ImagenDto> mapFotoUsuario(List<Imagen> fotoUsuario) {
         if (fotoUsuario == null) {
@@ -51,5 +52,5 @@ public interface UsuarioMapper {
                 })
                 .collect(Collectors.toList());
     }
-
+*/
 }

@@ -70,7 +70,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setUsername(usuarioDto.getUsername());
         usuario.setPassword(usuarioDto.getPassword());
         usuario.setActive(usuarioDto.isActive());
-        //usuario.setIntroduccion(usuarioDto.getIntroduccion());
+        usuario.setIntroduccion(usuarioDto.getIntroduccion());
         usuario.setDescripcion(usuarioDto.getDescripcion());
 
         // metodo especifico para actualizar fotos

@@ -3,6 +3,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.UsuarioDto;
 import com.example.demo.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ public class UsuarioController {
 
     // POST /usuarios
     @PostMapping("/guardarUsuario")
-    ResponseEntity<UsuarioDto> saveUsuario(@RequestBody UsuarioDto usuarioDto) {
+    ResponseEntity<UsuarioDto> saveUsuario( @Valid @RequestBody UsuarioDto usuarioDto) {
         ResponseEntity responseEntity = ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(usuarioService.create(usuarioDto));
