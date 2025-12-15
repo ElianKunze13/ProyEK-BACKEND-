@@ -45,7 +45,6 @@ public class UsuarioDto {
     @Size(min=5, max=500, message = "La descripción debe tener entre 5 y 301 caracteres")
     private String descripcion;
 
-    @Enumerated(EnumType.STRING)
     @NotNull(message = "Rol no puede ser nulo")
     private Role rol;
 

@@ -62,7 +62,7 @@ public class Usuario implements UserDetails, Source {
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference // Si usas @JsonBackReference en Imagen
-    private List<ImagenDto> fotoUsuario = new ArrayList<>();
+    private List<Imagen> fotoUsuario = new ArrayList<>();
 
     //private Imagen fotoUsuario;
 
