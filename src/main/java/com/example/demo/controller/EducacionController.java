@@ -27,7 +27,7 @@ public class EducacionController {
     }
 
     @PostMapping("/auth/guardar/educacion")
-    ResponseEntity<EducacionDto> saveEducacion(@RequestBody @Valid EducacionDto educacionDto) {
+    ResponseEntity<EducacionDto> saveEducacion(@Valid @RequestBody EducacionDto educacionDto) {
         ResponseEntity responseEntity = ResponseEntity.status(HttpStatus.CREATED).body(educacionService.saveEducacion(educacionDto));
         return responseEntity;
     }

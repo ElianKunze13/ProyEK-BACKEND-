@@ -23,6 +23,7 @@ public class Imagen {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conocimiento_id")
+    @JsonBackReference
     @JsonIgnore  // Evita que se serialice conocimiento
     private Conocimiento conocimiento;
 

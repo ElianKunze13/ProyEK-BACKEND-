@@ -26,5 +26,5 @@ public class ConocimientoDto {
 
     private TipoConocimiento tipoConocimiento;
 
-    private List<Imagen> imagenes = new ArrayList<>();
+    private List<ImagenDto> imagenes = new ArrayList<>();
 }

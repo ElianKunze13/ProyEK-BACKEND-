@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.example.demo.dto.ImagenDto;
 import com.example.demo.enums.Role;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -61,7 +62,7 @@ public class Usuario implements UserDetails, Source {
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference // Si usas @JsonBackReference en Imagen
-    private List<Imagen> fotoUsuario = new ArrayList<>();
+    private List<ImagenDto> fotoUsuario = new ArrayList<>();
 
     //private Imagen fotoUsuario;
 

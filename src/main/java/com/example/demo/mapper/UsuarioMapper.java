@@ -20,7 +20,7 @@ public interface UsuarioMapper {
     @Mapping(target = "fotoUsuario", source = "fotoUsuario")
     Usuario toEntity(UsuarioDto usuarioDto);
 
-    /*
+
     // Método por defecto para mapear lista de Imagen a ImagenDto
     default List<ImagenDto> mapFotoUsuario(List<Imagen> fotoUsuario) {
         if (fotoUsuario == null) {
@@ -52,5 +52,5 @@ public interface UsuarioMapper {
                 })
                 .collect(Collectors.toList());
     }
-*/
+
 }

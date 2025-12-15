@@ -36,6 +36,8 @@ public class EducacionServiceImpl implements EducacionService {
         Educacion educacion = educacionRepository.findById(id).orElse(null);
 
         if (educacion != null) {
+            educacion.setTitulo(educacionDto.getTitulo());
+            //educacion.setFechaObtencion(educacionDto.getFechaObtencion());
             educacion.setDescripcion(educacionDto.getDescripcion());
             educacion.setTipoEducacion(educacionDto.getTipoEducacion());
 

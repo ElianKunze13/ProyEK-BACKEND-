@@ -49,7 +49,7 @@ public class UsuarioDto {
     @NotNull(message = "Rol no puede ser nulo")
     private Role rol;
 
-    private List<ImagenDto> fotoUsuario = new ArrayList<>();
+    private List<Imagen> fotoUsuario = new ArrayList<>();
     //private String fotoPerfilUrl; // Solo la URL de la foto principal
 
 

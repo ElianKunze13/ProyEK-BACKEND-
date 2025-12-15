@@ -4,6 +4,7 @@ import com.example.demo.enums.Nivel;
 import com.example.demo.enums.TecnologiaUsada;
 import com.example.demo.enums.TipoConocimiento;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -45,6 +46,7 @@ public class Conocimiento {
 
     //conocimiento tendra imagen de icono
     @OneToMany(mappedBy = "conocimiento", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // Esto permite serializar las imágenes
     private List<Imagen> imagenes = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

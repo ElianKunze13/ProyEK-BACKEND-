@@ -12,11 +12,19 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ConocimientoMapper {
 
+   /* ConocimientoDto toConocimientoDto(Conocimiento conocimiento);
+    Conocimiento toConocimiento(ConocimientoDto conocimientoDto);
+*/
+
+    @Mapping(target = "imagenes", source = "imagenes")
     ConocimientoDto toConocimientoDto(Conocimiento conocimiento);
+
+    @Mapping(target = "imagenes", source = "imagenes")
     Conocimiento toConocimiento(ConocimientoDto conocimientoDto);
 
-
-
+    // Métodos para mapear imágenes si usas ImagenDto
+    ImagenDto toImagenDto(Imagen imagen);
+    Imagen toImagen(ImagenDto imagenDto);
 
 
 }

@@ -57,7 +57,7 @@ public class ConocimientoController {
     }
 
     @PostMapping("/auth/guardar/conocimiento")
-    ResponseEntity<ConocimientoDto> saveConocimiento(@RequestBody @Valid ConocimientoDto conocimientoDto) {
+    ResponseEntity<ConocimientoDto> saveConocimiento(@Valid @RequestBody ConocimientoDto conocimientoDto) {
         ResponseEntity responseEntity = ResponseEntity.status(HttpStatus.CREATED).body(conocimientoService.saveConocimiento(conocimientoDto));
         return responseEntity;
     }

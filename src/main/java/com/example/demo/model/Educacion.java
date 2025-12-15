@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +31,9 @@ public class Educacion {
     @Size(min = 3, max = 145, message = "Nombre debe tener entre 3 y 50 caracteres")
     private String titulo;
 
+    /*@Column(name = "fechaObtencion")
+    @NotNull
+    private LocalDate fechaObtencion;*/
 
     @NotNull
     @NotEmpty
