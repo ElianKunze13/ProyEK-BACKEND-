@@ -4,6 +4,12 @@ Este repositorio contiene el **backend** de mi portofolio digital personal, desa
 
 El objetivo es construir un software robusto que soporte las funcionalidades del frontend, basandose en lo aprendido durante la tecnicatura (Programacion, Base de datos,Practicas Profesionalizantes e Ingenieria de Software), y aplicando modalidades de trabajo que permiten mejorar el rendimiento a la hora de desarrollar (metodologia agile y scrum, testing unitario y de integracion basado en SOLID y AAA).
 
+
+---
+## 🔗 Repositorios Relacionados
+
+- **Frontend:** [ProyEK-FrontEnd](https://github.com/ElianKunze13/ProyEK-FRONTEND-.git)
+
 ---
 
 ## 🛠️ Herramientas implementadas
@@ -63,8 +69,9 @@ backend-portofolio/
 
 ### Prerrequisitos
 - Java JDK 11 o superior
+- IDE (recomendado): IntelliJ IDEA / Eclipse / VS Code
 - Maven 3.6+
-- Base de datos (MySQL/PostgreSQL)
+- Base de datos MySQL
 
 
 ## 📌 Convenciones utilizadas
