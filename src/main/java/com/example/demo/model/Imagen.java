@@ -23,20 +23,21 @@ public class Imagen {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conocimiento_id")
-    @JsonBackReference
+    @JsonBackReference("imagen-conocimiento")
     @JsonIgnore  // Evita que se serialice conocimiento
     private Conocimiento conocimiento;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "educacion_id")
     @JsonIgnore  // Evita que se serialice educacion
+    @JsonBackReference("imagen-educacion")
     private Educacion educacion;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
+    @JsonBackReference("imagen-usuario")
     @JsonIgnore  // Evita que se serialice usuario
     private Usuario usuario;
 

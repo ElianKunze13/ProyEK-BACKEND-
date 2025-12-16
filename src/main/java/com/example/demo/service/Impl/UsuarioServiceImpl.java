@@ -31,10 +31,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         log.info("Buscando usuario con ID: {}", id);
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id " + id));
-        //Depuración
-        log.info("Usuario mapeado - fotoUsuario: {}", usuario.getFotoUsuario());
-        log.info("Es null? {}", usuario.getFotoUsuario() == null);
-        log.info("Es lista vacía? {}", usuario.getFotoUsuario().isEmpty());
+        // Forzar la carga de las imágenes si son LAZY
+        if (usuario.getFotoUsuario() != null) {
+            usuario.getFotoUsuario().size(); // Esto fuerza la carga de la colección
+        }
         return usuarioMapper.toDto(usuario);
 
     }

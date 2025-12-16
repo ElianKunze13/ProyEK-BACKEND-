@@ -60,8 +60,8 @@ public class Usuario implements UserDetails, Source {
     @Enumerated(EnumType.STRING)
     private Role rol;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference // Si usas @JsonBackReference en Imagen
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference("imagen-usuario") // Si usas @JsonBackReference en Imagen
     private List<Imagen> fotoUsuario = new ArrayList<>();
 
     //private Imagen fotoUsuario;
