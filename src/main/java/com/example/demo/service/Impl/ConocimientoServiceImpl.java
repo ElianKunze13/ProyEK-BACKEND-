@@ -89,6 +89,21 @@ public class ConocimientoServiceImpl implements ConocimientoService {
                 .toList();
     }
 
+ @Override
+    public List<ConocimientoDto> filtrarIA(TipoConocimiento tipoConocimiento) {
+        List<Conocimiento> conocimientos = conocimientoRepository.findByIA(tipoConocimiento);
+        return conocimientos.stream()
+                .map(conocimientoMapper::toConocimientoDto)
+                .toList();
+    }
+ @Override
+    public List<ConocimientoDto> filtrarPrototipos(TipoConocimiento tipoConocimiento) {
+        List<Conocimiento> conocimientos = conocimientoRepository.findByPrototipo(tipoConocimiento);
+        return conocimientos.stream()
+                .map(conocimientoMapper::toConocimientoDto)
+                .toList();
+    }
+
 
     /// RECORDATORIO
     /// incluir metodo especifico para modificar imagen

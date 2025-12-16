@@ -17,19 +17,24 @@ public interface ConocimientoRepository extends JpaRepository<Conocimiento, Inte
     //definir consultas para traer lista de conocimientos
     // segun su tipo (FRONTEND, BACKEND, BASE_DATOS, ETC.)
 
-    @Query("SELECT c FROM Conocimiento c LEFT JOIN FETCH c.imagenes WHERE c.tipoConocimiento = :tipoConocimiento ") // llama y filtar los reportes que no esten cerrados
+    @Query("SELECT c FROM Conocimiento c LEFT JOIN FETCH c.imagenes WHERE c.tipoConocimiento = :tipoConocimiento ")
     List<Conocimiento> findByFrontEnd(@Param("tipoConocimiento") TipoConocimiento tipoConocimiento);
 
-    @Query("SELECT c FROM Conocimiento c WHERE c.tipoConocimiento = :tipoConocimiento") // llama y filtar los reportes que no esten cerrados
+    @Query("SELECT c FROM Conocimiento c WHERE c.tipoConocimiento = :tipoConocimiento")
     List<Conocimiento> findByBackend(@Param("tipoConocimiento") TipoConocimiento tipoConocimiento);
 
-    @Query("SELECT c FROM Conocimiento c WHERE c.tipoConocimiento = :tipoConocimiento ") // llama y filtar los reportes que no esten cerrados
+    @Query("SELECT c FROM Conocimiento c WHERE c.tipoConocimiento = :tipoConocimiento ")
     List<Conocimiento> findByBD(@Param("tipoConocimiento") TipoConocimiento tipoConocimiento);
 
-    @Query("SELECT c FROM Conocimiento c WHERE c.tipoConocimiento = :tipoConocimiento ") // llama y filtar los reportes que no esten cerrados
+    @Query("SELECT c FROM Conocimiento c WHERE c.tipoConocimiento = :tipoConocimiento ")
     List<Conocimiento> findByTest(@Param("tipoConocimiento") TipoConocimiento tipoConocimiento);
 
-    @Query("SELECT c FROM Conocimiento c WHERE c.tipoConocimiento = :tipoConocimiento ") // llama y filtar los reportes que no esten cerrados
+    @Query("SELECT c FROM Conocimiento c WHERE c.tipoConocimiento = :tipoConocimiento ")
     List<Conocimiento> findByOtros(@Param("tipoConocimiento") TipoConocimiento tipoConocimiento);
 
+ @Query("SELECT c FROM Conocimiento c WHERE c.tipoConocimiento = :tipoConocimiento ")
+    List<Conocimiento> findByIA(@Param("tipoConocimiento") TipoConocimiento tipoConocimiento);
+
+     @Query("SELECT c FROM Conocimiento c WHERE c.tipoConocimiento = :tipoConocimiento ")
+    List<Conocimiento> findByPrototipo(@Param("tipoConocimiento") TipoConocimiento tipoConocimiento);
 }

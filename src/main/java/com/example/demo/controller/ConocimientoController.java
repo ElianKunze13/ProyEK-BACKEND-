@@ -31,29 +31,47 @@ public class ConocimientoController {
                 conocimientoService.filtrarFrontEnd(TipoConocimiento.FRONTEND);
         return ResponseEntity.ok(conFrontend);
     }
+
     @GetMapping("/backend")
     public ResponseEntity<List<ConocimientoDto>> getConocimientosBackend(){
         List<ConocimientoDto> conBackend =
                 conocimientoService.filtrarBackEnd(TipoConocimiento.BACKEND);
         return ResponseEntity.ok(conBackend);
     }
+
     @GetMapping("/baseDatos")
     public ResponseEntity<List<ConocimientoDto>> getConocimientosBD(){
         List<ConocimientoDto> conBaseDatos =
                 conocimientoService.filtrarBD(TipoConocimiento.BASE_DATOS);
         return ResponseEntity.ok(conBaseDatos);
     }
+
     @GetMapping("/testing")
     public ResponseEntity<List<ConocimientoDto>> getConocimientosTest(){
         List<ConocimientoDto> conTesting =
                 conocimientoService.filtrarTesting(TipoConocimiento.TESTING);
         return ResponseEntity.ok(conTesting);
     }
+
     @GetMapping("/otros/conocimientos")
     public ResponseEntity<List<ConocimientoDto>> getConocimientosVarios(){
         List<ConocimientoDto> conVarios =
                 conocimientoService.filtrarOtros(TipoConocimiento.OTROS);
         return ResponseEntity.ok(conVarios);
+    }
+
+@GetMapping("/ia")
+    public ResponseEntity<List<ConocimientoDto>> getConocimientosIA(){
+        List<ConocimientoDto> conIA =
+                conocimientoService.filtrarIA(TipoConocimiento.IA);
+        return ResponseEntity.ok(conIA);
+    }
+
+@GetMapping("/prototipado")
+    public ResponseEntity<List<ConocimientoDto>> getConocimientosPrototipos(){
+        List<ConocimientoDto> conPrototipos =
+                conocimientoService.filtrarPrototipos(TipoConocimiento.PROTOTIPO);
+        return ResponseEntity.ok(conPrototipos);
     }
 
     @PostMapping("/auth/guardar/conocimiento")

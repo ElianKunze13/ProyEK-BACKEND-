@@ -51,7 +51,6 @@ public class UsuarioDto {
     private List<Imagen> fotoUsuario = new ArrayList<>();
     //private String fotoPerfilUrl; // Solo la URL de la foto principal
 
-
     private  boolean active=true;
 
 
