@@ -20,6 +20,8 @@ public class ConocimientoController {
     @Autowired
     private ConocimientoService conocimientoService;
 
+
+    /// metodo GET /todos/educaciones esta definido distinto para ver si hay direncia de respuesta con demas GET
     @GetMapping("/todos/educaciones")
     public ResponseEntity<List<ConocimientoDto>> getAllConocimientos(){
         ResponseEntity responseEntity = ResponseEntity.ok(conocimientoService.getAllConocimientos());
@@ -75,7 +77,7 @@ public class ConocimientoController {
     }
 
     @PostMapping("/auth/guardar/conocimiento")
-    ResponseEntity<ConocimientoDto> saveConocimiento(@Valid @RequestBody ConocimientoDto conocimientoDto) {
+    ResponseEntity<ConocimientoDto> saveConocimiento(@RequestBody @Valid ConocimientoDto conocimientoDto) {
         ResponseEntity responseEntity = ResponseEntity.status(HttpStatus.CREATED).body(conocimientoService.saveConocimiento(conocimientoDto));
         return responseEntity;
     }

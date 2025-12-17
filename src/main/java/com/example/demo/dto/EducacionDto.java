@@ -3,6 +3,7 @@ package com.example.demo.dto;
 import com.example.demo.enums.Nivel;
 import com.example.demo.enums.TipoEducacion;
 import com.example.demo.model.Imagen;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -22,7 +23,9 @@ public class EducacionDto {
 
     private String titulo;
 
-    //private LocalDate fechaObtencion;
+   /* @NotNull(message = "fechaObtencion no debe ser nulo")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate fechaObtencion;*/
 
     private String descripcion;
 

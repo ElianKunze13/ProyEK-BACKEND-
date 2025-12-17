@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import com.example.demo.enums.Nivel;
 import com.example.demo.enums.TipoEducacion;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -32,7 +33,8 @@ public class Educacion {
     private String titulo;
 
     /*@Column(name = "fechaObtencion")
-    @NotNull
+    @NotNull(message = "fechaObtencion no debe ser nulo")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate fechaObtencion;*/
 
     @NotNull
