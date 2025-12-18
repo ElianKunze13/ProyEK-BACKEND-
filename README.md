@@ -2,7 +2,7 @@
 
 Este repositorio contiene el **backend** de mi portofolio digital personal, desarrollado para gestionar y exponer mis proyectos, habilidades y experiencia profesional de manera dinámica. Es un proyecto personal que aplica buenas prácticas de desarrollo web, arquitectura REST y control de versiones.
 
-El objetivo es construir un software robusto que soporte las funcionalidades del frontend, basandose en lo aprendido durante la tecnicatura (Programacion, Base de datos,Practicas Profesionalizantes e Ingenieria de Software), y aplicando modalidades de trabajo que permiten mejorar el rendimiento a la hora de desarrollar (metodologia agile y scrum, testing unitario y de integracion basado en SOLID y AAA).
+El objetivo es construir un software robusto que soporte las funcionalidades del frontend, basandose en lo aprendido durante la tecnicatura (Programacion, Base de datos,Practicas Profesionalizantes e Ingenieria de Software), y aplicando modalidades de trabajo que permiten mejorar el rendimiento a la hora de desarrollar.
 
 
 ---
