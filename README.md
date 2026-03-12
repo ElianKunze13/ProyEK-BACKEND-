@@ -1,4 +1,4 @@
-# Repositorio Backend Portofolio
+# ✨Repositorio Backend Portofolio
 
 Este repositorio contiene el backend de mi portofolio digital, desarrollado para gestionar y exponer mis proyectos y habilidades de manera dinámica. Es un proyecto personal que aplica buenas prácticas de desarrollo web, arquitectura REST y control de versiones.
 
@@ -15,30 +15,30 @@ El objetivo es construir un software robusto que soporte todas las funcionalidad
 ## 🛠️ Herramientas implementadas
 
 ### Lenguajes
-- **Java JDK** - Lenguaje principal del backend
+- **Java JDK v17** - Lenguaje principal del backend
 - **HTML** - Definicion de estructura de mails
 - **CSS** - Para modificar estetica de html
 
 ### Frameworks y Librerías
-- **Spring Boot** - Framework para desarrollo de aplicaciones Java
+*   [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.3-6DB33F?style=flat&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot) - Framework para desarrollo de aplicaciones Java
 
 
 ### Dependencias
-- **Lombok** - Reducción de código boilerplate
-- **Maven** - Gestión de dependencias y construcción del proyecto
+*   [![Maven](https://img.shields.io/badge/Maven-3.9.x-C71A36?style=flat&logo=apache-maven&logoColor=white)](https://maven.apache.org/) - Gestión de dependencias y construcción del proyecto
+*   [![Project Lombok](https://img.shields.io/badge/Lombok-1.18.30-4B9BBE?style=flat)](https://projectlombok.org/) - Reducción de código 
 
-## Testeo y seguridad
+### Seguridad y Testeo
 - **Swagger**
 - **Postman**
 - **JWT**
 
-## Herramientas varias
-- **Git** - Control de versiones 
-- **MySQL** - base de datos usada
+  
+### Base de Datos
+*   [![MySQL](https://img.shields.io/badge/MySQL-9.3.0-4479A1?style=flat&logo=mysql&logoColor=white)](https://www.mysql.com/) - base de datos usada
 
 
 ## 📂 Estructura del Proyecto
-
+La arquitectura sigue el patrón **MVC (Modelo-Vista-Controlador)** y una clara separación en capas:
 ```
 backend-portofolio/
 ├── src/
