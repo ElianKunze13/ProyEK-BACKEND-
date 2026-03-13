@@ -78,5 +78,5 @@ backend-portofolio/
 
 ## 📄 Licencia
 
-Este proyecto es de uso personal y tiene fines de demostración profesional y herramientas varias; asi mismo, está en constante evolución y se actualiza regularmente con nuevas funcionalidades y mejoras.
+Este proyecto usa una licencia MIT. Tiene fines educativos y demostracion profesional del uso de herramientas.
 
