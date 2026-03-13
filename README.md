@@ -2,7 +2,7 @@
 
 Este repositorio contiene el backend de mi portofolio digital, desarrollado para gestionar y exponer mis proyectos y habilidades de manera dinámica. Es un proyecto personal que aplica buenas prácticas de desarrollo web, arquitectura REST y control de versiones.
 
-El objetivo es construir un software robusto que soporte todas las funcionalidades definidas, haciendo uso de todo lo aprendido durante la tecnicatura e intergrandolo en un unico proyecto.
+El objetivo es construir un software robusto que soporte todas las funcionalidades definidas, haciendo uso de reglas de nomenclatura para definicion de nombres, pruebas/test de escenarios con datos limites, reduccion y reutilizacion de codigo reduntante, entre demas cosas aprendidas en la tecnicatura.
 
 
 ---
