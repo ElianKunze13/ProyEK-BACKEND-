@@ -20,11 +20,13 @@ El objetivo es construir un software robusto que soporte todas las funcionalidad
 - **CSS** - Para modificar estetica de html
 
 ### Frameworks y Librerías
-*   [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.3-6DB33F?style=flat&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot) - Framework para desarrollo de aplicaciones Java
+*   ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.3-6DB33F?style=flat&logo=spring-boot&logoColor=white) - Framework para desarrollo de aplicaciones Java
 
 
 ### Dependencias
 *   [![Maven](https://img.shields.io/badge/Maven-3.9.x-C71A36?style=flat&logo=apache-maven&logoColor=white)](https://maven.apache.org/) - Gestión de dependencias y construcción del proyecto
+*   ![JUnit](https://img.shields.io/badge/JUnit-5.10.0-green.svg) - estructurar/ejecutar test **(No implementado aun)**
+*   ![Mockito](https://img.shields.io/badge/Mockito-0.0.0-orange.svg) - Framework para estructurar/ejecutar test **(No implementado aun)**
 *   [![Project Lombok](https://img.shields.io/badge/Lombok-1.18.30-4B9BBE?style=flat)](https://projectlombok.org/) - Reducción de código 
 
 ### Seguridad y Testeo
