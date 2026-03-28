@@ -64,7 +64,9 @@ public class Usuario implements UserDetails, Source {
     @JsonManagedReference("imagen-usuario") // Si usas @JsonBackReference en Imagen
     private List<Imagen> fotoUsuario = new ArrayList<>();
 
-    //private Imagen fotoUsuario;
+    /// ARREGLAR RELACION CON IMAGEN PARA TENER IMAGEN UNICA EN VEZ DE UNA LISTA
+    /// Si decides usar un DTO para la imagen, podrías tener algo como esto en lugar de la relación directa:
+    /// private Imagen fotoUsuario;
 
 
     // Relaciones que faltan:

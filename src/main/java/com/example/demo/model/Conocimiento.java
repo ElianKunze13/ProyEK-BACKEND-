@@ -45,6 +45,8 @@ public class Conocimiento {
     private TipoConocimiento tipoConocimiento;
 
     //conocimiento tendra imagen de icono
+    /// cambiar de lista de imagen a una imagen unica, ya que cada conocimiento
+    ///  solo tendra un icono asociado
     @OneToMany(mappedBy = "conocimiento", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference // Esto permite serializar las imágenes
     private List<Imagen> imagenes = new ArrayList<>();

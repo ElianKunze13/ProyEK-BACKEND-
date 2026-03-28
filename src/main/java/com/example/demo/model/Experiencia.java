@@ -46,6 +46,9 @@ public class Experiencia {
     @Enumerated(EnumType.STRING)
     private TecnologiaUsada tecnologiaUsada;
 
+    /// INCLUIR LINK A PROYECTO O APORTES EN CODIGO ABIERTO (GITHUB, LINKEDIN, PORTFOLIO)
+    /// private String link;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;

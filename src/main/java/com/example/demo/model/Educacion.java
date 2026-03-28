@@ -32,6 +32,7 @@ public class Educacion {
     @Size(min = 3, max = 145, message = "Nombre debe tener entre 3 y 50 caracteres")
     private String titulo;
 
+    /// ARREGLAR e incluir fecha de inicio y fin de estudio, o fecha de obtencion del titulo
     /*@Column(name = "fechaObtencion")
     @NotNull(message = "fechaObtencion no debe ser nulo")
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -49,8 +50,11 @@ public class Educacion {
 
 
     //incluir imagen de certificado o pdf
+    /// cambiar de lista de imagen a una imagen unica, ya que cada educacion
+    ///  tendra solo una imagen del certificado
     @OneToMany(mappedBy = "educacion", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Imagen> imagenes = new ArrayList<>();
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
