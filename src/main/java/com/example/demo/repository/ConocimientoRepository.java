@@ -14,10 +14,8 @@ import java.util.List;
 public interface ConocimientoRepository extends JpaRepository<Conocimiento, Integer> {
 
     List<Conocimiento> findAll();
-    //definir consultas para traer lista de conocimientos
-    // segun su tipo (FRONTEND, BACKEND, BASE_DATOS, ETC.)
-
-    @Query("SELECT c FROM Conocimiento c LEFT JOIN FETCH c.imagenes WHERE c.tipoConocimiento = :tipoConocimiento ")
+    // traer lista segun su tipo de conocimiento (FRONTEND, BACKEND, BASE_DATOS, ETC.)
+    /*@Query("SELECT c FROM Conocimiento c LEFT JOIN FETCH c.imagenes WHERE c.tipoConocimiento = :tipoConocimiento ")
     List<Conocimiento> findByFrontEnd(@Param("tipoConocimiento") TipoConocimiento tipoConocimiento);
 
     @Query("SELECT c FROM Conocimiento c WHERE c.tipoConocimiento = :tipoConocimiento")
@@ -37,4 +35,10 @@ public interface ConocimientoRepository extends JpaRepository<Conocimiento, Inte
 
      @Query("SELECT c FROM Conocimiento c WHERE c.tipoConocimiento = :tipoConocimiento ")
     List<Conocimiento> findByPrototipo(@Param("tipoConocimiento") TipoConocimiento tipoConocimiento);
+*/
+
+    // Metodo único para filtrar por tipo (usando Spring Data JPA)
+    List<Conocimiento> findByTipoConocimiento(TipoConocimiento tipoConocimiento);
+
 }
+

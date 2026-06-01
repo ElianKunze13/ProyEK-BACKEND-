@@ -27,7 +27,21 @@ public class ConocimientoController {
         ResponseEntity responseEntity = ResponseEntity.ok(conocimientoService.getAllConocimientos());
         return responseEntity;
     }
-    @GetMapping("/frontend")
+    // ENDPOINT ÚNICO Y REUTILIZABLE
+    @GetMapping("/conocimientos/tipo/{tipo}")
+    public ResponseEntity<List<ConocimientoDto>> getConocimientosByTipo(@PathVariable TipoConocimiento tipo){
+        List<ConocimientoDto> conocimientos = conocimientoService.filtrarPorTipo(tipo);
+        return ResponseEntity.ok(conocimientos);
+    }
+
+    // Alternativa con Query Param (más RESTful)
+    @GetMapping("/conocimientos/filtrar")
+    public ResponseEntity<List<ConocimientoDto>> getConocimientosByTipoParam(@RequestParam TipoConocimiento tipo){
+        List<ConocimientoDto> conocimientos = conocimientoService.filtrarPorTipo(tipo);
+        return ResponseEntity.ok(conocimientos);
+    }
+
+    /*@GetMapping("/frontend")
     public ResponseEntity<List<ConocimientoDto>> getConocimientosFrontend(){
         List<ConocimientoDto> conFrontend =
                 conocimientoService.filtrarFrontEnd(TipoConocimiento.FRONTEND);
@@ -74,7 +88,7 @@ public class ConocimientoController {
         List<ConocimientoDto> conPrototipos =
                 conocimientoService.filtrarPrototipos(TipoConocimiento.PROTOTIPO);
         return ResponseEntity.ok(conPrototipos);
-    }
+    }*/
 
     @PostMapping("/auth/guardar/conocimiento")
     ResponseEntity<ConocimientoDto> saveConocimiento(@RequestBody @Valid ConocimientoDto conocimientoDto) {

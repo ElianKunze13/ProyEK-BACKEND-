@@ -49,7 +49,15 @@ public class ConocimientoServiceImpl implements ConocimientoService {
 
     }
 
+    //metodo unico para traer lista sugun conocimiento pasado
     @Override
+    public List<ConocimientoDto> filtrarPorTipo(TipoConocimiento tipoConocimiento) {
+        List<Conocimiento> conocimientos = conocimientoRepository.findByTipoConocimiento(tipoConocimiento);
+        return conocimientos.stream()
+                .map(conocimientoMapper::toConocimientoDto)
+                .toList();
+    }
+   /* @Override
     public List<ConocimientoDto> filtrarFrontEnd(TipoConocimiento tipoConocimiento) {
         List<Conocimiento> conocimientos = conocimientoRepository.findByFrontEnd(tipoConocimiento);
         return conocimientos.stream()
@@ -103,7 +111,7 @@ public class ConocimientoServiceImpl implements ConocimientoService {
                 .map(conocimientoMapper::toConocimientoDto)
                 .toList();
     }
-
+*/
 
     /// RECORDATORIO
     /// incluir metodo especifico para modificar imagen
