@@ -28,6 +28,80 @@ public class ConocimientoServiceImpl implements ConocimientoService {
     @Override
     @Transactional
     public ConocimientoDto saveConocimiento(ConocimientoDto conocimientoDto) {
+        log.info("Guardando nuevo conocimiento: {}", conocimientoDto.getNombre());
+        Conocimiento conocimiento = conocimientoMapper.toConocimiento(conocimientoDto);
+
+        // Establecer la relación bidireccional si hay imagen
+        if (conocimiento.getImagen() != null) {
+            conocimiento.getImagen().setConocimiento(conocimiento);
+        }
+
+        Conocimiento saveConocimiento = conocimientoRepository.save(conocimiento);
+        return conocimientoMapper.toConocimientoDto(saveConocimiento);
+    }
+
+    @Override
+    public void deleteConocimientoById(Integer id) {
+        log.info("Eliminando conocimiento con ID: {}", id);
+        conocimientoRepository.deleteById(id);
+        log.info("Conocimiento eliminado exitosamente");
+    }
+
+    @Override
+    public List<ConocimientoDto> getAllConocimientos() {
+        List<Conocimiento> todasLosConocimientos = conocimientoRepository.findAll();
+        return todasLosConocimientos.stream()
+                .map(conocimientoMapper::toConocimientoDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ConocimientoDto> filtrarPorTipo(TipoConocimiento tipoConocimiento) {
+        List<Conocimiento> conocimientos = conocimientoRepository.findByTipoConocimiento(tipoConocimiento);
+        return conocimientos.stream()
+                .map(conocimientoMapper::toConocimientoDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public ConocimientoDto actualizarConocimientoPorId(Integer id, ConocimientoDto conocimientoDto) {
+        log.info("Actualizando conocimiento con id: {}", id);
+
+        Conocimiento conocimiento = conocimientoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Conocimiento no encontrado con id " + id));
+
+        // Actualizar campos básicos
+        conocimiento.setNombre(conocimientoDto.getNombre());
+        conocimiento.setNivel(conocimientoDto.getNivel());
+        conocimiento.setTipoConocimiento(conocimientoDto.getTipoConocimiento());
+
+        // Actualizar imagen (ahora es una sola imagen)
+        if (conocimientoDto.getImagen() != null) {
+            if (conocimiento.getImagen() == null) {
+                // Crear nueva imagen
+                Imagen nuevaImagen = Imagen.builder()
+                        .url(conocimientoDto.getImagen().getUrl())
+                        .alt(conocimientoDto.getImagen().getAlt())
+                        .conocimiento(conocimiento)
+                        .build();
+                conocimiento.setImagen(nuevaImagen);
+            } else {
+                // Actualizar imagen existente
+                conocimiento.getImagen().setUrl(conocimientoDto.getImagen().getUrl());
+                conocimiento.getImagen().setAlt(conocimientoDto.getImagen().getAlt());
+            }
+        } else if (conocimientoDto.getImagen() == null && conocimiento.getImagen() != null) {
+            // Si se envía null y había imagen, eliminar la imagen
+            conocimiento.setImagen(null);
+        }
+
+        Conocimiento conocimientoActualizado = conocimientoRepository.save(conocimiento);
+        return conocimientoMapper.toConocimientoDto(conocimientoActualizado);
+    }
+   /* @Override
+    @Transactional
+    public ConocimientoDto saveConocimiento(ConocimientoDto conocimientoDto) {
         Conocimiento conocimiento = conocimientoMapper.toConocimiento(conocimientoDto);
         Conocimiento saveConocimiento = conocimientoRepository.save(conocimiento);
         return conocimientoMapper.toConocimientoDto(saveConocimiento);
@@ -49,7 +123,7 @@ public class ConocimientoServiceImpl implements ConocimientoService {
 
     }
 
-    //metodo unico para traer lista sugun conocimiento pasado
+    //metodo unico para traer lista segun conocimiento pasado
     @Override
     public List<ConocimientoDto> filtrarPorTipo(TipoConocimiento tipoConocimiento) {
         List<Conocimiento> conocimientos = conocimientoRepository.findByTipoConocimiento(tipoConocimiento);
@@ -57,64 +131,9 @@ public class ConocimientoServiceImpl implements ConocimientoService {
                 .map(conocimientoMapper::toConocimientoDto)
                 .toList();
     }
-   /* @Override
-    public List<ConocimientoDto> filtrarFrontEnd(TipoConocimiento tipoConocimiento) {
-        List<Conocimiento> conocimientos = conocimientoRepository.findByFrontEnd(tipoConocimiento);
-        return conocimientos.stream()
-                .map(conocimientoMapper::toConocimientoDto)
-                .toList();
-    }
 
-    @Override
-    public List<ConocimientoDto> filtrarBackEnd(TipoConocimiento tipoConocimiento) {
-        List<Conocimiento> conocimientos = conocimientoRepository.findByBackend(tipoConocimiento);
-        return conocimientos.stream()
-                .map(conocimientoMapper::toConocimientoDto)
-                .toList();
-    }
 
-    @Override
-    public List<ConocimientoDto> filtrarBD(TipoConocimiento tipoConocimiento) {
-        List<Conocimiento> conocimientos = conocimientoRepository.findByBD(tipoConocimiento);
-        return conocimientos.stream()
-                .map(conocimientoMapper::toConocimientoDto)
-                .toList();
-    }
 
-    @Override
-    public List<ConocimientoDto> filtrarTesting(TipoConocimiento tipoConocimiento) {
-        List<Conocimiento> conocimientos = conocimientoRepository.findByTest(tipoConocimiento);
-        return conocimientos.stream()
-                .map(conocimientoMapper::toConocimientoDto)
-                .toList();
-    }
-
-    @Override
-    public List<ConocimientoDto> filtrarOtros(TipoConocimiento tipoConocimiento) {
-        List<Conocimiento> conocimientos = conocimientoRepository.findByOtros(tipoConocimiento);
-        return conocimientos.stream()
-                .map(conocimientoMapper::toConocimientoDto)
-                .toList();
-    }
-
- @Override
-    public List<ConocimientoDto> filtrarIA(TipoConocimiento tipoConocimiento) {
-        List<Conocimiento> conocimientos = conocimientoRepository.findByIA(tipoConocimiento);
-        return conocimientos.stream()
-                .map(conocimientoMapper::toConocimientoDto)
-                .toList();
-    }
- @Override
-    public List<ConocimientoDto> filtrarPrototipos(TipoConocimiento tipoConocimiento) {
-        List<Conocimiento> conocimientos = conocimientoRepository.findByPrototipo(tipoConocimiento);
-        return conocimientos.stream()
-                .map(conocimientoMapper::toConocimientoDto)
-                .toList();
-    }
-*/
-
-    /// RECORDATORIO
-    /// incluir metodo especifico para modificar imagen
     @Override
     public ConocimientoDto actualizarConocimientoPorId(Integer id, ConocimientoDto conocimientoDto) {
 
@@ -143,6 +162,7 @@ public class ConocimientoServiceImpl implements ConocimientoService {
 
             Conocimiento conocimientoActualizado = conocimientoRepository.save(conocimiento);
             return conocimientoMapper.toConocimientoDto(conocimientoActualizado);
-        }
+        }*/
+
     }
 

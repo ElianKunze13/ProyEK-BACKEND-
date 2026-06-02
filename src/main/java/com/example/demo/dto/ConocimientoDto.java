@@ -26,7 +26,8 @@ public class ConocimientoDto {
 
     private TipoConocimiento tipoConocimiento;
 
-    //private List<ImagenDto> imagenes = new ArrayList<>();
-    private List<ImagenDto> imagenes;
+    // Cambiado de List<ImagenDto> a ImagenDto (una sola imagen)
+    private ImagenDto imagen;
+    //private List<ImagenDto> imagenes;
 
 }

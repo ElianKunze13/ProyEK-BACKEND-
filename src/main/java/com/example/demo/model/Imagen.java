@@ -21,11 +21,19 @@ public class Imagen {
     @NonNull
     private String alt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // Relación OneToOne con Conocimiento
+    @OneToOne(mappedBy = "imagen", fetch = FetchType.LAZY)
+    @JoinColumn(name = "conocimiento_id")
+    @JsonBackReference("imagen-conocimiento")
+    @JsonIgnore  // Evita que se serialice (al crear conocimiento nuevo, atributo img conecte con
+    // otros modelos que tambien poseen una imagen y por ende genera error de referencia circular)
+    private Conocimiento conocimiento;
+
+    /*@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conocimiento_id")
     @JsonBackReference("imagen-conocimiento")
     @JsonIgnore  // Evita que se serialice conocimiento
-    private Conocimiento conocimiento;
+    private Conocimiento conocimiento;*/
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "educacion_id")

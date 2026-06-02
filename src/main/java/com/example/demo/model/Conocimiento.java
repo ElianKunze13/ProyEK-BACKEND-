@@ -25,7 +25,7 @@ public class Conocimiento {
 
     /// conocimientos serian las tecnologias usadas/aprendidas
     ///(html, css, java, angular, springboot, bootstrap, tailwind)
-    /// va en seccion HERRAMIENTAS
+    /// va en seccion HERRAMIENTAS en Frontend
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,9 +47,15 @@ public class Conocimiento {
     //conocimiento tendra imagen de icono
     /// cambiar de lista de imagen a una imagen unica, ya que cada conocimiento
     ///  solo tendra un icono asociado
-    @OneToMany(mappedBy = "conocimiento", cascade = CascadeType.ALL, orphanRemoval = true)
+    /*@OneToMany(mappedBy = "conocimiento", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference // Esto permite serializar las imágenes
-    private List<Imagen> imagenes = new ArrayList<>();
+    private List<Imagen> imagenes = new ArrayList<>();*/
+
+    // Cambiado de OneToMany a OneToOne - cada conocimiento tiene UNA imagen
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "imagen_id", referencedColumnName = "id")
+    @JsonManagedReference
+    private Imagen imagen;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")

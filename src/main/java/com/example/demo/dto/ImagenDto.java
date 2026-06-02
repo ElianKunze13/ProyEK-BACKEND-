@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ImagenDto {
 
+    private Integer id;  // Añadido id
+
     private String url;
     private String alt;
 }
