@@ -3,6 +3,7 @@ package com.example.demo.model;
 import com.example.demo.enums.Nivel;
 import com.example.demo.enums.TipoEducacion;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -33,10 +34,10 @@ public class Educacion {
     private String titulo;
 
     /// ARREGLAR e incluir fecha de inicio y fin de estudio, o fecha de obtencion del titulo
-    /*@Column(name = "fechaObtencion")
+    @Column(name = "fechaObtencion")
     @NotNull(message = "fechaObtencion no debe ser nulo")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate fechaObtencion;*/
+    private LocalDate fechaObtencion;
 
     @NotNull
     @NotEmpty
@@ -52,8 +53,13 @@ public class Educacion {
     //incluir imagen de certificado o pdf
     /// cambiar de lista de imagen a una imagen unica, ya que cada educacion
     ///  tendra solo una imagen del certificado
-    @OneToMany(mappedBy = "educacion", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Imagen> imagenes = new ArrayList<>();
+    /*@OneToMany(mappedBy = "educacion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Imagen> imagenes = new ArrayList<>();*/
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "imagen_id", referencedColumnName = "id")
+    @JsonManagedReference
+    private Imagen imagen;
 
 
     @ManyToOne(fetch = FetchType.LAZY)

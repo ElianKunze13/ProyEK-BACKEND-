@@ -23,14 +23,14 @@ public class EducacionDto {
 
     private String titulo;
 
-   /* @NotNull(message = "fechaObtencion no debe ser nulo")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate fechaObtencion;*/
+    ///
+    private LocalDate fechaObtencion;
 
     private String descripcion;
 
     private TipoEducacion tipoEducacion;
 
+    //private List<Imagen> imagenes = new ArrayList<>();
+    private ImagenDto imagen;
 
-    private List<Imagen> imagenes = new ArrayList<>();
 }

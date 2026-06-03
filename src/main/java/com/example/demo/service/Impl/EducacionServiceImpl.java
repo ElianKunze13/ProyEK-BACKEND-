@@ -2,17 +2,16 @@ package com.example.demo.service.Impl;
 
 import com.example.demo.dto.EducacionDto;
 import com.example.demo.mapper.EducacionMapper;
-import com.example.demo.model.Conocimiento;
 import com.example.demo.model.Educacion;
 import com.example.demo.model.Imagen;
 import com.example.demo.repository.EducacionRepository;
 import com.example.demo.service.EducacionService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j // remplaza el  Sout
 @Service // indica que es un servicio
@@ -30,39 +29,43 @@ public class EducacionServiceImpl implements EducacionService {
 
     /// RECORDATORIO
     /// incluir en controller metodo especifico para modificar imagen
+    /// usar definicion de Conocimiento como guia 
+    
     @Override
+    @Transactional
     public EducacionDto actualizarEducacionPorId(Integer id, EducacionDto educacionDto) {
-        log.info("Actualizando educaion con id: " + id);
-        Educacion educacion = educacionRepository.findById(id).orElse(null);
+        log.info("Actualizando educación con id: {}", id);
 
-        if (educacion != null) {
-            educacion.setTitulo(educacionDto.getTitulo());
-            //educacion.setFechaObtencion(educacionDto.getFechaObtencion());
-            educacion.setDescripcion(educacionDto.getDescripcion());
-            educacion.setTipoEducacion(educacionDto.getTipoEducacion());
+        Educacion educacion = educacionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Educación no encontrada con id " + id));
 
-            // metodo especifico para actualizar fotos
-            if (educacionDto.getImagenes() != null && !educacionDto.getImagenes().isEmpty()) {
-                educacion.getImagenes().clear();//borra las fotos
-                List<Imagen> nuevaImagen = educacionDto.getImagenes().stream()
-                        .map(imagenDto -> {
-                            Imagen imagen = new Imagen();
-                            imagen.setUrl(imagenDto.getUrl());//establece url nueva
-                            imagen.setAlt(imagenDto.getAlt());//establece alt nueva
-                            imagen.setEducacion(educacion); // Establecer relación bidireccional
-                            return imagen;
-                        })
-                        .collect(Collectors.toList());
-                educacion.getImagenes().addAll(nuevaImagen);
+        // Actualizar campos básicos
+        educacion.setTitulo(educacionDto.getTitulo());
+        educacion.setDescripcion(educacionDto.getDescripcion());
+        educacion.setTipoEducacion(educacionDto.getTipoEducacion());
+
+        // Actualizar imagen (ahora es una sola imagen)
+        if (educacionDto.getImagen() != null) {
+            if (educacion.getImagen() == null) {
+                // Crear nueva imagen
+                Imagen nuevaImagen = Imagen.builder()
+                        .url(educacionDto.getImagen().getUrl())
+                        .alt(educacionDto.getImagen().getAlt())
+                        .educacion(educacion)
+                        .build();
+                educacion.setImagen(nuevaImagen);
+            } else {
+                // Actualizar imagen existente
+                educacion.getImagen().setUrl(educacionDto.getImagen().getUrl());
+                educacion.getImagen().setAlt(educacionDto.getImagen().getAlt());
             }
-
-
-            Educacion educacionActualizada = educacionRepository.save(educacion);
-            return educacionMapper.toEducacionDto(educacionActualizada);
-        } else {
-            log.warn("Educacion no encontrado con id: " + id);
-            return null;
+        } else if (educacionDto.getImagen() == null && educacion.getImagen() != null) {
+            // Si se envía null y había imagen, eliminar la imagen
+            educacion.setImagen(null);
         }
+
+        Educacion educacionActualizada = educacionRepository.save(educacion);
+        return educacionMapper.toEducacionDto(educacionActualizada);
     }
 
     @Override
