@@ -29,6 +29,8 @@ public class Experiencia {
     @Size(min = 3, max = 145, message = "Nombre debe tener entre 3 y 50 caracteres")
     private String titulo;
 
+    /// cambiar e incluir fecha de inicio y fin de experiencia, o fecha de realizacion del proyecto
+    /// en vez de fechaHora (ya que es muy general y ambiguo)
     @Column(name = "fechaYHora")
     @NotNull
     private LocalDate fechaHora;
