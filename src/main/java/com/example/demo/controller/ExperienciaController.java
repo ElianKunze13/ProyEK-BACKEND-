@@ -30,7 +30,7 @@ public class ExperienciaController {
         return responseEntity;
     }
 
-    @PutMapping("/auth/modificar/experiencias")
+    @PutMapping("/auth/modificar/experiencia/{id}")
     ResponseEntity<ExperienciaDto> updateExperiencia(@PathVariable Integer id, @RequestBody @Valid ExperienciaDto experienciaDto) {
         try {
             ExperienciaDto experienciaActualizada = experienciaService.actualizarExperienciaPorId(id, experienciaDto);
