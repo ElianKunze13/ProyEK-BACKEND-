@@ -42,6 +42,12 @@ public class Imagen {
     @JsonBackReference("imagen-educacion")
     private Educacion educacion;
 
+    @OneToOne(mappedBy = "imagen", fetch = FetchType.LAZY)
+    @JoinColumn(name = "experiencia_id")
+    @JsonIgnore  // Evita que se serialice educacion
+    @JsonBackReference("imagen-experiencia")
+    private Experiencia experiencia;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
     @ToString.Exclude

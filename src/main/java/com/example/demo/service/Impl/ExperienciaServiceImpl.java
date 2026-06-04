@@ -35,7 +35,7 @@ public class ExperienciaServiceImpl implements ExperienciaService {
         Experiencia experienciaExistente = experienciaRepository.findById(id).orElse(null);
         if (experienciaExistente != null) {
             experienciaExistente.setTitulo(experienciaDto.getTitulo());
-            experienciaExistente.setFechaHora(experienciaDto.getFechaHora());
+            experienciaExistente.setFechaFinProyecto(experienciaDto.getFechaFinProyecto());
             experienciaExistente.setDescripcion(experienciaDto.getDescripcion());
             experienciaExistente.setTipoExperiencia(experienciaDto.getTipoExperiencia());
             experienciaExistente.setTecnologiaUsada(experienciaDto.getTecnologiaUsada());

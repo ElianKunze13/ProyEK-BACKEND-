@@ -21,10 +21,13 @@ public class ExperienciaDto {
 
     private Integer id;
     private String titulo;
-    private LocalDate fechaHora;
+    private LocalDate fechaFinProyecto;
     private String descripcion;
+    private String link;
 
-    private TipoExperiencia tipoExperiencia; //incluir tecnologias y tipo de experiencia como tags
+    ///incluir imagen
+    private ImagenDto imagen;
+    private TipoExperiencia tipoExperiencia;
     private TecnologiaUsada tecnologiaUsada;
 
 }

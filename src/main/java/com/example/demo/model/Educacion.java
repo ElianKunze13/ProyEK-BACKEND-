@@ -34,6 +34,11 @@ public class Educacion {
     private String titulo;
 
     /// ARREGLAR e incluir fecha de inicio y fin de estudio, o fecha de obtencion del titulo
+    @Column(name = "fechaInicio")
+    @NotNull(message = "fechaInicio no debe ser nulo")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate fechaInicio;
+
     @Column(name = "fechaObtencion")
     @NotNull(message = "fechaObtencion no debe ser nulo")
     @JsonFormat(pattern = "yyyy-MM-dd")

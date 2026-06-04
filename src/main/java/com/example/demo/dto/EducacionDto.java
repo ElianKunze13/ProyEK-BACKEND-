@@ -24,6 +24,7 @@ public class EducacionDto {
     private String titulo;
 
     ///
+    private LocalDate fechaInicio;
     private LocalDate fechaObtencion;
 
     private String descripcion;
