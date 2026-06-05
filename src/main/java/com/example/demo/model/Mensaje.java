@@ -26,7 +26,7 @@ public class Mensaje {
     @Size(min= 10, max = 100, message = "El nombre no puede exceder 100 caracteres")
     private String email;
 
-    @Size(max = 300, message = "El mensaje no puede exceder 1000 caracteres")
+    @Size(max = 1000, message = "El mensaje no puede exceder 1000 caracteres")
     private String mensaje;
 
     @Column(name = "fecha_creacion")
