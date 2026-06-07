@@ -48,8 +48,10 @@ public class UsuarioDto {
     @NotNull(message = "Rol no puede ser nulo")
     private Role rol;
 
-    private List<Imagen> fotoUsuario = new ArrayList<>();
-    //private String fotoPerfilUrl; // Solo la URL de la foto principal
+    //private List<Imagen> fotoUsuario = new ArrayList<>();
+    private ImagenDto fotoPerfil;
+
+    private ImagenDto fotoPortada;
 
     private  boolean active=true;
 

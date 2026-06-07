@@ -60,19 +60,21 @@ public class Usuario implements UserDetails, Source {
     @Enumerated(EnumType.STRING)
     private Role rol;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    /*@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference("imagen-usuario") // Si usas @JsonBackReference en Imagen
-    private List<Imagen> fotoUsuario = new ArrayList<>();
+    private List<Imagen> fotoUsuario = new ArrayList<>();*/
 
-    /// ARREGLAR RELACION CON IMAGEN PARA TENER IMAGEN UNICA EN VEZ DE UNA LISTA
-    /// Si decides usar un DTO para la imagen, podrías tener algo como esto en lugar de la relación directa:
-    /// private Imagen fotoUsuario;
-///usar modelo conocimiento como ejemplo
-    /// // Cambiado de OneToMany a OneToOne - cada conocimiento tiene UNA imagen
-    ///     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    ///     @JoinColumn(name = "imagen_id", referencedColumnName = "id")
-    ///     @JsonManagedReference
-    ///     private Imagen imagen;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "imagen_perfil_id", referencedColumnName = "id")
+    @JsonManagedReference
+    private Imagen fotoPerfil;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "imagen_portada_id", referencedColumnName = "id")
+    @JsonManagedReference
+    private Imagen fotoPortada;
+
+
 
     // Relaciones que faltan:
    /* @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

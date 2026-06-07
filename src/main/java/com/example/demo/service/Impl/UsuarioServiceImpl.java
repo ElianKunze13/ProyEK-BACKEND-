@@ -32,9 +32,9 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id " + id));
         // Forzar la carga de las imágenes si son LAZY
-        if (usuario.getFotoUsuario() != null) {
+       /* if (usuario.getFotoUsuario() != null) {
             usuario.getFotoUsuario().size(); // Esto fuerza la carga de la colección
-        }
+        }*/
         return usuarioMapper.toDto(usuario);
 
     }
@@ -74,7 +74,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setDescripcion(usuarioDto.getDescripcion());
 
         // metodo especifico para actualizar fotos
-        if (usuarioDto.getFotoUsuario() != null && !usuarioDto.getFotoUsuario().isEmpty()) {
+       /* if (usuarioDto.getFotoUsuario() != null && !usuarioDto.getFotoUsuario().isEmpty()) {
             usuario.getFotoUsuario().clear();//borra las fotos
             List<Imagen> nuevaImagen = usuarioDto.getFotoUsuario().stream()
                     .map(imagenDto -> {
@@ -86,21 +86,22 @@ public class UsuarioServiceImpl implements UsuarioService {
                     })
                     .collect(Collectors.toList());
             usuario.getFotoUsuario().addAll(nuevaImagen);
-        }
-        // Manejar la foto INDIVIDUAL
-        /*if (usuarioDto.getFotoPerfilUrl() != null && !usuarioDto.getFotoPerfilUrl().isEmpty()) {
-            // Limpiar fotos existentes si quieres solo una
-            usuario.getFotoUsuario().clear();
-
-            // Crear nueva imagen
-            Imagen nuevaImagen = Imagen.builder()
-                    .url(usuarioDto.getFotoPerfilUrl())
-                    .alt("Foto de perfil de " + usuarioDto.getNombre())
-                    .usuario(usuario)
-                    .build();
-
-            usuario.getFotoUsuario().add(nuevaImagen);
         }*/
+        // Manejar la foto INDIVIDUAL
+        if (usuarioDto.getFotoPerfil() != null) {
+            Imagen imagen = new Imagen();
+            imagen.setUrl(usuarioDto.getFotoPerfil().getUrl());
+            imagen.setAlt(usuarioDto.getFotoPerfil().getAlt());
+            imagen.setUsuario(usuario); // Establecer relación bidireccional
+            usuario.setFotoPerfil(imagen);
+        }
+        if (usuarioDto.getFotoPortada() != null) {
+            Imagen imagen = new Imagen();
+            imagen.setUrl(usuarioDto.getFotoPortada().getUrl());
+            imagen.setAlt(usuarioDto.getFotoPortada().getAlt());
+            imagen.setUsuario(usuario); // Establecer relación bidireccional
+            usuario.setFotoPortada(imagen);
+        }
 
         Usuario updated = usuarioRepository.save(usuario);
         return usuarioMapper.toDto(updated);
