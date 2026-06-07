@@ -67,7 +67,12 @@ public class Usuario implements UserDetails, Source {
     /// ARREGLAR RELACION CON IMAGEN PARA TENER IMAGEN UNICA EN VEZ DE UNA LISTA
     /// Si decides usar un DTO para la imagen, podrías tener algo como esto en lugar de la relación directa:
     /// private Imagen fotoUsuario;
-
+///usar modelo conocimiento como ejemplo
+    /// // Cambiado de OneToMany a OneToOne - cada conocimiento tiene UNA imagen
+    ///     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    ///     @JoinColumn(name = "imagen_id", referencedColumnName = "id")
+    ///     @JsonManagedReference
+    ///     private Imagen imagen;
 
     // Relaciones que faltan:
    /* @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
