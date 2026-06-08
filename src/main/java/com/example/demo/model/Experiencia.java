@@ -30,7 +30,13 @@ public class Experiencia {
     @Size(min = 3, max = 145, message = "Nombre debe tener entre 3 y 50 caracteres")
     private String titulo;
 
-    /// cambiar e incluir fecha de inicio y fin de experiencia, o fecha de realizacion del proyecto
+
+    /// incluir fecha de inicio
+    /// EN CASO DE QUE SEA UN PROYECTO EN CURSO,
+    /// LA FECHA DE FIN PUEDE SER NULL O UN VALOR ESPECIAL
+    ///  private LocalDate fechaInicioProyecto;
+
+
     @Column(name = "fechaFinProyecto")
     @NotNull
     private LocalDate fechaFinProyecto;
