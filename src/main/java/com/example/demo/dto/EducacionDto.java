@@ -20,15 +20,12 @@ import java.util.List;
 public class EducacionDto {
 
     private Integer id;
-
     private String titulo;
 
-    ///
     private LocalDate fechaInicio;
+
     private LocalDate fechaObtencion;
-
     private String descripcion;
-
     private TipoEducacion tipoEducacion;
 
     //private List<Imagen> imagenes = new ArrayList<>();

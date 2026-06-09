@@ -31,14 +31,14 @@ public class Experiencia {
     private String titulo;
 
 
-    /// incluir fecha de inicio
-    /// EN CASO DE QUE SEA UN PROYECTO EN CURSO,
-    /// LA FECHA DE FIN PUEDE SER NULL O UN VALOR ESPECIAL
-    ///  private LocalDate fechaInicioProyecto;
-
-
-    @Column(name = "fechaFinProyecto")
+    @Column(name = "fechaInicioProyecto")
     @NotNull
+    private LocalDate fechaInicioProyecto;
+
+    //modificar fechaFinProyecto para que pueda ser null o un valor especial
+    // en caso de proyectos en curso
+    @Column(name = "fechaFinProyecto")
+    //@NotNull
     private LocalDate fechaFinProyecto;
 
     /// incluir aporte personal especifico en caso de ser un proyecto colaborativo
@@ -63,14 +63,13 @@ public class Experiencia {
     @Enumerated(EnumType.STRING)
     private TecnologiaUsada tecnologiaUsada;
 
-    /// incluir captura de pantalla o imagen representativa del proyecto
-    //IMPORTANTE
-    //incluir relacion bidireccional con modelo Imagen
+    /// para incluir captura de pantalla o imagen representativa del proyecto
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "imagen_id", referencedColumnName = "id")
     @JsonManagedReference
     private Imagen imagen;
 
+    /// relacion con usuario
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;

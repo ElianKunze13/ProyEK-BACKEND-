@@ -21,11 +21,12 @@ public class ExperienciaDto {
 
     private Integer id;
     private String titulo;
+
+    private LocalDate fechaInicioProyecto;
     private LocalDate fechaFinProyecto;
     private String descripcion;
     private String link;
 
-    ///incluir imagen
     private ImagenDto imagen;
     private TipoExperiencia tipoExperiencia;
     private TecnologiaUsada tecnologiaUsada;
