@@ -22,7 +22,7 @@ public class EducacionDto {
     private Integer id;
     private String titulo;
 
-    private LocalDate fechaInicio;
+    //private LocalDate fechaInicio;
 
     private LocalDate fechaObtencion;
     private String descripcion;
