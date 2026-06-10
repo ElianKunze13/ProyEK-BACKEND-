@@ -50,8 +50,9 @@ public class UsuarioDto {
 
     //private List<Imagen> fotoUsuario = new ArrayList<>();
     private ImagenDto fotoPerfil;
-
     private ImagenDto fotoPortada;
+
+    private VideoDto videoPresentacion;  // ← Video simplificado
 
     private  boolean active=true;
 
