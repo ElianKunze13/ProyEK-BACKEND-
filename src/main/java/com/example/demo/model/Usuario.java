@@ -60,10 +60,6 @@ public class Usuario implements UserDetails, Source {
     @Enumerated(EnumType.STRING)
     private Role rol;
 
-    /*@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonManagedReference("imagen-usuario") // Si usas @JsonBackReference en Imagen
-    private List<Imagen> fotoUsuario = new ArrayList<>();*/
-
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "imagen_perfil_id", referencedColumnName = "id")
     @JsonManagedReference
@@ -74,20 +70,9 @@ public class Usuario implements UserDetails, Source {
     @JsonManagedReference
     private Imagen fotoPortada;
 
+///INCLUIR ATRIBUTO VIDEO
 
 
-    // Relaciones que faltan:
-   /* @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Habilidad> habilidades = new ArrayList<>();
-
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Conocimiento> conocimientos = new ArrayList<>();
-
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Experiencia> experiencias = new ArrayList<>();
-
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Educacion> educaciones = new ArrayList<>();*/
 
      private  boolean active=true;
 
