@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.example.demo.enums.TipoVideo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,5 +15,5 @@ public class VideoDto {
     private String path;
     private String nombreOriginal;
 
-    //private TipoVideo tipoMime;  // ← Enum en lugar de String
+    private TipoVideo tipoMime;  // ← Enum en lugar de String
 }
