@@ -28,6 +28,7 @@ public class Video {
 
    /* @Column(name = "tipo_mime")
     @Enumerated(EnumType.STRING)  // ← Guardar como STRING en BD
+    @NotNull
     private TipoVideo tipoMime;  // ← Usar Enum en lugar de String
 */
     // Relación con Usuario
