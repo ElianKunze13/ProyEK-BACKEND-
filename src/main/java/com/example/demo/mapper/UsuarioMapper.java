@@ -21,21 +21,7 @@ public interface UsuarioMapper {
     Usuario toEntity(UsuarioDto usuarioDto);
 
 
-    // Método por defecto para mapear lista de Imagen a ImagenDto
-    /*default List<ImagenDto> mapFotoUsuario(List<Imagen> fotoUsuario) {
-        if (fotoUsuario == null) {
-            return new ArrayList<>();
-        }
-        return fotoUsuario.stream()
-                .map(imagen -> {
-                    ImagenDto dto = new ImagenDto();
-                    dto.setUrl(imagen.getUrl());
-                    dto.setAlt(imagen.getAlt());
-                    // Mapea otros campos si existen
-                    return dto;
-                })
-                .collect(Collectors.toList());
-    }
+  /*
 
     // Método por defecto para mapear lista de ImagenDto a Imagen
     default List<Imagen> mapFotoUsuarioEntity(List<ImagenDto> fotoUsuarioDto) {

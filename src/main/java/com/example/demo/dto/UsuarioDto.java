@@ -52,7 +52,7 @@ public class UsuarioDto {
     private ImagenDto fotoPerfil;
     private ImagenDto fotoPortada;
 
-    private VideoDto videoPresentacion;  // ← Video simplificado
+   // private VideoDto videoPresentacion;  // ← Video simplificado
 
     private  boolean active=true;
 
