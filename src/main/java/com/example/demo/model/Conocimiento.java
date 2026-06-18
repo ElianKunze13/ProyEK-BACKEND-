@@ -44,9 +44,7 @@ public class Conocimiento {
     @Enumerated(EnumType.STRING)
     private TipoConocimiento tipoConocimiento;
 
-    //conocimiento tendra imagen de icono
-    /// cambiar de lista de imagen a una imagen unica, ya que cada conocimiento
-    ///  solo tendra un icono asociado
+    /// cambiar de lista a una imagen unica,
     /*@OneToMany(mappedBy = "conocimiento", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference // Esto permite serializar las imágenes
     private List<Imagen> imagenes = new ArrayList<>();*/
