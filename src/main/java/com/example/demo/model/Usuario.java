@@ -71,10 +71,10 @@ public class Usuario implements UserDetails, Source {
     private Imagen fotoPortada;
 
 ///INCLUIR ATRIBUTO VIDEO
-@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+/*@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 @JoinColumn(name = "video_presentacion_id", referencedColumnName = "id")
 @JsonManagedReference
-private Video videoPresentacion;
+private Video videoPresentacion;*/
 
 
      private  boolean active=true;
