@@ -1,15 +1,11 @@
 package com.example.demo.mapper;
 
-import com.example.demo.dto.ImagenDto;
 import com.example.demo.dto.UsuarioDto;
-import com.example.demo.model.Imagen;
 import com.example.demo.model.Usuario;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Mapper(componentModel = "spring",uses = {ImagenMapper.class})
 public interface UsuarioMapper {
