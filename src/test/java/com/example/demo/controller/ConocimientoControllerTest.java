@@ -29,11 +29,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-/**
- * Pruebas unitarias para la clase ConocimientoController
- * Principios FIRST: Fast, Independent, Repeatable, Self-Validating, Timely
- * Principios SOLID: Responsabilidad única en cada test, dependencias inyectadas mediante Mock
- */
+
 @ExtendWith(MockitoExtension.class)
 class ConocimientoControllerTest {
 
