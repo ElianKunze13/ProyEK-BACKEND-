@@ -29,13 +29,8 @@ public class Imagen {
     // otros modelos que tambien poseen una imagen y por ende genera error de referencia circular)
     private Conocimiento conocimiento;
 
-    /*@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "conocimiento_id")
-    @JsonBackReference("imagen-conocimiento")
-    @JsonIgnore  // Evita que se serialice conocimiento
-    private Conocimiento conocimiento;*/
 
-   // @ManyToOne(fetch = FetchType.LAZY)
+
    @OneToOne(mappedBy = "imagen", fetch = FetchType.LAZY)
    @JoinColumn(name = "educacion_id")
     @JsonIgnore  // Evita que se serialice educacion
