@@ -127,7 +127,13 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfig() {
     CorsConfiguration config = new CorsConfiguration();
-    config.setAllowedOrigins(List.of("http://localhost:4200","http://localhost:8080"));
+    //config.setAllowedOrigins(List.of("http://localhost:4200","http://localhost:8080"));
+    //rutas permitidas modificadas para permitir el acceso desde el frontend en desarrollo y producción
+      config.setAllowedOrigins(List.of(
+              "http://localhost:4200",
+              "http://localhost:8080",
+              System.getenv("FRONTEND_URL") != null ? System.getenv("FRONTEND_URL") : ""
+      ));
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("*"));
     config.setAllowCredentials(true);
