@@ -71,7 +71,14 @@ public class JwtService {
 
   private Key getSigningKey() {
     if (signingKey == null) {
-      signingKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+      byte[] keyBytes;
+      try {
+        keyBytes = Decoders.BASE64.decode(secretKey);
+      } catch (IllegalArgumentException e) {
+        // If secret is not Base64, fall back to raw UTF-8 bytes (useful for local dev)
+        keyBytes = secretKey.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+      }
+      signingKey = Keys.hmacShaKeyFor(keyBytes);
     }
     return signingKey;
   }
