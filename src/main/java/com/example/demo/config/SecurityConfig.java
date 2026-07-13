@@ -123,8 +123,25 @@ public class SecurityConfig {
   public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
     return config.getAuthenticationManager();
   }
-
-  @Bean
+    @Bean
+    public CorsConfigurationSource corsConfig() {
+        CorsConfiguration config = new CorsConfiguration();
+        String frontendUrl = System.getenv("FRONTEND_URL");
+        // Si la variable de entorno no existe, permite todo (solo para desarrollo)
+        if (frontendUrl == null || frontendUrl.isEmpty()) {
+            config.setAllowedOrigins(List.of("*"));
+        } else {
+            config.setAllowedOrigins(List.of(frontendUrl));
+        }
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
+        var source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+ /* @Bean
   public CorsConfigurationSource corsConfig() {
     CorsConfiguration config = new CorsConfiguration();
     //rutas permitidas modificadas para permitir el acceso desde el frontend en desarrollo y producción
@@ -145,7 +162,7 @@ public class SecurityConfig {
     source.registerCorsConfiguration("/**", config);
     return source;
 
-  }
+  }*/
 
   @Bean
   public AuthenticationProvider authProvider() {
