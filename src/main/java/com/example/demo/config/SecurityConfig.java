@@ -127,42 +127,38 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfig() {
         CorsConfiguration config = new CorsConfiguration();
         String frontendUrl = System.getenv("FRONTEND_URL");
-        // Si la variable de entorno no existe, permite todo (solo para desarrollo)
+        String activeProfile = System.getenv("SPRING_PROFILES_ACTIVE");
+        
+        // Configuración por ambiente
         if (frontendUrl == null || frontendUrl.isEmpty()) {
-            config.setAllowedOrigins(List.of("*"));
+            // DESARROLLO: Permitir localhost en múltiples puertos
+            config.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "http://localhost:4200",
+                "http://localhost:8080",
+                "http://localhost:5173",
+                "http://127.0.0.1:3000",
+                "http://127.0.0.1:4200",
+                "http://127.0.0.1:8080"
+            ));
+            config.setAllowCredentials(true);
+            log.info("🔧 CORS en DESARROLLO - Orígenes localhost permitidos");
         } else {
+            // PRODUCCIÓN: Solo el frontend URL especificado
             config.setAllowedOrigins(List.of(frontendUrl));
+            config.setAllowCredentials(true);
+            log.info("🔧 CORS en PRODUCCIÓN - Origen: {}", frontendUrl);
         }
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
+        config.setExposedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         config.setMaxAge(3600L);
+        
         var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
- /* @Bean
-  public CorsConfigurationSource corsConfig() {
-    CorsConfiguration config = new CorsConfiguration();
-    //rutas permitidas modificadas para permitir el acceso desde el frontend en desarrollo y producción
-      config.setAllowedOrigins(List.of(
-              "http://localhost:4200",
-              "http://localhost:8080",
-              System.getenv("FRONTEND_URL") != null ? System.getenv("FRONTEND_URL") : ""
-      ));
-    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    config.setAllowedHeaders(List.of("*"));
-    config.setAllowCredentials(true);
-
-    //config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
-    //config.setExposedHeaders(List.of("Content-Security-Policy", "X-XSS-Protection"));
-    config.setMaxAge(3600L);
-
-    var source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", config);
-    return source;
-
-  }*/
 
   @Bean
   public AuthenticationProvider authProvider() {
