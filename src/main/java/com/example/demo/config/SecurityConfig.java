@@ -127,7 +127,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfig() {
         CorsConfiguration config = new CorsConfiguration();
         String frontendUrl = System.getenv("FRONTEND_URL");
-        String activeProfile = System.getenv("SPRING_PROFILES_ACTIVE");
+        //String activeProfile = System.getenv("SPRING_PROFILES_ACTIVE");
         
         // Configuración por ambiente
         if (frontendUrl == null || frontendUrl.isEmpty()) {
