@@ -11,7 +11,7 @@ import lombok.Data;
 @Builder
 public class AuthRequest {
 
-  @Email(message = "Debe ser un email válido")
+  //@Email(message = "Debe ser un email válido")
   @NotNull(message = "Username/Email no puede ser nulo")
   private String username;
 
