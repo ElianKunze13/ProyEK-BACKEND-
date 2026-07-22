@@ -29,7 +29,7 @@ public class HabilidadController {
         return responseEntity;
     }
 
-    @PutMapping("/auth/modificar/habilidad")
+    @PutMapping("/auth/modificar/habilidad/{id}")
     ResponseEntity<HabilidadDto> updateExperiencia(@PathVariable Integer id, @RequestBody @Valid HabilidadDto habilidadDto) {
         try {
             HabilidadDto habilidadActualizada = habilidadService.actualizarHabilidadPorId(id, habilidadDto);
