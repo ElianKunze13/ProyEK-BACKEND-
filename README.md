@@ -1,8 +1,8 @@
 # ✨Repositorio Backend Portofolio
 
-Este repositorio contiene el backend de mi portofolio digital, desarrollado para gestionar y exponer mis proyectos y habilidades de manera dinámica. Es un proyecto que busca demostrar el uso de buenas prácticas en el desarrollo web aprendidas en la tecnicatura.
+Repositorio que guarda backend de mi portofolio, desarrollado para gestionar y exponer mis proyectos/habilidades de manera dinámica.
 
-El objetivo de su realizacion fue el de construir un software robusto que soporte funcionalidades basicas (GET, POST, PUT, DELETE) implementando seguridad y pruebas (unitarias y de integracion) para testeo de posibles escenarios con datos limites e interesantes reduccion y reutilizacion de codigo reduntante, entre demas cosas.
+El objetivo fue construir un software robusto que soporte funcionalidades basicas (GET, POST, PUT, DELETE) implementando seguridad y pruebas (unitarias y de integracion) para testeo con datos limites e interesantes, ademas de reduccion y reutilizacion de codigo reduntante, entre demas cosas.
 
 
 ---
