@@ -4,6 +4,7 @@ Repositorio que guarda backend de mi portofolio, desarrollado para gestionar y e
 
 El objetivo fue construir un software robusto que soporte funcionalidades basicas (GET, POST, PUT, DELETE) implementando seguridad y pruebas (unitarias y de integracion) para testeo con datos limites e interesantes, ademas de reduccion y reutilizacion de codigo reduntante, entre demas cosas.
 
+Desplegada como *Web Service* en hosting [![Render](https://img.shields.io/badge/Render-46E3B7?style=flat&logo=render&logoColor=white)](https://render.com/) 
 
 ---
 ## 🔗 Repositorios Relacionados
@@ -15,13 +16,12 @@ El objetivo fue construir un software robusto que soporte funcionalidades basica
 ## 🛠️ Herramientas implementadas
 
 ### Lenguajes
-- **Java JDK v17** - Lenguaje principal del backend
-- **HTML** - Definicion de estructura de mails
-- **CSS** - Para modificar estetica de html
+- **Java JDK v17** - Lenguaje principal
+- **HTML** - Para definir estructura de mails
+- **CSS** - Para estetica de html
 
 ### Frameworks y Librerías
 *   ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.3-6DB33F?style=flat&logo=spring-boot&logoColor=white) - Framework para desarrollo de aplicaciones Java
-
 
 ### Dependencias
 *   [![Maven](https://img.shields.io/badge/Maven-3.9.x-C71A36?style=flat&logo=apache-maven&logoColor=white)](https://maven.apache.org/) - Gestión de dependencias y construcción del proyecto
@@ -33,12 +33,14 @@ El objetivo fue construir un software robusto que soporte funcionalidades basica
 - **Swagger**
 - **Postman**
 - **JWT**
+- **CORS**
 
-  
 ### Base de Datos
-*   [![MySQL](https://img.shields.io/badge/MySQL-9.3.0-4479A1?style=flat&logo=mysql&logoColor=white)](https://www.mysql.com/) - base de datos usada
+*   [![MySQL](https://img.shields.io/badge/MySQL-9.3.0-4479A1?style=flat&logo=mysql&logoColor=white)](https://www.mysql.com/) 
 
+### Otros
 
+---
 ## 📂 Estructura del Proyecto
 La arquitectura sigue el patrón **MVC (Modelo-Vista-Controlador)** y una clara separación en capas:
 ```
@@ -68,6 +70,10 @@ backend-portofolio/
 - Maven 3.6+
 - Base de datos MySQL
 
+**IMPORTANTE**
+*Para probar api en dispositivo personal se debe definir variables de entorno nuevas/locales en application.properties, caso contrario dara error al ejecutar programa
+
+---
 
 ## 📌 Convenciones utilizadas
 
