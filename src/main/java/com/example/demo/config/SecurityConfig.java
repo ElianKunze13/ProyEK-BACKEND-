@@ -55,7 +55,8 @@ public class SecurityConfig {
         .build();
     return new InMemoryUserDetailsManager(user, admin);}
 }
-*/@Configuration
+*/
+@Configuration
 @EnableWebSecurity
 @Slf4j
 @EnableMethodSecurity(prePostEnabled = true) // Activar seguridad a nivel de métodos
@@ -63,83 +64,86 @@ public class SecurityConfig {
 public class SecurityConfig {
 
 
-  private final JwtAuthFilter jwtAuthFilter;
-  private final UserDetailsService userDetailsService;
+    private final JwtAuthFilter jwtAuthFilter;
+    private final UserDetailsService userDetailsService;
 
-  private static final String[] WHITE_LIST = {
-      "/api/v1/auth/**", "/api/v1/**" , "/api/v1/test/**",
-      "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/health","/api/v1/health"
-  };
+    private static final String[] WHITE_LIST = {
+            "/api/v1/auth/**", "/api/v1/**", "/api/v1/test/**",
+            "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
+            "/health", "/api/v1/health", "/api/v1/auth/upload/imagen"
 
-  public SecurityConfig(JwtAuthFilter jwtAuthFilter, UserDetailsService userDetailsService) {
-    this.jwtAuthFilter = Objects.requireNonNull(jwtAuthFilter, "JwtAuthFilter is required");
-    this.userDetailsService = Objects.requireNonNull(userDetailsService, "UserDetailsService is required");
-  }
+    };
 
-  @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    log.info("🛡️ Configurando seguridad");
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, UserDetailsService userDetailsService) {
+        this.jwtAuthFilter = Objects.requireNonNull(jwtAuthFilter, "JwtAuthFilter is required");
+        this.userDetailsService = Objects.requireNonNull(userDetailsService, "UserDetailsService is required");
+    }
 
-    http
-        .csrf(AbstractHttpConfigurer::disable)
-        // Configuración CSRF para APIs stateless
-        /*.csrf(csrf -> csrf
-            .ignoringRequestMatchers(WHITE_LIST) // Opcional: endpoints públicos
-            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-        )*/
-        .cors(cors -> cors.configurationSource(corsConfig()))
-        .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .headers(headers -> headers
-            // Activa X-XSS-Protection
-            .xssProtection(xss -> xss
-                .headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK)
-            )
-            // Política de Seguridad de Contenido (CSP)
-            .contentSecurityPolicy(csp -> csp
-                .policyDirectives("default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'")
-            )
-            // Otras cabeceras de seguridad
-            .frameOptions(frame -> frame.deny())
-            .httpStrictTransportSecurity(hsts -> hsts
-                .includeSubDomains(true)
-                .preload(true)
-                .maxAgeInSeconds(31536000) // 1 año
-            )
-            // Prevención de Content Sniffing (Agregar esta línea)
-            .contentTypeOptions(withDefaults())
-        )
-        .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(WHITE_LIST).permitAll()
-            .anyRequest().authenticated())
-        .authenticationProvider(authProvider())
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        log.info("🛡️ Configurando seguridad");
 
-    return http.build();
-  }
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                // Configuración CSRF para APIs stateless
+                /*.csrf(csrf -> csrf
+                    .ignoringRequestMatchers(WHITE_LIST) // Opcional: endpoints públicos
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                )*/
+                .cors(cors -> cors.configurationSource(corsConfig()))
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .headers(headers -> headers
+                        // Activa X-XSS-Protection
+                        .xssProtection(xss -> xss
+                                .headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK)
+                        )
+                        // Política de Seguridad de Contenido (CSP)
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives("default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'")
+                        )
+                        // Otras cabeceras de seguridad
+                        .frameOptions(frame -> frame.deny())
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .preload(true)
+                                .maxAgeInSeconds(31536000) // 1 año
+                        )
+                        // Prevención de Content Sniffing (Agregar esta línea)
+                        .contentTypeOptions(withDefaults())
+                )
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(WHITE_LIST).permitAll()
+                        .anyRequest().authenticated())
+                .authenticationProvider(authProvider())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
 
 
-  @Bean
-  public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
-    return config.getAuthenticationManager();
-  }
+    @Bean
+    public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
     @Bean
     public CorsConfigurationSource corsConfig() {
         CorsConfiguration config = new CorsConfiguration();
         String frontendUrl = System.getenv("FRONTEND_URL");
         //String activeProfile = System.getenv("SPRING_PROFILES_ACTIVE");
-        
+
         // Configuración por ambiente
         if (frontendUrl == null || frontendUrl.isEmpty()) {
             // DESARROLLO: Permitir localhost en múltiples puertos
             config.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://localhost:4200",
-                "http://localhost:8080",
-                "http://localhost:5173",
-                "http://127.0.0.1:3000",
-                "http://127.0.0.1:4200",
-                "http://127.0.0.1:8080"
+                    "http://localhost:3000",
+                    "http://localhost:4200",
+                    "http://localhost:8080",
+                    "http://localhost:5173",
+                    "http://127.0.0.1:3000",
+                    "http://127.0.0.1:4200",
+                    "http://127.0.0.1:8080"
             ));
             config.setAllowCredentials(true);
             log.info("🔧 CORS en DESARROLLO - Orígenes localhost permitidos");
@@ -149,28 +153,27 @@ public class SecurityConfig {
             config.setAllowCredentials(true);
             log.info("🔧 CORS en PRODUCCIÓN - Origen: {}", frontendUrl);
         }
-        
+
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         config.setMaxAge(3600L);
-        
+
         var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
 
-  @Bean
-  public AuthenticationProvider authProvider() {
-    var provider = new DaoAuthenticationProvider(userDetailsService);
+    @Bean
+    public AuthenticationProvider authProvider() {
+        var provider = new DaoAuthenticationProvider(userDetailsService);
 //    provider.setUserDetailsService(userDetailsService);
-    provider.setPasswordEncoder(new BCryptPasswordEncoder(12));
-    return provider;
-  }
+        provider.setPasswordEncoder(new BCryptPasswordEncoder(12));
+        return provider;
+    }
 
-  @Bean
-  public PasswordEncoder passwordEncoder()
-  {
-    return new BCryptPasswordEncoder(12);
-  }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12);
+    }
 }
