@@ -36,28 +36,38 @@ Desplegada como *Web Service* en hosting [![Render](https://img.shields.io/badge
 - **CORS**
 
 ### Base de Datos
-*   [![MySQL](https://img.shields.io/badge/MySQL-9.3.0-4479A1?style=flat&logo=mysql&logoColor=white)](https://www.mysql.com/) 
+*   [![MySQL](https://img.shields.io/badge/MySQL-9.3.0-4479A1?style=flat&logo=mysql&logoColor=white)](https://www.mysql.com/) - Se cambio a PostgreSQL para desplegar 
 
 ### Otros
-
+*  [![UptimeRobot](https://img.shields.io/badge/UptimeRobot-Monitoring-7B3CE4?style=flat&logo=uptimerobot&logoColor=white)](https://uptimerobot.com/) - Mantiene activo backend, reduciendo carga de componentes
+  
 ---
+
 ## 📂 Estructura del Proyecto
 La arquitectura sigue el patrón **MVC (Modelo-Vista-Controlador)** y una clara separación en capas:
 ```
 backend-portofolio/
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/portofolio/
-│   │   │       ├── controllers/
-│   │   │       ├── models/
-│   │   │       ├── services/
-│   │   │       └── repositories/
-│   │   └── resources/
-│   │       └── application.properties
-│   └── test/
-├── pom.xml
-└── README.md
+├── 📁src/
+│   ├── 📁main/
+│   │   ├── 📁java/
+│   │   │   └── 📁com/portofolio/
+│   │   │       ├── 📁authsecurity/
+│   │   │       ├── 📁config/
+│   │   │       ├── 📁controllers/
+│   │   │       ├── 📁dto/
+│   │   │       ├── 📁enums/
+│   │   │       ├── 📁mapper/
+│   │   │       ├── 📁models/
+│   │   │       ├── 📁repository/
+│   │   │       └── 📁service/
+│   │   │            └── 📁impl/
+│   │   └── 📁resources/
+│   │       └── 📄application.properties
+│   │
+│   └── 📁test/
+│   
+├── 📄pom.xml
+└── 📄README.md
 ```
 
 ---
