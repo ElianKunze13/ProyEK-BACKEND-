@@ -28,34 +28,7 @@ import java.util.Objects;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
-/*
-@Configuration
-@EnableWebSecurity
-public class SecurityConfig {
-  @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/", "/home",  "/api/*", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            .anyRequest().authenticated()   )
-        .httpBasic(Customizer.withDefaults()); // Configuración de autenticación básica
-    return http.build();  }
 
-  @Bean
-  public UserDetailsService userDetailsService() {
-    UserDetails user = User.withDefaultPasswordEncoder()
-        .username("user") .password("password")
-        .roles("USER")
-        .build();
-    UserDetails admin = User.withDefaultPasswordEncoder()
-        .username("admin")
-        .password("admin123")
-        .roles("ADMIN")
-        .build();
-    return new InMemoryUserDetailsManager(user, admin);}
-}
-*/
 @Configuration
 @EnableWebSecurity
 @Slf4j
@@ -70,7 +43,7 @@ public class SecurityConfig {
     private static final String[] WHITE_LIST = {
             "/api/v1/auth/**", "/api/v1/**", "/api/v1/test/**",
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-            "/health", "/api/v1/health", "/api/v1/auth/upload/imagen"
+            "/health", "/api/v1/health"
 
     };
 
