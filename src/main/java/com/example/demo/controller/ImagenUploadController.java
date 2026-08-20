@@ -1,10 +1,11 @@
-// ImagenUploadController.java
+// ImagenUploadController.java - VERSIÓN CORREGIDA
 package com.example.demo.controller;
 
 import com.example.demo.dto.ImagenDto;
 import com.example.demo.service.ImagenUploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,21 +16,33 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class ImagenUploadController {
 
-
     private final ImagenUploadService imagenUploadService;
 
-    @PostMapping("/auth/upload/imagen")
-    public ResponseEntity<ImagenDto> uploadImage(@RequestParam("file") MultipartFile file) {
+    // ✅ VERSIÓN 1: Con consumes explícito
+    @PostMapping(value = "/auth/upload/imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ImagenDto> uploadImage(
+            @RequestParam(value = "file", required = true) MultipartFile file) {
+
         log.info("📤 Recibida solicitud de subida de imagen");
         log.info("📄 Nombre: {}", file.getOriginalFilename());
         log.info("📏 Tamaño: {} bytes", file.getSize());
         log.info("📋 Tipo: {}", file.getContentType());
-        log.info("🔗 Headers: {}", file.getName());
 
         try {
-            // Validar archivo
+            // Validaciones adicionales
             if (file.isEmpty()) {
                 log.error("❌ El archivo está vacío");
+                return ResponseEntity.badRequest().build();
+            }
+
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                log.error("❌ Tipo de archivo no válido: {}", contentType);
+                return ResponseEntity.badRequest().build();
+            }
+
+            if (file.getSize() > 5 * 1024 * 1024) {
+                log.error("❌ Archivo demasiado grande: {} bytes", file.getSize());
                 return ResponseEntity.badRequest().build();
             }
 
@@ -39,10 +52,18 @@ public class ImagenUploadController {
 
         } catch (IllegalArgumentException e) {
             log.error("❌ Error de validación: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(null);
         } catch (Exception e) {
             log.error("❌ Error al subir imagen: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    // ✅ VERSIÓN 2: Alternativa sin consumes específico
+    @PostMapping("/auth/upload/imagen-alt")
+    public ResponseEntity<ImagenDto> uploadImageAlt(
+            @RequestParam("file") MultipartFile file) {
+        // Mismo código de arriba
+        return uploadImage(file);
     }
 }
