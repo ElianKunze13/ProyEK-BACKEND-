@@ -1,4 +1,4 @@
-// ImagenUploadServiceImpl.java - VERSIÓN DEFINITIVA
+// ImagenUploadServiceImpl.java - VERSIÓN DEFINITIVA CON API KEY EN URL
 package com.example.demo.service.Impl;
 
 import com.example.demo.dto.ImagenDto;
@@ -56,15 +56,17 @@ public class ImagenUploadServiceImpl implements ImagenUploadService {
         }
 
         try {
-            // ✅ USAR API KEY EN EL BODY (FORMA CORRECTA)
+            // ✅ CONSTRUIR URL CON LA API KEY COMO PARÁMETRO
+            String uploadUrlWithKey = IMGBB_UPLOAD_URL + "?key=" + imgbbApiKey;
+            log.info("📤 Enviando petición a: {}", uploadUrlWithKey); // Log para depurar
+
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("key", imgbbApiKey); // ✅ LA CLAVE DEBE SER "key"
 
-            // ✅ CONVERTIR MultipartFile A ByteArrayResource
+            // ✅ EL CUERPO SOLO CONTIENE LA IMAGEN (LA CLAVE VA EN LA URL)
             byte[] fileBytes = file.getBytes();
             ByteArrayResource fileResource = new ByteArrayResource(fileBytes) {
                 @Override
@@ -72,7 +74,7 @@ public class ImagenUploadServiceImpl implements ImagenUploadService {
                     return file.getOriginalFilename();
                 }
             };
-            body.add("image", fileResource); // ✅ EL ARCHIVO DEBE SER "image"
+            body.add("image", fileResource); // El campo debe llamarse "image"
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity =
                     new HttpEntity<>(body, headers);
@@ -82,7 +84,7 @@ public class ImagenUploadServiceImpl implements ImagenUploadService {
             log.info("📏 Tamaño: {} bytes", file.getSize());
 
             ResponseEntity<String> response = restTemplate.exchange(
-                    IMGBB_UPLOAD_URL,
+                    uploadUrlWithKey, // ✅ URL CON LA KEY INCLUIDA
                     HttpMethod.POST,
                     requestEntity,
                     String.class
