@@ -1,14 +1,13 @@
-// ImagenUploadServiceImpl.java
 package com.example.demo.service.Impl;
 
 import com.example.demo.dto.ImagenDto;
 import com.example.demo.service.ImagenUploadService;
-import com.example.demo.service.Impl.MultipartFileResource; // ✅ IMPORT CORRECTO
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -26,65 +25,58 @@ public class ImagenUploadServiceImpl implements ImagenUploadService {
 
     private final String IMGBB_UPLOAD_URL = "https://api.imgbb.com/1/upload";
 
+
+    // ImagenUploadServiceImpl.java - VERSIÓN ALTERNATIVA
     @Override
     public ImagenDto uploadImageToImgBB(MultipartFile file) throws Exception {
-        log.info("🔄 Subiendo imagen a ImgBB");
-        log.info("🔑 API Key (primeros 5 chars): {}",
-                imgbbApiKey != null ? imgbbApiKey.substring(0, 5) + "..." : "null");
+        log.info("🔄 Subiendo imagen a ImgBB (versión con API en URL)");
 
-        // ✅ VERIFICAR QUE LA API KEY NO ESTÉ VACÍA
         if (imgbbApiKey == null || imgbbApiKey.isEmpty()) {
             log.error("❌ IMGBB_API_KEY no configurada");
             throw new Exception("IMGBB_API_KEY no configurada");
         }
 
-        // Validar archivo
-        if (file.isEmpty()) {
-            log.error("❌ El archivo está vacío");
-            throw new IllegalArgumentException("El archivo está vacío");
-        }
-
-        String contentType = file.getContentType();
-        if (contentType == null || !contentType.startsWith("image/")) {
-            log.error("❌ Tipo de archivo no válido: {}", contentType);
-            throw new IllegalArgumentException("El archivo debe ser una imagen");
-        }
-
-        if (file.getSize() > 5 * 1024 * 1024) {
-            log.error("❌ Archivo demasiado grande: {} bytes", file.getSize());
-            throw new IllegalArgumentException("La imagen no puede superar los 5MB");
-        }
-
         try {
-            // ✅ PREPARAR PETICIÓN CON FORMATO CORRECTO
+            // ✅ USAR API KEY EN LA URL
+            String uploadUrl = IMGBB_UPLOAD_URL + "?key=" + imgbbApiKey;
+
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("key", imgbbApiKey);
-            body.add("image", new MultipartFileResource(file));
+
+            // Convertir MultipartFile a ByteArrayResource
+            byte[] fileBytes = file.getBytes();
+            ByteArrayResource fileResource = new ByteArrayResource(fileBytes) {
+                @Override
+                public String getFilename() {
+                    return file.getOriginalFilename();
+                }
+            };
+            body.add("image", fileResource);
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity =
                     new HttpEntity<>(body, headers);
 
             log.info("📤 Enviando petición a ImgBB...");
+            log.info("📄 Archivo: {}", file.getOriginalFilename());
+            log.info("📏 Tamaño: {} bytes", file.getSize());
 
             ResponseEntity<String> response = restTemplate.exchange(
-                    IMGBB_UPLOAD_URL,
+                    uploadUrl,  // ✅ API KEY EN URL
                     HttpMethod.POST,
                     requestEntity,
                     String.class
             );
 
-            log.info("📥 Código de respuesta ImgBB: {}", response.getStatusCode());
+            log.info("📥 Código de respuesta: {}", response.getStatusCode());
+            log.info("📥 Respuesta: {}", response.getBody());
 
             if (response.getStatusCode() != HttpStatus.OK) {
-                log.error("❌ Respuesta de ImgBB no exitosa: {}", response.getBody());
                 throw new Exception("ImgBB respondió con código: " + response.getStatusCode());
             }
 
-            // Parsear respuesta
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response.getBody());
 
@@ -92,11 +84,9 @@ public class ImagenUploadServiceImpl implements ImagenUploadService {
                 String errorMsg = root.has("error") ?
                         root.get("error").get("message").asText() :
                         "Error desconocido";
-                log.error("❌ Error en ImgBB: {}", errorMsg);
                 throw new Exception("Error de ImgBB: " + errorMsg);
             }
 
-            // Extraer datos
             JsonNode data = root.get("data");
             String url = data.get("url").asText();
 
@@ -112,4 +102,5 @@ public class ImagenUploadServiceImpl implements ImagenUploadService {
             throw e;
         }
     }
+
 }
