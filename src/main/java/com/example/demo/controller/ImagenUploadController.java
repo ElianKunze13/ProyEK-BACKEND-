@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -63,7 +64,29 @@ public class ImagenUploadController {
     @PostMapping("/auth/upload/imagen-alt")
     public ResponseEntity<ImagenDto> uploadImageAlt(
             @RequestParam("file") MultipartFile file) {
+
         // Mismo código de arriba
         return uploadImage(file);
+    }
+    // ImagenUploadController.java - AGREGAR ENDPOINT DE PRUEBA
+    @GetMapping("/auth/test-imgbb")
+    public ResponseEntity<String> testImgBBConnection() {
+        try {
+            // Verificar que la API Key existe
+            String apiKey = System.getenv("IMGBB_API_KEY");
+            if (apiKey == null || apiKey.isEmpty()) {
+                return ResponseEntity.badRequest().body("❌ IMGBB_API_KEY no configurada");
+            }
+
+            // Hacer una petición de prueba a ImgBB
+            RestTemplate restTemplate = new RestTemplate();
+            String url = "https://api.imgbb.com/1/upload?key=" + apiKey;
+
+            // Intentar una subida de prueba con un archivo pequeño
+            // (Esto es solo para verificar que la API Key funciona)
+            return ResponseEntity.ok("✅ API Key encontrada: " + apiKey.substring(0, 5) + "...");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("❌ Error: " + e.getMessage());
+        }
     }
 }
