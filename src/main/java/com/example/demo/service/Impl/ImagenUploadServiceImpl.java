@@ -1,9 +1,9 @@
-// ImagenUploadServiceImpl.java - CON MEJOR MANEJO DE ERRORES
+// ImagenUploadServiceImpl.java
 package com.example.demo.service.Impl;
 
 import com.example.demo.dto.ImagenDto;
-import com.example.demo.exception.MultipartFileResource;
 import com.example.demo.service.ImagenUploadService;
+import com.example.demo.service.Impl.MultipartFileResource; // ✅ IMPORT CORRECTO
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -29,13 +29,14 @@ public class ImagenUploadServiceImpl implements ImagenUploadService {
     @Override
     public ImagenDto uploadImageToImgBB(MultipartFile file) throws Exception {
         log.info("🔄 Subiendo imagen a ImgBB");
+        log.info("🔑 API Key (primeros 5 chars): {}",
+                imgbbApiKey != null ? imgbbApiKey.substring(0, 5) + "..." : "null");
 
         // ✅ VERIFICAR QUE LA API KEY NO ESTÉ VACÍA
         if (imgbbApiKey == null || imgbbApiKey.isEmpty()) {
             log.error("❌ IMGBB_API_KEY no configurada");
-            throw new Exception("IMGBB_API_KEY no configurada. Configura la variable de entorno.");
+            throw new Exception("IMGBB_API_KEY no configurada");
         }
-        log.info("🔑 API Key encontrada: {}", imgbbApiKey.substring(0, 5) + "...");
 
         // Validar archivo
         if (file.isEmpty()) {
@@ -69,31 +70,23 @@ public class ImagenUploadServiceImpl implements ImagenUploadService {
 
             log.info("📤 Enviando petición a ImgBB...");
 
-            // ✅ HACER LA PETICIÓN CON MEJOR MANEJO DE ERRORES
-            ResponseEntity<String> response;
-            try {
-                response = restTemplate.exchange(
-                        IMGBB_UPLOAD_URL,
-                        HttpMethod.POST,
-                        requestEntity,
-                        String.class
-                );
-            } catch (Exception e) {
-                log.error("❌ Error al conectar con ImgBB: {}", e.getMessage());
-                throw new Exception("Error al conectar con ImgBB: " + e.getMessage());
-            }
+            ResponseEntity<String> response = restTemplate.exchange(
+                    IMGBB_UPLOAD_URL,
+                    HttpMethod.POST,
+                    requestEntity,
+                    String.class
+            );
 
-            // ✅ VERIFICAR RESPUESTA
+            log.info("📥 Código de respuesta ImgBB: {}", response.getStatusCode());
+
             if (response.getStatusCode() != HttpStatus.OK) {
-                log.error("❌ Respuesta de ImgBB no exitosa: {}", response.getStatusCode());
+                log.error("❌ Respuesta de ImgBB no exitosa: {}", response.getBody());
                 throw new Exception("ImgBB respondió con código: " + response.getStatusCode());
             }
 
             // Parsear respuesta
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response.getBody());
-
-            log.info("📥 Respuesta de ImgBB: {}", response.getBody());
 
             if (!root.has("success") || !root.get("success").asBoolean()) {
                 String errorMsg = root.has("error") ?
@@ -106,12 +99,9 @@ public class ImagenUploadServiceImpl implements ImagenUploadService {
             // Extraer datos
             JsonNode data = root.get("data");
             String url = data.get("url").asText();
-            String deleteUrl = data.has("delete_url") ? data.get("delete_url").asText() : null;
-            String thumb = data.get("thumb").get("url").asText();
 
             log.info("✅ Imagen subida exitosamente: {}", url);
 
-            // Crear DTO de respuesta
             return ImagenDto.builder()
                     .url(url)
                     .alt(file.getOriginalFilename())
@@ -119,7 +109,7 @@ public class ImagenUploadServiceImpl implements ImagenUploadService {
 
         } catch (Exception e) {
             log.error("❌ Error al subir imagen: {}", e.getMessage(), e);
-            throw new Exception("Error al subir la imagen: " + e.getMessage(), e);
+            throw e;
         }
     }
 }
