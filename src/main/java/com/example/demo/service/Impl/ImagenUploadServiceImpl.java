@@ -31,9 +31,25 @@ public class ImagenUploadServiceImpl implements ImagenUploadService {
     public ImagenDto uploadImageToImgBB(MultipartFile file) throws Exception {
         log.info("🔄 Subiendo imagen a ImgBB (versión con API en URL)");
 
+
         if (imgbbApiKey == null || imgbbApiKey.isEmpty()) {
-            log.error("❌ IMGBB_API_KEY no configurada");
-            throw new Exception("IMGBB_API_KEY no configurada");
+            log.info("🔄 Subiendo imagen a ImgBB");
+
+            // ✅ LOG DETALLADO DE LA API KEY
+            log.info("🔑 API Key (longitud): {}", imgbbApiKey != null ? imgbbApiKey.length() : 0);
+            log.info("🔑 API Key (primeros 10 chars): {}",
+                    imgbbApiKey != null && imgbbApiKey.length() > 10 ?
+                            imgbbApiKey.substring(0, 10) + "..." : "null");
+
+            // ✅ VERIFICAR QUE LA API KEY NO TENGA ESPACIOS
+            if (imgbbApiKey != null) {
+                imgbbApiKey = imgbbApiKey.trim(); // ✅ ELIMINAR ESPACIOS
+            }
+
+            if (imgbbApiKey == null || imgbbApiKey.isEmpty()) {
+                log.error("❌ IMGBB_API_KEY no configurada");
+                throw new Exception("IMGBB_API_KEY no configurada");
+            }
         }
 
         try {
