@@ -1,42 +1,31 @@
-// ImagenUploadServiceImpl.java - VERSIÓN DEFINITIVA CON API KEY EN URL
+// ImagenUploadServiceImpl.java - VERSIÓN CORREGIDA
 package com.example.demo.service.Impl;
 
 import com.example.demo.dto.ImagenDto;
 import com.example.demo.service.ImagenUploadService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.imagekit.sdk.ImageKit;
+import io.imagekit.sdk.models.FileCreateRequest;
+import io.imagekit.sdk.models.results.Result;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ImagenUploadServiceImpl implements ImagenUploadService {
 
-    @Value("${imgbb.api.key}")
-    private String imgbbApiKey;
-
-    private final String IMGBB_UPLOAD_URL = "https://api.imgbb.com/1/upload";
+    private final ImageKit imageKit;
 
     @Override
     public ImagenDto uploadImageToImgBB(MultipartFile file) throws Exception {
-        log.info("🔄 Subiendo imagen a ImgBB");
-        log.info("🔑 API Key (primeros 5 chars): {}",
-                imgbbApiKey != null ? imgbbApiKey.substring(0, 5) + "..." : "null");
-
-        // ✅ VERIFICAR API KEY
-        if (imgbbApiKey == null || imgbbApiKey.isEmpty()) {
-            log.error("❌ IMGBB_API_KEY no configurada");
-            throw new Exception("IMGBB_API_KEY no configurada");
-        }
+        log.info("🔄 Subiendo imagen a ImageKit.io");
+        log.info("📄 Nombre: {}", file.getOriginalFilename());
+        log.info("📏 Tamaño: {} bytes", file.getSize());
+        log.info("📋 Tipo: {}", file.getContentType());
 
         // ✅ VALIDAR ARCHIVO
         if (file.isEmpty()) {
@@ -56,74 +45,40 @@ public class ImagenUploadServiceImpl implements ImagenUploadService {
         }
 
         try {
-            // ✅ CONSTRUIR URL CON LA API KEY COMO PARÁMETRO
-            String uploadUrlWithKey = IMGBB_UPLOAD_URL + "?key=" + imgbbApiKey;
-            log.info("📤 Enviando petición a: {}", uploadUrlWithKey); // Log para depurar
+            // ✅ CREAR SOLICITUD DE SUBIDA A IMAGEKIT
+            FileCreateRequest request = new FileCreateRequest(file.getBytes(), file.getOriginalFilename());
 
-            RestTemplate restTemplate = new RestTemplate();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            // ✅ OPCIONAL: Definir carpeta
+            // request.setFolder("/portfolio/experiencias");
 
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            log.info("📤 Enviando petición a ImageKit.io...");
 
-            // ✅ EL CUERPO SOLO CONTIENE LA IMAGEN (LA CLAVE VA EN LA URL)
-            byte[] fileBytes = file.getBytes();
-            ByteArrayResource fileResource = new ByteArrayResource(fileBytes) {
-                @Override
-                public String getFilename() {
-                    return file.getOriginalFilename();
-                }
-            };
-            body.add("image", fileResource); // El campo debe llamarse "image"
+            // ✅ SUBIR LA IMAGEN USANDO EL SDK
+            Result result = imageKit.upload(request);
 
-            HttpEntity<MultiValueMap<String, Object>> requestEntity =
-                    new HttpEntity<>(body, headers);
-
-            log.info("📤 Enviando petición a ImgBB...");
-            log.info("📄 Archivo: {}", file.getOriginalFilename());
-            log.info("📏 Tamaño: {} bytes", file.getSize());
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                    uploadUrlWithKey, // ✅ URL CON LA KEY INCLUIDA
-                    HttpMethod.POST,
-                    requestEntity,
-                    String.class
-            );
-
-            log.info("📥 Código de respuesta: {}", response.getStatusCode());
-            log.info("📥 Respuesta: {}", response.getBody());
-
-            // ✅ VERIFICAR RESPUESTA
-            if (response.getStatusCode() != HttpStatus.OK) {
-                throw new Exception("ImgBB respondió con código: " + response.getStatusCode());
-            }
-
-            // ✅ PARSEAR RESPUESTA
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(response.getBody());
-
-            if (!root.has("success") || !root.get("success").asBoolean()) {
-                String errorMsg = root.has("error") ?
-                        root.get("error").get("message").asText() :
-                        "Error desconocido";
-                log.error("❌ Error en ImgBB: {}", errorMsg);
-                throw new Exception("Error de ImgBB: " + errorMsg);
+            // ✅ VERIFICAR RESPUESTA - MÉTODO CORRECTO PARA ESTA VERSIÓN
+            // En lugar de isSuccessful(), verificamos si el resultado tiene URL
+            if (result.getUrl() == null || result.getUrl().isEmpty()) {
+                log.error("❌ Error en ImageKit: No se obtuvo URL");
+                throw new Exception("Error en ImageKit: No se obtuvo URL");
             }
 
             // ✅ EXTRAER URL
-            JsonNode data = root.get("data");
-            String url = data.get("url").asText();
+            String url = result.getUrl();
 
-            log.info("✅ Imagen subida exitosamente: {}", url);
+            log.info("✅ Imagen subida exitosamente a ImageKit: {}", url);
 
             return ImagenDto.builder()
                     .url(url)
                     .alt(file.getOriginalFilename())
                     .build();
 
+        } catch (IOException e) {
+            log.error("❌ Error al leer el archivo: {}", e.getMessage());
+            throw new Exception("Error al leer el archivo: " + e.getMessage());
         } catch (Exception e) {
-            log.error("❌ Error al subir imagen: {}", e.getMessage(), e);
-            throw e;
+            log.error("❌ Error al subir imagen a ImageKit: {}", e.getMessage(), e);
+            throw new Exception("Error al subir la imagen: " + e.getMessage());
         }
     }
 }
