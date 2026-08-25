@@ -40,6 +40,7 @@ Desplegada como *Web Service* en hosting [![Render](https://img.shields.io/badge
 
 ### Otros
 *  [![UptimeRobot](https://img.shields.io/badge/UptimeRobot-Monitoring-7B3CE4?style=flat&logo=uptimerobot&logoColor=white)](https://uptimerobot.com/) - Mantiene activo backend, reduciendo carga de componentes
+* [![ImageKit](https://img.shields.io/badge/ImageKit-CloudStorage-1A8CFF?style=flat&logo=imagekit&logoColor=white)](https://imagekit.io/dashboard) - Almacenamiento para imagenes
   
 ---
 
