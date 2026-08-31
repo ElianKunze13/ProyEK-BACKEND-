@@ -7,7 +7,7 @@ public enum TipoConocimiento {
     BASE_DATOS,
     TESTING,
     IA,
-    DISENIO,
     PROTOTIPO,
+    DISENIO,
     OTROS
 }
