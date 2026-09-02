@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,7 +70,7 @@ class ExperienciaMapperTest {
                 .descripcion("Apasionado por la tecnología")
                 .build();
 
-        // Crear experiencia válida
+        // 🔥 Crear experiencia válida con lista de tecnologías
         experienciaValida = Experiencia.builder()
                 .id(1)
                 .titulo("Sistema de Gestión de Usuarios")
@@ -77,12 +79,12 @@ class ExperienciaMapperTest {
                 .descripcion("Desarrollo de API REST con Spring Boot y JWT para gestión de usuarios")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
 
-        // Crear ExperienciaDto válido
+        // 🔥 Crear ExperienciaDto válido con lista de tecnologías
         experienciaDtoValido = ExperienciaDto.builder()
                 .id(1)
                 .titulo("Sistema de Gestión de Usuarios")
@@ -91,7 +93,7 @@ class ExperienciaMapperTest {
                 .descripcion("Desarrollo de API REST con Spring Boot y JWT para gestión de usuarios")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(imagenDto)
                 .build();
 
@@ -138,8 +140,13 @@ class ExperienciaMapperTest {
         assertEquals(experienciaValida.getLink(), resultado.getLink(), "El link debería coincidir");
         assertEquals(experienciaValida.getTipoExperiencia(), resultado.getTipoExperiencia(),
                 "El tipo de experiencia debería coincidir");
-        assertEquals(experienciaValida.getTecnologiaUsada(), resultado.getTecnologiaUsada(),
-                "La tecnología usada debería coincidir");
+
+        // 🔥 Verificar que la lista de tecnologías se mapea correctamente
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(experienciaValida.getTecnologiasUsadas().size(), resultado.getTecnologiasUsadas().size(),
+                "El tamaño de la lista de tecnologías debería coincidir");
+        assertTrue(resultado.getTecnologiasUsadas().containsAll(experienciaValida.getTecnologiasUsadas()),
+                "Las tecnologías usadas deberían coincidir");
 
         // Verificar que se llamó a ImagenMapper para la imagen
         verify(imagenMapper, times(1)).toImagenDto(experienciaValida.getImagen());
@@ -157,7 +164,7 @@ class ExperienciaMapperTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-sin-imagen")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .usuario(null)
                 .build();
@@ -170,6 +177,9 @@ class ExperienciaMapperTest {
         assertEquals(experienciaSinImagen.getId(), resultado.getId(), "El ID debería coincidir");
         assertEquals(experienciaSinImagen.getTitulo(), resultado.getTitulo(), "El título debería coincidir");
         assertNull(resultado.getImagen(), "La imagen debería ser nula");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
+                "La tecnología usada debería ser JAVA");
 
         // Verificar que no se llamó a ImagenMapper para imagen nula
         verify(imagenMapper, never()).toImagenDto(any());
@@ -187,7 +197,7 @@ class ExperienciaMapperTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.PYTHON)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON, TecnologiaUsada.DJANGO)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(null)
                 .build();
@@ -199,6 +209,8 @@ class ExperienciaMapperTest {
         assertNotNull(resultado, "El resultado no debería ser nulo");
         assertEquals(experienciaEnCurso.getId(), resultado.getId(), "El ID debería coincidir");
         assertNull(resultado.getFechaFinProyecto(), "La fecha de fin debería ser nula");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, resultado.getTecnologiasUsadas().size(), "Debería tener 2 tecnologías");
 
         // Verificar que se llamó a ImagenMapper para la imagen
         verify(imagenMapper, times(1)).toImagenDto(experienciaEnCurso.getImagen());
@@ -216,7 +228,7 @@ class ExperienciaMapperTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-independiente")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVASCRIPT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVASCRIPT, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(null)
                 .build();
@@ -228,6 +240,10 @@ class ExperienciaMapperTest {
         assertNotNull(resultado, "El resultado no debería ser nulo");
         assertEquals(experienciaSinUsuario.getId(), resultado.getId(), "El ID debería coincidir");
         assertNotNull(resultado.getImagen(), "La imagen no debería ser nula");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(resultado.getTecnologiasUsadas().containsAll(
+                        List.of(TecnologiaUsada.JAVASCRIPT, TecnologiaUsada.TYPESCRIPT)),
+                "Las tecnologías usadas deberían coincidir");
 
         // Verificar que se llamó a ImagenMapper
         verify(imagenMapper, times(1)).toImagenDto(experienciaSinUsuario.getImagen());
@@ -267,8 +283,13 @@ class ExperienciaMapperTest {
         assertEquals(experienciaDtoValido.getLink(), resultado.getLink(), "El link debería coincidir");
         assertEquals(experienciaDtoValido.getTipoExperiencia(), resultado.getTipoExperiencia(),
                 "El tipo de experiencia debería coincidir");
-        assertEquals(experienciaDtoValido.getTecnologiaUsada(), resultado.getTecnologiaUsada(),
-                "La tecnología usada debería coincidir");
+
+        // 🔥 Verificar que la lista de tecnologías se mapea correctamente
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(experienciaDtoValido.getTecnologiasUsadas().size(), resultado.getTecnologiasUsadas().size(),
+                "El tamaño de la lista de tecnologías debería coincidir");
+        assertTrue(resultado.getTecnologiasUsadas().containsAll(experienciaDtoValido.getTecnologiasUsadas()),
+                "Las tecnologías usadas deberían coincidir");
 
         // Verificar que se llamó a ImagenMapper para la imagen
         verify(imagenMapper, times(1)).toImagen(experienciaDtoValido.getImagen());
@@ -286,7 +307,7 @@ class ExperienciaMapperTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-sin-imagen-dto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.REACT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .build();
 
@@ -298,6 +319,9 @@ class ExperienciaMapperTest {
         assertEquals(experienciaDtoSinImagen.getId(), resultado.getId(), "El ID debería coincidir");
         assertEquals(experienciaDtoSinImagen.getTitulo(), resultado.getTitulo(), "El título debería coincidir");
         assertNull(resultado.getImagen(), "La imagen debería ser nula");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.REACT),
+                "La tecnología usada debería ser REACT");
 
         // Verificar que no se llamó a ImagenMapper para imagen nula
         verify(imagenMapper, never()).toImagen(any());
@@ -315,7 +339,7 @@ class ExperienciaMapperTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-en-curso-dto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.DJANGO)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.DJANGO, TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
                 .imagen(imagenDto)
                 .build();
 
@@ -326,6 +350,8 @@ class ExperienciaMapperTest {
         assertNotNull(resultado, "El resultado no debería ser nulo");
         assertEquals(experienciaDtoEnCurso.getId(), resultado.getId(), "El ID debería coincidir");
         assertNull(resultado.getFechaFinProyecto(), "La fecha de fin debería ser nula");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, resultado.getTecnologiasUsadas().size(), "Debería tener 2 tecnologías");
 
         // Verificar que se llamó a ImagenMapper
         verify(imagenMapper, times(1)).toImagen(experienciaDtoEnCurso.getImagen());
@@ -357,18 +383,28 @@ class ExperienciaMapperTest {
         assertNotNull(dto, "El DTO no debería ser nulo");
         assertNotNull(experienciaConvertida, "La experiencia convertida no debería ser nula");
         assertEquals(experienciaValida.getId(), experienciaConvertida.getId(), "El ID debería ser el mismo");
-        assertEquals(experienciaValida.getTitulo(), experienciaConvertida.getTitulo(), "El título debería ser el mismo");
+        assertEquals(experienciaValida.getTitulo(), experienciaConvertida.getTitulo(),
+                "El título debería ser el mismo");
         assertEquals(experienciaValida.getFechaInicioProyecto(), experienciaConvertida.getFechaInicioProyecto(),
                 "La fecha de inicio debería ser la misma");
         assertEquals(experienciaValida.getFechaFinProyecto(), experienciaConvertida.getFechaFinProyecto(),
                 "La fecha de fin debería ser la misma");
         assertEquals(experienciaValida.getDescripcion(), experienciaConvertida.getDescripcion(),
                 "La descripción debería ser la misma");
-        assertEquals(experienciaValida.getLink(), experienciaConvertida.getLink(), "El link debería ser el mismo");
+        assertEquals(experienciaValida.getLink(), experienciaConvertida.getLink(),
+                "El link debería ser el mismo");
         assertEquals(experienciaValida.getTipoExperiencia(), experienciaConvertida.getTipoExperiencia(),
                 "El tipo de experiencia debería ser el mismo");
-        assertEquals(experienciaValida.getTecnologiaUsada(), experienciaConvertida.getTecnologiaUsada(),
-                "La tecnología usada debería ser la misma");
+
+        // 🔥 Verificar que la lista de tecnologías se mantiene en el round-trip
+        assertNotNull(experienciaConvertida.getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(experienciaValida.getTecnologiasUsadas().size(),
+                experienciaConvertida.getTecnologiasUsadas().size(),
+                "El tamaño de la lista de tecnologías debería ser el mismo");
+        assertTrue(experienciaConvertida.getTecnologiasUsadas().containsAll(
+                        experienciaValida.getTecnologiasUsadas()),
+                "Las tecnologías usadas deberían ser las mismas");
 
         // Verificar que la imagen se mapeó correctamente en ambos sentidos
         assertNotNull(experienciaConvertida.getImagen(), "La imagen no debería ser nula");
@@ -392,7 +428,7 @@ class ExperienciaMapperTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .build();
 
@@ -406,6 +442,9 @@ class ExperienciaMapperTest {
         assertEquals(dtoSinImagen.getId(), dtoConvertido.getId(), "El ID debería ser el mismo");
         assertEquals(dtoSinImagen.getTitulo(), dtoConvertido.getTitulo(), "El título debería ser el mismo");
         assertNull(dtoConvertido.getImagen(), "La imagen debería ser nula");
+        assertNotNull(dtoConvertido.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(dtoConvertido.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT),
+                "La tecnología usada debería ser SPRINGBOOT");
     }
 
     @Test
@@ -420,7 +459,7 @@ class ExperienciaMapperTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.PYTHON)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .usuario(null)
                 .build();
@@ -434,7 +473,12 @@ class ExperienciaMapperTest {
         assertNotNull(experienciaConvertida, "La experiencia convertida no debería ser nula");
         assertEquals(experienciaEnCurso.getId(), experienciaConvertida.getId(), "El ID debería ser el mismo");
         assertNull(experienciaConvertida.getFechaFinProyecto(), "La fecha de fin debería ser nula");
-        assertEquals(experienciaEnCurso.getTitulo(), experienciaConvertida.getTitulo(), "El título debería ser el mismo");
+        assertEquals(experienciaEnCurso.getTitulo(), experienciaConvertida.getTitulo(),
+                "El título debería ser el mismo");
+        assertNotNull(experienciaConvertida.getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(experienciaConvertida.getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON),
+                "La tecnología usada debería ser PYTHON");
     }
 
     // ==================== TESTS CON DIFERENTES ENUMS ====================
@@ -455,7 +499,7 @@ class ExperienciaMapperTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/proyecto")
                     .tipoExperiencia(tipo)
-                    .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                    .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                     .imagen(imagen)
                     .usuario(null)
                     .build();
@@ -465,7 +509,8 @@ class ExperienciaMapperTest {
 
             // Assert
             assertNotNull(resultado, "El resultado no debería ser nulo para tipo: " + tipo);
-            assertEquals(tipo, resultado.getTipoExperiencia(), "El tipo de experiencia debería coincidir para: " + tipo);
+            assertEquals(tipo, resultado.getTipoExperiencia(),
+                    "El tipo de experiencia debería coincidir para: " + tipo);
         }
     }
 
@@ -485,7 +530,7 @@ class ExperienciaMapperTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/proyecto")
                     .tipoExperiencia(tipo)
-                    .tecnologiaUsada(TecnologiaUsada.REACT)
+                    .tecnologiasUsadas(List.of(TecnologiaUsada.REACT)) // 🔥 Cambiado a lista
                     .imagen(imagenDto)
                     .build();
 
@@ -494,12 +539,13 @@ class ExperienciaMapperTest {
 
             // Assert
             assertNotNull(resultado, "El resultado no debería ser nulo para tipo: " + tipo);
-            assertEquals(tipo, resultado.getTipoExperiencia(), "El tipo de experiencia debería coincidir para: " + tipo);
+            assertEquals(tipo, resultado.getTipoExperiencia(),
+                    "El tipo de experiencia debería coincidir para: " + tipo);
         }
     }
 
     @Test
-    @DisplayName("toExperienciaDto - Debería mapear correctamente todas las tecnologías")
+    @DisplayName("toExperienciaDto - Debería mapear correctamente todas las tecnologías en lista")
     void toExperienciaDto_ShouldMapAllTecnologiasUsadaCorrectly() {
         // Arrange - Probar todas las tecnologías
         TecnologiaUsada[] tecnologias = TecnologiaUsada.values();
@@ -514,7 +560,7 @@ class ExperienciaMapperTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/proyecto")
                     .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                    .tecnologiaUsada(tecnologia)
+                    .tecnologiasUsadas(List.of(tecnologia)) // 🔥 Cambiado a lista
                     .imagen(imagen)
                     .usuario(null)
                     .build();
@@ -524,13 +570,50 @@ class ExperienciaMapperTest {
 
             // Assert
             assertNotNull(resultado, "El resultado no debería ser nulo para tecnología: " + tecnologia);
-            assertEquals(tecnologia, resultado.getTecnologiaUsada(),
+            assertNotNull(resultado.getTecnologiasUsadas(),
+                    "Las tecnologías usadas no deberían ser nulas para: " + tecnologia);
+            assertTrue(resultado.getTecnologiasUsadas().contains(tecnologia),
                     "La tecnología usada debería coincidir para: " + tecnologia);
         }
     }
 
     @Test
-    @DisplayName("toExperiencia - Debería mapear correctamente todas las tecnologías")
+    @DisplayName("toExperienciaDto - Debería mapear correctamente múltiples tecnologías en lista")
+    void toExperienciaDto_ShouldMapMultipleTecnologiasUsadaCorrectly() {
+        // Arrange - Crear experiencia con múltiples tecnologías
+        List<TecnologiaUsada> tecnologiasMultiples = Arrays.asList(
+                TecnologiaUsada.JAVA,
+                TecnologiaUsada.SPRINGBOOT,
+                TecnologiaUsada.REACT,
+                TecnologiaUsada.TYPESCRIPT
+        );
+
+        Experiencia experienciaMultiples = Experiencia.builder()
+                .id(350)
+                .titulo("Proyecto con múltiples tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-multiples")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(tecnologiasMultiples) // 🔥 Lista múltiple
+                .imagen(imagen)
+                .usuario(null)
+                .build();
+
+        // Act
+        ExperienciaDto resultado = experienciaMapper.toExperienciaDto(experienciaMultiples);
+
+        // Assert
+        assertNotNull(resultado, "El resultado no debería ser nulo");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(4, resultado.getTecnologiasUsadas().size(), "Debería tener 4 tecnologías");
+        assertTrue(resultado.getTecnologiasUsadas().containsAll(tecnologiasMultiples),
+                "Debería contener todas las tecnologías");
+    }
+
+    @Test
+    @DisplayName("toExperiencia - Debería mapear correctamente todas las tecnologías en lista")
     void toExperiencia_ShouldMapAllTecnologiasUsadaCorrectly() {
         // Arrange - Probar todas las tecnologías
         TecnologiaUsada[] tecnologias = TecnologiaUsada.values();
@@ -545,7 +628,7 @@ class ExperienciaMapperTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/proyecto")
                     .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                    .tecnologiaUsada(tecnologia)
+                    .tecnologiasUsadas(List.of(tecnologia)) // 🔥 Cambiado a lista
                     .imagen(imagenDto)
                     .build();
 
@@ -554,9 +637,44 @@ class ExperienciaMapperTest {
 
             // Assert
             assertNotNull(resultado, "El resultado no debería ser nulo para tecnología: " + tecnologia);
-            assertEquals(tecnologia, resultado.getTecnologiaUsada(),
+            assertNotNull(resultado.getTecnologiasUsadas(),
+                    "Las tecnologías usadas no deberían ser nulas para: " + tecnologia);
+            assertTrue(resultado.getTecnologiasUsadas().contains(tecnologia),
                     "La tecnología usada debería coincidir para: " + tecnologia);
         }
+    }
+
+    @Test
+    @DisplayName("toExperiencia - Debería mapear correctamente múltiples tecnologías en lista")
+    void toExperiencia_ShouldMapMultipleTecnologiasUsadaCorrectly() {
+        // Arrange - Crear ExperienciaDto con múltiples tecnologías
+        List<TecnologiaUsada> tecnologiasMultiples = Arrays.asList(
+                TecnologiaUsada.PYTHON,
+                TecnologiaUsada.DJANGO,
+                TecnologiaUsada.POSTGRESQL
+        );
+
+        ExperienciaDto dtoMultiples = ExperienciaDto.builder()
+                .id(450)
+                .titulo("Proyecto DTO con múltiples tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-dto-multiples")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(tecnologiasMultiples) // 🔥 Lista múltiple
+                .imagen(imagenDto)
+                .build();
+
+        // Act
+        Experiencia resultado = experienciaMapper.toExperiencia(dtoMultiples);
+
+        // Assert
+        assertNotNull(resultado, "El resultado no debería ser nulo");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(3, resultado.getTecnologiasUsadas().size(), "Debería tener 3 tecnologías");
+        assertTrue(resultado.getTecnologiasUsadas().containsAll(tecnologiasMultiples),
+                "Debería contener todas las tecnologías");
     }
 
     // ==================== TESTS DE CASOS BORDE ====================
@@ -573,7 +691,7 @@ class ExperienciaMapperTest {
                 .descripcion("")
                 .link("")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of()) // 🔥 Lista vacía
                 .imagen(null)
                 .usuario(null)
                 .build();
@@ -587,6 +705,8 @@ class ExperienciaMapperTest {
         assertEquals("", resultado.getDescripcion(), "La descripción vacía debería mantenerse");
         assertEquals("", resultado.getLink(), "El link vacío debería mantenerse");
         assertNull(resultado.getImagen(), "La imagen debería ser nula");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(resultado.getTecnologiasUsadas().isEmpty(), "La lista de tecnologías debería estar vacía");
 
         // Verificar que no se llamó a ImagenMapper
         verify(imagenMapper, never()).toImagenDto(any());
@@ -604,7 +724,7 @@ class ExperienciaMapperTest {
                 .descripcion("")
                 .link("")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of()) // 🔥 Lista vacía
                 .imagen(null)
                 .build();
 
@@ -617,6 +737,8 @@ class ExperienciaMapperTest {
         assertEquals("", resultado.getDescripcion(), "La descripción vacía debería mantenerse");
         assertEquals("", resultado.getLink(), "El link vacío debería mantenerse");
         assertNull(resultado.getImagen(), "La imagen debería ser nula");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(resultado.getTecnologiasUsadas().isEmpty(), "La lista de tecnologías debería estar vacía");
 
         // Verificar que no se llamó a ImagenMapper
         verify(imagenMapper, never()).toImagen(any());
@@ -634,7 +756,7 @@ class ExperienciaMapperTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/usuario/proyecto-sin-id")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(null)
                 .build();
@@ -646,6 +768,7 @@ class ExperienciaMapperTest {
         assertNotNull(resultado, "El resultado no debería ser nulo");
         assertNull(resultado.getId(), "El ID debería ser nulo");
         assertEquals(experienciaSinId.getTitulo(), resultado.getTitulo(), "El título debería coincidir");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
 
         // Verificar que se llamó a ImagenMapper
         verify(imagenMapper, times(1)).toImagenDto(experienciaSinId.getImagen());
@@ -663,7 +786,7 @@ class ExperienciaMapperTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/usuario/proyecto-sin-id-dto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.REACT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT)) // 🔥 Cambiado a lista
                 .imagen(imagenDto)
                 .build();
 
@@ -674,6 +797,7 @@ class ExperienciaMapperTest {
         assertNotNull(resultado, "El resultado no debería ser nulo");
         assertNull(resultado.getId(), "El ID debería ser nulo");
         assertEquals(experienciaDtoSinId.getTitulo(), resultado.getTitulo(), "El título debería coincidir");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
 
         // Verificar que se llamó a ImagenMapper
         verify(imagenMapper, times(1)).toImagen(experienciaDtoSinId.getImagen());
@@ -713,7 +837,7 @@ class ExperienciaMapperTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/usuario/sin-imagen")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .usuario(null)
                 .build();
@@ -746,7 +870,7 @@ class ExperienciaMapperTest {
                 .descripcion("Descripción completa del proyecto")
                 .link("https://github.com/usuario/proyecto-completo")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                .tecnologiaUsada(TecnologiaUsada.ANGULAR)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR, TecnologiaUsada.TYPESCRIPT)) // 🔥 Lista múltiple
                 .imagen(imagenCompleta)
                 .usuario(usuario)
                 .build();
@@ -767,13 +891,17 @@ class ExperienciaMapperTest {
         assertNotNull(resultado, "El resultado no debería ser nulo");
         assertNotNull(resultado.getImagen(), "La imagen no debería ser nula");
         assertEquals(20, resultado.getImagen().getId(), "El ID de la imagen debería ser 20");
-        assertEquals("imagen-completa.jpg", resultado.getImagen().getUrl(), "La URL de la imagen debería coincidir");
+        assertEquals("imagen-completa.jpg", resultado.getImagen().getUrl(),
+                "La URL de la imagen debería coincidir");
         assertEquals("Imagen completa de proyecto", resultado.getImagen().getAlt(),
                 "El alt de la imagen debería coincidir");
         assertEquals(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO, resultado.getTipoExperiencia(),
                 "El tipo de experiencia debería ser TRABAJO_LABORAL_COLABORATIVO");
-        assertEquals(TecnologiaUsada.ANGULAR, resultado.getTecnologiaUsada(),
-                "La tecnología usada debería ser ANGULAR");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, resultado.getTecnologiasUsadas().size(), "Debería tener 2 tecnologías");
+        assertTrue(resultado.getTecnologiasUsadas().containsAll(
+                        List.of(TecnologiaUsada.ANGULAR, TecnologiaUsada.TYPESCRIPT)),
+                "Las tecnologías usadas deberían ser ANGULAR y TYPESCRIPT");
 
         // Verificar que se llamó a ImagenMapper
         verify(imagenMapper, times(1)).toImagenDto(imagenCompleta);
@@ -797,7 +925,7 @@ class ExperienciaMapperTest {
                 .descripcion("Descripción DTO completa del proyecto")
                 .link("https://github.com/usuario/proyecto-dto-completo")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_FREELANCE)
-                .tecnologiaUsada(TecnologiaUsada.VUE)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.VUE, TecnologiaUsada.TAILWIND)) // 🔥 Lista múltiple
                 .imagen(imagenDtoCompleta)
                 .build();
 
@@ -823,8 +951,11 @@ class ExperienciaMapperTest {
                 "El alt de la imagen debería coincidir");
         assertEquals(TipoExperiencia.TRABAJO_LABORAL_FREELANCE, resultado.getTipoExperiencia(),
                 "El tipo de experiencia debería ser TRABAJO_LABORAL_FREELANCE");
-        assertEquals(TecnologiaUsada.VUE, resultado.getTecnologiaUsada(),
-                "La tecnología usada debería ser VUE");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, resultado.getTecnologiasUsadas().size(), "Debería tener 2 tecnologías");
+        assertTrue(resultado.getTecnologiasUsadas().containsAll(
+                        List.of(TecnologiaUsada.VUE, TecnologiaUsada.TAILWIND)),
+                "Las tecnologías usadas deberían ser VUE y TAILWIND");
 
         // Verificar que se llamó a ImagenMapper
         verify(imagenMapper, times(1)).toImagen(imagenDtoCompleta);
@@ -842,7 +973,7 @@ class ExperienciaMapperTest {
                 .descripcion("Descripción del proyecto pasado")
                 .link("https://github.com/usuario/proyecto-pasado")
                 .tipoExperiencia(TipoExperiencia.PRACTICA_PROFESIONAL)
-                .tecnologiaUsada(TecnologiaUsada.POSTGRESQL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.POSTGRESQL, TecnologiaUsada.JAVA)) // 🔥 Lista múltiple
                 .imagen(imagen)
                 .usuario(null)
                 .build();
@@ -858,6 +989,8 @@ class ExperienciaMapperTest {
                 "La fecha de fin debería ser 2021-12-31");
         assertEquals(TipoExperiencia.PRACTICA_PROFESIONAL, resultado.getTipoExperiencia(),
                 "El tipo de experiencia debería ser PRACTICA_PROFESIONAL");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, resultado.getTecnologiasUsadas().size(), "Debería tener 2 tecnologías");
 
         // Verificar que se llamó a ImagenMapper
         verify(imagenMapper, times(1)).toImagenDto(experienciaPasada.getImagen());
@@ -875,7 +1008,7 @@ class ExperienciaMapperTest {
                 .descripcion("Descripción del proyecto futuro")
                 .link("https://github.com/usuario/proyecto-futuro")
                 .tipoExperiencia(TipoExperiencia.APORTE_CODIGO_ABIERTO)
-                .tecnologiaUsada(TecnologiaUsada.MONGODB)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.MONGODB, TecnologiaUsada.VUE)) // 🔥 Lista múltiple
                 .imagen(imagenDto)
                 .build();
 
@@ -890,8 +1023,24 @@ class ExperienciaMapperTest {
                 "La fecha de fin debería ser 2026-12-31");
         assertEquals(TipoExperiencia.APORTE_CODIGO_ABIERTO, resultado.getTipoExperiencia(),
                 "El tipo de experiencia debería ser APORTE_CODIGO_ABIERTO");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, resultado.getTecnologiasUsadas().size(), "Debería tener 2 tecnologías");
 
         // Verificar que se llamó a ImagenMapper
         verify(imagenMapper, times(1)).toImagen(experienciaDtoFuturo.getImagen());
+    }
+
+    // ==================== TEST NEGATIVO ====================
+
+    @Test
+    @DisplayName("Debería lanzar NullPointerException al acceder método en objeto nulo - Test negativo")
+    void shouldThrowExceptionWhenAccessingMethodOnNullObject() {
+        // Arrange
+        ExperienciaMapper mapper = null;
+
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> {
+            mapper.toExperienciaDto(null);
+        }, "Debería lanzar NullPointerException al acceder método en objeto nulo");
     }
 }
