@@ -13,6 +13,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,7 +49,7 @@ class ExperienciaDtoTest {
         String expectedDescripcion = "Desarrollo de API REST con Spring Boot y JWT para gestión de usuarios";
         String expectedLink = "https://github.com/usuario/proyecto";
         TipoExperiencia expectedTipo = TipoExperiencia.PROYECTO_PERSONAL;
-        TecnologiaUsada expectedTecnologia = TecnologiaUsada.SPRINGBOOT;
+        List<TecnologiaUsada> expectedTecnologias = List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA);
 
         // Crear imagen para prueba
         ImagenDto imagen = ImagenDto.builder()
@@ -65,7 +67,7 @@ class ExperienciaDtoTest {
                 .descripcion(expectedDescripcion)
                 .link(expectedLink)
                 .tipoExperiencia(expectedTipo)
-                .tecnologiaUsada(expectedTecnologia)
+                .tecnologiasUsadas(expectedTecnologias)
                 .imagen(imagen)
                 .build();
 
@@ -78,7 +80,9 @@ class ExperienciaDtoTest {
         assertEquals(expectedDescripcion, experienciaDto.getDescripcion(), "La descripción debería coincidir");
         assertEquals(expectedLink, experienciaDto.getLink(), "El link debería coincidir");
         assertEquals(expectedTipo, experienciaDto.getTipoExperiencia(), "El tipo de experiencia debería coincidir");
-        assertEquals(expectedTecnologia, experienciaDto.getTecnologiaUsada(), "La tecnología usada debería coincidir");
+        assertNotNull(experienciaDto.getTecnologiasUsadas(), "La lista de tecnologías no debería ser nula");
+        assertTrue(experienciaDto.getTecnologiasUsadas().containsAll(expectedTecnologias),
+                "Las tecnologías usadas deberían coincidir");
         assertNotNull(experienciaDto.getImagen(), "La imagen no debería ser nula");
         assertEquals("proyecto.jpg", experienciaDto.getImagen().getUrl(), "La URL de la imagen debería coincidir");
 
@@ -102,7 +106,7 @@ class ExperienciaDtoTest {
         assertNull(experienciaDto.getDescripcion(), "La descripción debería ser nula por defecto");
         assertNull(experienciaDto.getLink(), "El link debería ser nulo por defecto");
         assertNull(experienciaDto.getTipoExperiencia(), "El tipo de experiencia debería ser nulo por defecto");
-        assertNull(experienciaDto.getTecnologiaUsada(), "La tecnología usada debería ser nula por defecto");
+        assertNull(experienciaDto.getTecnologiasUsadas(), "Las tecnologías usadas deberían ser nulas por defecto");
         assertNull(experienciaDto.getImagen(), "La imagen debería ser nula por defecto");
     }
 
@@ -117,7 +121,7 @@ class ExperienciaDtoTest {
         String descripcion = "Desarrollo de tienda online con carrito de compras y pasarela de pago";
         String link = "https://github.com/usuario/ecommerce";
         TipoExperiencia tipo = TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO;
-        TecnologiaUsada tecnologia = TecnologiaUsada.REACT;
+        List<TecnologiaUsada> tecnologias = List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT);
         ImagenDto imagen = ImagenDto.builder()
                 .id(1)
                 .url("ecommerce.jpg")
@@ -127,7 +131,7 @@ class ExperienciaDtoTest {
         // Act
         ExperienciaDto experienciaDto = new ExperienciaDto(
                 id, titulo, fechaInicio, fechaFin, descripcion,
-                link, imagen, tipo, tecnologia
+                link, imagen, tipo, tecnologias
         );
 
         // Assert
@@ -139,7 +143,9 @@ class ExperienciaDtoTest {
         assertEquals(descripcion, experienciaDto.getDescripcion(), "La descripción debería coincidir");
         assertEquals(link, experienciaDto.getLink(), "El link debería coincidir");
         assertEquals(tipo, experienciaDto.getTipoExperiencia(), "El tipo de experiencia debería coincidir");
-        assertEquals(tecnologia, experienciaDto.getTecnologiaUsada(), "La tecnología usada debería coincidir");
+        assertNotNull(experienciaDto.getTecnologiasUsadas(), "La lista de tecnologías no debería ser nula");
+        assertTrue(experienciaDto.getTecnologiasUsadas().containsAll(tecnologias),
+                "Las tecnologías usadas deberían coincidir");
         assertNotNull(experienciaDto.getImagen(), "La imagen no debería ser nula");
         assertEquals("ecommerce.jpg", experienciaDto.getImagen().getUrl(), "La URL de la imagen debería coincidir");
     }
@@ -156,7 +162,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .imagen(null)
                 .build();
 
@@ -181,7 +187,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .build();
 
         // Act & Assert
@@ -191,6 +197,27 @@ class ExperienciaDtoTest {
         // Validar que no hay violaciones (fechaFinProyecto es opcional)
         Set<ConstraintViolation<ExperienciaDto>> violations = validator.validate(experienciaDto);
         assertTrue(violations.isEmpty(), "No debería haber violaciones con fecha de fin nula");
+    }
+
+    @Test
+    @DisplayName("Debería permitir lista vacía de tecnologías")
+    void shouldAllowEmptyTecnologiasUsadas() {
+        // Arrange - Experiencia con lista vacía de tecnologías
+        ExperienciaDto experienciaDto = ExperienciaDto.builder()
+                .id(1)
+                .titulo("Proyecto sin tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-sin-tecnologias")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of()) // Lista vacía
+                .build();
+
+        // Act & Assert
+        assertNotNull(experienciaDto, "El objeto ExperienciaDto no debería ser nulo");
+        assertNotNull(experienciaDto.getTecnologiasUsadas(), "La lista de tecnologías no debería ser nula");
+        assertTrue(experienciaDto.getTecnologiasUsadas().isEmpty(), "La lista de tecnologías debería estar vacía");
     }
 
     // ==================== TESTS DE VALIDACIONES ====================
@@ -207,7 +234,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -229,7 +256,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -253,7 +280,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -278,7 +305,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -302,7 +329,7 @@ class ExperienciaDtoTest {
                 .descripcion(null)
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -326,7 +353,7 @@ class ExperienciaDtoTest {
                 .descripcion("1234")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -351,7 +378,7 @@ class ExperienciaDtoTest {
                 .descripcion(descripcionLarga)
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -375,7 +402,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link(null)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -399,7 +426,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("http")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -424,7 +451,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link(linkLargo)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -448,7 +475,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -472,7 +499,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(null)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -485,9 +512,9 @@ class ExperienciaDtoTest {
     }
 
     @Test
-    @DisplayName("Validación - Debe tener violaciones cuando tecnologiaUsada es nulo")
-    void validation_ShouldHaveViolations_WhenTecnologiaUsadaIsNull() {
-        // Arrange - Tecnología usada nula
+    @DisplayName("Validación - Debe tener violaciones cuando tecnologiasUsadas es nulo")
+    void validation_ShouldHaveViolations_WhenTecnologiasUsadasIsNull() {
+        // Arrange - Tecnologías usadas nulas
         ExperienciaDto experienciaDto = ExperienciaDto.builder()
                 .id(1)
                 .titulo("Título Válido")
@@ -496,16 +523,16 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(null)
+                .tecnologiasUsadas(null)
                 .build();
 
         // Act
         Set<ConstraintViolation<ExperienciaDto>> violations = validator.validate(experienciaDto);
 
         // Assert
-        assertFalse(violations.isEmpty(), "Debe haber violaciones para tecnología usada nula");
-        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("tecnologiaUsada")),
-                "Debe haber violación específica para el campo tecnologiaUsada");
+        assertFalse(violations.isEmpty(), "Debe haber violaciones para tecnologías usadas nulas");
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("tecnologiasUsadas")),
+                "Debe haber violación específica para el campo tecnologiasUsadas");
     }
 
     // ==================== TESTS DE ENUMS ====================
@@ -526,7 +553,7 @@ class ExperienciaDtoTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/test")
                     .tipoExperiencia(tipo)
-                    .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                    .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                     .build();
 
             // Assert
@@ -536,7 +563,7 @@ class ExperienciaDtoTest {
     }
 
     @Test
-    @DisplayName("Debe manejar todas las tecnologías del enum")
+    @DisplayName("Debe manejar todas las tecnologías del enum en lista")
     void shouldHandleAllTecnologiasUsada() {
         // Arrange - Probar todas las tecnologías
         TecnologiaUsada[] tecnologias = TecnologiaUsada.values();
@@ -551,13 +578,45 @@ class ExperienciaDtoTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/test")
                     .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                    .tecnologiaUsada(tecnologia)
+                    .tecnologiasUsadas(List.of(tecnologia))
                     .build();
 
             // Assert
             assertNotNull(experienciaDto, "La ExperienciaDto no debería ser nula para tecnología: " + tecnologia);
-            assertEquals(tecnologia, experienciaDto.getTecnologiaUsada(), "Debería manejar correctamente la tecnología: " + tecnologia);
+            assertTrue(experienciaDto.getTecnologiasUsadas().contains(tecnologia),
+                    "Debería manejar correctamente la tecnología: " + tecnologia);
         }
+    }
+
+    @Test
+    @DisplayName("Debe manejar múltiples tecnologías en la lista")
+    void shouldHandleMultipleTecnologiasUsada() {
+        // Arrange
+        List<TecnologiaUsada> tecnologiasMultiples = Arrays.asList(
+                TecnologiaUsada.JAVA,
+                TecnologiaUsada.SPRINGBOOT,
+                TecnologiaUsada.REACT,
+                TecnologiaUsada.TYPESCRIPT
+        );
+
+        // Act
+        ExperienciaDto experienciaDto = ExperienciaDto.builder()
+                .id(1)
+                .titulo("Proyecto con múltiples tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://github.com/usuario/test")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(tecnologiasMultiples)
+                .build();
+
+        // Assert
+        assertNotNull(experienciaDto, "La ExperienciaDto no debería ser nula");
+        assertNotNull(experienciaDto.getTecnologiasUsadas(), "La lista de tecnologías no debería ser nula");
+        assertEquals(4, experienciaDto.getTecnologiasUsadas().size(), "Debería tener 4 tecnologías");
+        assertTrue(experienciaDto.getTecnologiasUsadas().containsAll(tecnologiasMultiples),
+                "Debería contener todas las tecnologías");
     }
 
     // ==================== TESTS DE RELACIONES ====================
@@ -580,7 +639,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-con-imagen")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .imagen(imagen)
                 .build();
 
@@ -603,7 +662,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-sin-imagen")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .imagen(null)
                 .build();
 
@@ -630,7 +689,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción inicial válida")
                 .link("https://github.com/usuario/inicial")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .build();
 
         // Crear nueva imagen
@@ -640,6 +699,8 @@ class ExperienciaDtoTest {
                 .alt("Nuevo proyecto")
                 .build();
 
+        List<TecnologiaUsada> nuevasTecnologias = List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT);
+
         // Act
         experienciaDto.setId(2);
         experienciaDto.setTitulo("Título Actualizado");
@@ -648,20 +709,29 @@ class ExperienciaDtoTest {
         experienciaDto.setDescripcion("Descripción actualizada con más de 5 caracteres");
         experienciaDto.setLink("https://github.com/usuario/actualizado");
         experienciaDto.setTipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_FREELANCE);
-        experienciaDto.setTecnologiaUsada(TecnologiaUsada.REACT);
+        experienciaDto.setTecnologiasUsadas(nuevasTecnologias);
         experienciaDto.setImagen(nuevaImagen);
 
         // Assert
         assertEquals(2, experienciaDto.getId(), "El ID debería estar actualizado");
         assertEquals("Título Actualizado", experienciaDto.getTitulo(), "El título debería estar actualizado");
-        assertEquals(LocalDate.of(2024, 2, 1), experienciaDto.getFechaInicioProyecto(), "La fecha de inicio debería estar actualizada");
-        assertEquals(LocalDate.of(2024, 7, 1), experienciaDto.getFechaFinProyecto(), "La fecha de fin debería estar actualizada");
-        assertEquals("Descripción actualizada con más de 5 caracteres", experienciaDto.getDescripcion(), "La descripción debería estar actualizada");
-        assertEquals("https://github.com/usuario/actualizado", experienciaDto.getLink(), "El link debería estar actualizado");
-        assertEquals(TipoExperiencia.TRABAJO_LABORAL_FREELANCE, experienciaDto.getTipoExperiencia(), "El tipo de experiencia debería estar actualizado");
-        assertEquals(TecnologiaUsada.REACT, experienciaDto.getTecnologiaUsada(), "La tecnología usada debería estar actualizada");
+        assertEquals(LocalDate.of(2024, 2, 1), experienciaDto.getFechaInicioProyecto(),
+                "La fecha de inicio debería estar actualizada");
+        assertEquals(LocalDate.of(2024, 7, 1), experienciaDto.getFechaFinProyecto(),
+                "La fecha de fin debería estar actualizada");
+        assertEquals("Descripción actualizada con más de 5 caracteres", experienciaDto.getDescripcion(),
+                "La descripción debería estar actualizada");
+        assertEquals("https://github.com/usuario/actualizado", experienciaDto.getLink(),
+                "El link debería estar actualizado");
+        assertEquals(TipoExperiencia.TRABAJO_LABORAL_FREELANCE, experienciaDto.getTipoExperiencia(),
+                "El tipo de experiencia debería estar actualizado");
+        assertNotNull(experienciaDto.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, experienciaDto.getTecnologiasUsadas().size(), "Debería tener 2 tecnologías");
+        assertTrue(experienciaDto.getTecnologiasUsadas().containsAll(nuevasTecnologias),
+                "Las tecnologías usadas deberían estar actualizadas");
         assertNotNull(experienciaDto.getImagen(), "La imagen no debería ser nula");
-        assertEquals("nuevo-proyecto.jpg", experienciaDto.getImagen().getUrl(), "La URL de la imagen debería estar actualizada");
+        assertEquals("nuevo-proyecto.jpg", experienciaDto.getImagen().getUrl(),
+                "La URL de la imagen debería estar actualizada");
     }
 
     // ==================== TESTS DE IGUALDAD Y hashCode ====================
@@ -676,6 +746,8 @@ class ExperienciaDtoTest {
                 .alt("Captura del proyecto")
                 .build();
 
+        List<TecnologiaUsada> tecnologias = List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA);
+
         ExperienciaDto experienciaDto1 = ExperienciaDto.builder()
                 .id(1)
                 .titulo("Proyecto Test")
@@ -684,7 +756,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(tecnologias)
                 .imagen(imagen)
                 .build();
 
@@ -696,7 +768,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(tecnologias)
                 .imagen(imagen)
                 .build();
 
@@ -717,7 +789,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción del proyecto A")
                 .link("https://github.com/usuario/proyecto-a")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .build();
 
         ExperienciaDto experienciaDto2 = ExperienciaDto.builder()
@@ -728,12 +800,13 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción del proyecto B")
                 .link("https://github.com/usuario/proyecto-b")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                .tecnologiaUsada(TecnologiaUsada.PYTHON)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON))
                 .build();
 
         // Act & Assert
         assertNotEquals(experienciaDto1, experienciaDto2, "Los objetos ExperienciaDto no deberían ser iguales");
-        assertNotEquals(experienciaDto1.hashCode(), experienciaDto2.hashCode(), "Los hashCodes no deberían ser iguales");
+        assertNotEquals(experienciaDto1.hashCode(), experienciaDto2.hashCode(),
+                "Los hashCodes no deberían ser iguales");
     }
 
     // ==================== TESTS DE CASOS BORDE ====================
@@ -751,7 +824,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act - Validar título mínimo
@@ -759,7 +832,8 @@ class ExperienciaDtoTest {
 
         // Assert
         assertTrue(violationsMinimo.isEmpty(), "No debería haber violaciones para título exactamente de 3 caracteres");
-        assertEquals(3, experienciaDtoMinimo.getTitulo().length(), "El título debería tener exactamente 3 caracteres");
+        assertEquals(3, experienciaDtoMinimo.getTitulo().length(),
+                "El título debería tener exactamente 3 caracteres");
 
         // Arrange - Título exactamente de 145 caracteres (máximo)
         String tituloMaximo = "A".repeat(145);
@@ -771,7 +845,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act - Validar título máximo
@@ -779,7 +853,8 @@ class ExperienciaDtoTest {
 
         // Assert
         assertTrue(violationsMaximo.isEmpty(), "No debería haber violaciones para título exactamente de 145 caracteres");
-        assertEquals(145, experienciaDtoMaximo.getTitulo().length(), "El título debería tener exactamente 145 caracteres");
+        assertEquals(145, experienciaDtoMaximo.getTitulo().length(),
+                "El título debería tener exactamente 145 caracteres");
     }
 
     @Test
@@ -795,15 +870,17 @@ class ExperienciaDtoTest {
                 .descripcion(textoMinimo)
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act - Validar texto mínimo
         Set<ConstraintViolation<ExperienciaDto>> violationsMinimo = validator.validate(experienciaDtoMinimo);
 
         // Assert
-        assertTrue(violationsMinimo.isEmpty(), "No debería haber violaciones para descripción exactamente de 5 caracteres");
-        assertEquals(5, experienciaDtoMinimo.getDescripcion().length(), "La descripción debería tener exactamente 5 caracteres");
+        assertTrue(violationsMinimo.isEmpty(),
+                "No debería haber violaciones para descripción exactamente de 5 caracteres");
+        assertEquals(5, experienciaDtoMinimo.getDescripcion().length(),
+                "La descripción debería tener exactamente 5 caracteres");
 
         // Arrange - Texto exactamente de 300 caracteres (máximo)
         String textoMaximo = "A".repeat(300);
@@ -815,15 +892,17 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida")
                 .link(textoMaximo)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act - Validar texto máximo
         Set<ConstraintViolation<ExperienciaDto>> violationsMaximo = validator.validate(experienciaDtoMaximo);
 
         // Assert
-        assertTrue(violationsMaximo.isEmpty(), "No debería haber violaciones para link exactamente de 300 caracteres");
-        assertEquals(300, experienciaDtoMaximo.getLink().length(), "El link debería tener exactamente 300 caracteres");
+        assertTrue(violationsMaximo.isEmpty(),
+                "No debería haber violaciones para link exactamente de 300 caracteres");
+        assertEquals(300, experienciaDtoMaximo.getLink().length(),
+                "El link debería tener exactamente 300 caracteres");
     }
 
     @Test
@@ -842,7 +921,7 @@ class ExperienciaDtoTest {
                 .descripcion(descripcionEspecial)
                 .link(linkEspecial)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -850,9 +929,12 @@ class ExperienciaDtoTest {
 
         // Assert
         assertTrue(violations.isEmpty(), "No debería haber violaciones para caracteres especiales");
-        assertEquals(tituloEspecial, experienciaDto.getTitulo(), "El título con caracteres especiales debería mantenerse");
-        assertEquals(descripcionEspecial, experienciaDto.getDescripcion(), "La descripción con caracteres especiales debería mantenerse");
-        assertEquals(linkEspecial, experienciaDto.getLink(), "El link con caracteres especiales debería mantenerse");
+        assertEquals(tituloEspecial, experienciaDto.getTitulo(),
+                "El título con caracteres especiales debería mantenerse");
+        assertEquals(descripcionEspecial, experienciaDto.getDescripcion(),
+                "La descripción con caracteres especiales debería mantenerse");
+        assertEquals(linkEspecial, experienciaDto.getLink(),
+                "El link con caracteres especiales debería mantenerse");
     }
 
     @Test
@@ -870,7 +952,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -878,8 +960,10 @@ class ExperienciaDtoTest {
 
         // Assert
         assertTrue(violations.isEmpty(), "No debería haber violaciones para fechas válidas");
-        assertEquals(fechaInicioPasado, experienciaDto.getFechaInicioProyecto(), "La fecha de inicio debería mantenerse");
-        assertEquals(fechaFinReciente, experienciaDto.getFechaFinProyecto(), "La fecha de fin debería mantenerse");
+        assertEquals(fechaInicioPasado, experienciaDto.getFechaInicioProyecto(),
+                "La fecha de inicio debería mantenerse");
+        assertEquals(fechaFinReciente, experienciaDto.getFechaFinProyecto(),
+                "La fecha de fin debería mantenerse");
     }
 
     // ==================== TEST NEGATIVO ====================
@@ -910,7 +994,7 @@ class ExperienciaDtoTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
