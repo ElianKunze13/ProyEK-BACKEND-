@@ -71,7 +71,7 @@ class ExperienciaControllerTest {
                 .link("https://github.com/usuario/proyecto")
                 .imagen(imagenDto)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.REACT)) // 🔥 Cambiado a lista
                 .build();
     }
 
@@ -89,7 +89,7 @@ class ExperienciaControllerTest {
                 .descripcion("Aplicación frontend con Angular 17")
                 .link("https://github.com/usuario/angular-project")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.ANGULAR)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR)) // 🔥 Cambiado a lista
                 .build();
 
         List<ExperienciaDto> listaExperiencias = Arrays.asList(experienciaDtoValida, experienciaDto2);
@@ -156,7 +156,7 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción del nuevo proyecto con más de 5 caracteres")
                 .link("https://github.com/usuario/nuevo-proyecto")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                .tecnologiaUsada(TecnologiaUsada.DJANGO)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.DJANGO, TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
                 .imagen(imagenDto)
                 .build();
 
@@ -168,7 +168,7 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción del nuevo proyecto con más de 5 caracteres")
                 .link("https://github.com/usuario/nuevo-proyecto")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                .tecnologiaUsada(TecnologiaUsada.DJANGO)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.DJANGO, TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
                 .imagen(imagenDto)
                 .build();
 
@@ -184,7 +184,8 @@ class ExperienciaControllerTest {
         assertEquals(2, response.getBody().getId(), "El ID generado debería ser 2");
         assertEquals("Nuevo Proyecto", response.getBody().getTitulo());
         assertEquals(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO, response.getBody().getTipoExperiencia());
-        assertEquals(TecnologiaUsada.DJANGO, response.getBody().getTecnologiaUsada());
+        assertTrue(response.getBody().getTecnologiasUsadas().contains(TecnologiaUsada.DJANGO)); // 🔥 Cambiado a contains
+        assertTrue(response.getBody().getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON)); // 🔥 Cambiado a contains
 
         verify(experienciaService, times(1)).saveExperiencia(experienciaDtoCrear);
     }
@@ -200,7 +201,7 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción mínima válida de más de 5 caracteres")
                 .link("https://minimo.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .build();
 
         when(experienciaService.saveExperiencia(any(ExperienciaDto.class))).thenReturn(experienciaDtoMinima);
@@ -227,7 +228,7 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción válida de más de 5 caracteres para el proyecto sin imagen")
                 .link("https://sin-imagen.com")
                 .tipoExperiencia(TipoExperiencia.APORTE_CODIGO_ABIERTO)
-                .tecnologiaUsada(TecnologiaUsada.PYTHON)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .build();
 
@@ -286,7 +287,7 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción actualizada del proyecto con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-actualizado")
                 .tipoExperiencia(TipoExperiencia.PRACTICA_PROFESIONAL)
-                .tecnologiaUsada(TecnologiaUsada.REACT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
                 .imagen(imagenDto)
                 .build();
 
@@ -303,7 +304,8 @@ class ExperienciaControllerTest {
         assertEquals(id, response.getBody().getId(), "El ID debería coincidir");
         assertEquals("Proyecto Full Stack Actualizado", response.getBody().getTitulo());
         assertEquals(TipoExperiencia.PRACTICA_PROFESIONAL, response.getBody().getTipoExperiencia());
-        assertEquals(TecnologiaUsada.REACT, response.getBody().getTecnologiaUsada());
+        assertTrue(response.getBody().getTecnologiasUsadas().contains(TecnologiaUsada.REACT)); // 🔥 Cambiado a contains
+        assertTrue(response.getBody().getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT)); // 🔥 Cambiado a contains
 
         verify(experienciaService, times(1)).actualizarExperienciaPorId(eq(id), any(ExperienciaDto.class));
     }
@@ -461,7 +463,7 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://valid.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .build();
 
         // Act
@@ -485,7 +487,7 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://valid.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .build();
 
         // Act
@@ -508,7 +510,7 @@ class ExperienciaControllerTest {
                 .descripcion("Desc") // Menos de 5 caracteres
                 .link("https://valid.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .build();
 
         // Act
@@ -532,7 +534,7 @@ class ExperienciaControllerTest {
                 .descripcion(descripcionLarga)
                 .link("https://valid.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .build();
 
         // Act
@@ -555,7 +557,7 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("htt") // Menos de 5 caracteres
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .build();
 
         // Act
@@ -579,7 +581,7 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link(linkLargo)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .build();
 
         // Act
@@ -636,7 +638,7 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://valid.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .build();
 
         // Act - Nota: La validación de fechas no está en el DTO, pero podemos verificar que no hay violaciones
@@ -658,7 +660,7 @@ class ExperienciaControllerTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://valid.com")
                     .tipoExperiencia(tipo)
-                    .tecnologiaUsada(TecnologiaUsada.JAVA)
+                    .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                     .build();
 
             // Assert
@@ -668,9 +670,9 @@ class ExperienciaControllerTest {
     }
 
     @Test
-    @DisplayName("TecnologiaUsada - Todos los valores del enum deberían ser válidos")
-    void validation_ShouldAcceptAllTecnologiaUsadaValues() {
-        // Arrange & Act
+    @DisplayName("TecnologiasUsadas - Todos los valores del enum deberían ser válidos en una lista")
+    void validation_ShouldAcceptAllTecnologiasUsadasValues() {
+        // Arrange & Act - Probar todas las tecnologías individualmente en una lista
         for (TecnologiaUsada tecnologia : TecnologiaUsada.values()) {
             ExperienciaDto dto = ExperienciaDto.builder()
                     .titulo("Título Válido")
@@ -679,13 +681,27 @@ class ExperienciaControllerTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://valid.com")
                     .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                    .tecnologiaUsada(tecnologia)
+                    .tecnologiasUsadas(List.of(tecnologia)) // 🔥 Cambiado a lista con un elemento
                     .build();
 
             // Assert
             var violations = validator.validate(dto);
             assertTrue(violations.isEmpty(), "La tecnología " + tecnologia + " debería ser válida");
         }
+
+        // Probar lista con múltiples tecnologías
+        ExperienciaDto dtoMultiples = ExperienciaDto.builder()
+                .titulo("Título Válido")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 30))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://valid.com")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(Arrays.asList(TecnologiaUsada.JAVA, TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.REACT)) // 🔥 Cambiado a lista múltiple
+                .build();
+
+        var violationsMultiples = validator.validate(dtoMultiples);
+        assertTrue(violationsMultiples.isEmpty(), "Lista con múltiples tecnologías debería ser válida");
     }
 
     // ==================== TESTS DE VERIFICACIÓN DE INTERACCIONES ====================
@@ -732,7 +748,7 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción del proyecto de prueba con más de 5 caracteres")
                 .link("https://test.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .build();
 
         ExperienciaDto dto2 = ExperienciaDto.builder()
@@ -743,7 +759,7 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción del proyecto de prueba con más de 5 caracteres")
                 .link("https://test.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .build();
 
         // Act & Assert
@@ -764,7 +780,7 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción del proyecto de prueba con más de 5 caracteres")
                 .link("https://test.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .build();
 
         ExperienciaDto dto2 = ExperienciaDto.builder()
@@ -775,7 +791,7 @@ class ExperienciaControllerTest {
                 .descripcion("Otra descripción del proyecto con más de 5 caracteres")
                 .link("https://otro.com")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                .tecnologiaUsada(TecnologiaUsada.REACT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT)) // 🔥 Cambiado a lista
                 .build();
 
         // Act & Assert
@@ -811,7 +827,7 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción del builder con más de 5 caracteres")
                 .link("https://builder.com")
                 .tipoExperiencia(TipoExperiencia.APORTE_CODIGO_ABIERTO)
-                .tecnologiaUsada(TecnologiaUsada.TYPESCRIPT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
                 .imagen(imagenDto)
                 .build();
 
@@ -824,7 +840,7 @@ class ExperienciaControllerTest {
         assertEquals("Descripción del builder con más de 5 caracteres", dto.getDescripcion());
         assertEquals("https://builder.com", dto.getLink());
         assertEquals(TipoExperiencia.APORTE_CODIGO_ABIERTO, dto.getTipoExperiencia());
-        assertEquals(TecnologiaUsada.TYPESCRIPT, dto.getTecnologiaUsada());
+        assertTrue(dto.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT)); // 🔥 Cambiado a contains
         assertNotNull(dto.getImagen(), "La imagen no debería ser nula");
         assertEquals(1, dto.getImagen().getId());
     }
