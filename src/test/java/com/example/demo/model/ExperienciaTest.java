@@ -14,6 +14,8 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -48,7 +50,7 @@ class ExperienciaTest {
         String expectedDescripcion = "Desarrollo de API REST con Spring Boot y JWT para gestión de usuarios";
         String expectedLink = "https://github.com/usuario/proyecto";
         TipoExperiencia expectedTipo = TipoExperiencia.PROYECTO_PERSONAL;
-        TecnologiaUsada expectedTecnologia = TecnologiaUsada.SPRINGBOOT;
+        List<TecnologiaUsada> expectedTecnologias = List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA);
 
         // Crear imagen para prueba
         Imagen imagen = Imagen.builder()
@@ -65,7 +67,7 @@ class ExperienciaTest {
                 .descripcion(expectedDescripcion)
                 .link(expectedLink)
                 .tipoExperiencia(expectedTipo)
-                .tecnologiaUsada(expectedTecnologia)
+                .tecnologiasUsadas(expectedTecnologias) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .build();
 
@@ -78,7 +80,9 @@ class ExperienciaTest {
         assertEquals(expectedDescripcion, experiencia.getDescripcion(), "La descripción debería coincidir");
         assertEquals(expectedLink, experiencia.getLink(), "El link debería coincidir");
         assertEquals(expectedTipo, experiencia.getTipoExperiencia(), "El tipo de experiencia debería coincidir");
-        assertEquals(expectedTecnologia, experiencia.getTecnologiaUsada(), "La tecnología usada debería coincidir");
+        assertNotNull(experiencia.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(experiencia.getTecnologiasUsadas().containsAll(expectedTecnologias),
+                "Las tecnologías usadas deberían coincidir");
         assertNotNull(experiencia.getImagen(), "La imagen no debería ser nula");
 
         // Validar con Bean Validation
@@ -101,7 +105,7 @@ class ExperienciaTest {
         assertNull(experiencia.getDescripcion(), "La descripción debería ser nula por defecto");
         assertNull(experiencia.getLink(), "El link debería ser nulo por defecto");
         assertNull(experiencia.getTipoExperiencia(), "El tipo de experiencia debería ser nulo por defecto");
-        assertNull(experiencia.getTecnologiaUsada(), "La tecnología usada debería ser nula por defecto");
+        assertNull(experiencia.getTecnologiasUsadas(), "Las tecnologías usadas deberían ser nulas por defecto");
         assertNull(experiencia.getImagen(), "La imagen debería ser nula por defecto");
         assertNull(experiencia.getUsuario(), "El usuario debería ser nulo por defecto");
     }
@@ -117,14 +121,14 @@ class ExperienciaTest {
         String descripcion = "Desarrollo de tienda online con carrito de compras y pasarela de pago";
         String link = "https://github.com/usuario/ecommerce";
         TipoExperiencia tipo = TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO;
-        TecnologiaUsada tecnologia = TecnologiaUsada.REACT;
+        List<TecnologiaUsada> tecnologias = List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT);
         Imagen imagen = Imagen.builder().url("ecommerce.jpg").alt("Tienda online").build();
         Usuario usuario = Usuario.builder().id(1).nombre("Usuario Test").build();
 
         // Act
         Experiencia experiencia = new Experiencia(
                 id, titulo, fechaInicio, fechaFin, descripcion,
-                link, tipo, tecnologia, imagen, usuario
+                link, tipo, tecnologias, imagen, usuario // 🔥 Cambiado el orden de parámetros
         );
 
         // Assert
@@ -136,7 +140,9 @@ class ExperienciaTest {
         assertEquals(descripcion, experiencia.getDescripcion(), "La descripción debería coincidir");
         assertEquals(link, experiencia.getLink(), "El link debería coincidir");
         assertEquals(tipo, experiencia.getTipoExperiencia(), "El tipo de experiencia debería coincidir");
-        assertEquals(tecnologia, experiencia.getTecnologiaUsada(), "La tecnología usada debería coincidir");
+        assertNotNull(experiencia.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(experiencia.getTecnologiasUsadas().containsAll(tecnologias),
+                "Las tecnologías usadas deberían coincidir");
         assertNotNull(experiencia.getImagen(), "La imagen no debería ser nula");
         assertNotNull(experiencia.getUsuario(), "El usuario no debería ser nulo");
     }
@@ -152,7 +158,7 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .build();
 
         // Act & Assert
@@ -175,7 +181,7 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-sin-imagen")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.PYTHON)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .build();
 
@@ -199,7 +205,7 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-independiente")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVASCRIPT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVASCRIPT)) // 🔥 Cambiado a lista
                 .usuario(null)
                 .build();
 
@@ -210,6 +216,30 @@ class ExperienciaTest {
         // Validar que no hay violaciones (usuario es opcional)
         Set<ConstraintViolation<Experiencia>> violations = validator.validate(experiencia);
         assertTrue(violations.isEmpty(), "No debería haber violaciones con usuario nulo");
+    }
+
+    @Test
+    @DisplayName("Debería permitir lista vacía de tecnologías")
+    void shouldAllowEmptyTecnologiasUsadas() {
+        // Arrange - Experiencia con lista vacía de tecnologías
+        Experiencia experiencia = Experiencia.builder()
+                .titulo("Proyecto sin tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 3, 1))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-sin-tecnologias")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of()) // Lista vacía
+                .build();
+
+        // Act & Assert
+        assertNotNull(experiencia, "El objeto Experiencia no debería ser nulo");
+        assertNotNull(experiencia.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(experiencia.getTecnologiasUsadas().isEmpty(), "La lista de tecnologías debería estar vacía");
+
+        // Validar que no hay violaciones
+        Set<ConstraintViolation<Experiencia>> violations = validator.validate(experiencia);
+        assertTrue(violations.isEmpty(), "No debería haber violaciones con lista vacía de tecnologías");
     }
 
     // ==================== TESTS DE ACTUALIZACIÓN (Setters) ====================
@@ -226,7 +256,7 @@ class ExperienciaTest {
                 .descripcion("Descripción inicial válida")
                 .link("https://github.com/usuario/inicial")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .build();
 
         // Crear nueva imagen
@@ -240,6 +270,8 @@ class ExperienciaTest {
                 .nombre("Nuevo Usuario")
                 .build();
 
+        List<TecnologiaUsada> nuevasTecnologias = List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT);
+
         // Act
         experiencia.setId(2);
         experiencia.setTitulo("Título Actualizado");
@@ -248,21 +280,30 @@ class ExperienciaTest {
         experiencia.setDescripcion("Descripción actualizada con más de 5 caracteres");
         experiencia.setLink("https://github.com/usuario/actualizado");
         experiencia.setTipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_FREELANCE);
-        experiencia.setTecnologiaUsada(TecnologiaUsada.REACT);
+        experiencia.setTecnologiasUsadas(nuevasTecnologias);
         experiencia.setImagen(nuevaImagen);
         experiencia.setUsuario(nuevoUsuario);
 
         // Assert
         assertEquals(2, experiencia.getId(), "El ID debería estar actualizado");
         assertEquals("Título Actualizado", experiencia.getTitulo(), "El título debería estar actualizado");
-        assertEquals(LocalDate.of(2024, 2, 1), experiencia.getFechaInicioProyecto(), "La fecha de inicio debería estar actualizada");
-        assertEquals(LocalDate.of(2024, 7, 1), experiencia.getFechaFinProyecto(), "La fecha de fin debería estar actualizada");
-        assertEquals("Descripción actualizada con más de 5 caracteres", experiencia.getDescripcion(), "La descripción debería estar actualizada");
-        assertEquals("https://github.com/usuario/actualizado", experiencia.getLink(), "El link debería estar actualizado");
-        assertEquals(TipoExperiencia.TRABAJO_LABORAL_FREELANCE, experiencia.getTipoExperiencia(), "El tipo de experiencia debería estar actualizado");
-        assertEquals(TecnologiaUsada.REACT, experiencia.getTecnologiaUsada(), "La tecnología usada debería estar actualizada");
+        assertEquals(LocalDate.of(2024, 2, 1), experiencia.getFechaInicioProyecto(),
+                "La fecha de inicio debería estar actualizada");
+        assertEquals(LocalDate.of(2024, 7, 1), experiencia.getFechaFinProyecto(),
+                "La fecha de fin debería estar actualizada");
+        assertEquals("Descripción actualizada con más de 5 caracteres", experiencia.getDescripcion(),
+                "La descripción debería estar actualizada");
+        assertEquals("https://github.com/usuario/actualizado", experiencia.getLink(),
+                "El link debería estar actualizado");
+        assertEquals(TipoExperiencia.TRABAJO_LABORAL_FREELANCE, experiencia.getTipoExperiencia(),
+                "El tipo de experiencia debería estar actualizado");
+        assertNotNull(experiencia.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, experiencia.getTecnologiasUsadas().size(), "Debería tener 2 tecnologías");
+        assertTrue(experiencia.getTecnologiasUsadas().containsAll(nuevasTecnologias),
+                "Las tecnologías usadas deberían estar actualizadas");
         assertNotNull(experiencia.getImagen(), "La imagen no debería ser nula");
-        assertEquals("nuevo-proyecto.jpg", experiencia.getImagen().getUrl(), "La URL de la imagen debería estar actualizada");
+        assertEquals("nuevo-proyecto.jpg", experiencia.getImagen().getUrl(),
+                "La URL de la imagen debería estar actualizada");
         assertNotNull(experiencia.getUsuario(), "El usuario no debería ser nulo");
         assertEquals(2, experiencia.getUsuario().getId(), "El ID del usuario debería estar actualizado");
     }
@@ -273,6 +314,8 @@ class ExperienciaTest {
     @DisplayName("Debería ser igual cuando se comparan dos Experiencia con los mismos valores")
     void shouldBeEqualWhenComparingTwoExperienciasWithSameValues() {
         // Arrange
+        List<TecnologiaUsada> tecnologias = List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA);
+
         Experiencia experiencia1 = Experiencia.builder()
                 .id(1)
                 .titulo("Proyecto Test")
@@ -281,7 +324,7 @@ class ExperienciaTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(tecnologias)
                 .build();
 
         Experiencia experiencia2 = Experiencia.builder()
@@ -292,7 +335,7 @@ class ExperienciaTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(tecnologias)
                 .build();
 
         // Act & Assert
@@ -312,7 +355,7 @@ class ExperienciaTest {
                 .descripcion("Descripción del proyecto A")
                 .link("https://github.com/usuario/proyecto-a")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .build();
 
         Experiencia experiencia2 = Experiencia.builder()
@@ -323,7 +366,7 @@ class ExperienciaTest {
                 .descripcion("Descripción del proyecto B")
                 .link("https://github.com/usuario/proyecto-b")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                .tecnologiaUsada(TecnologiaUsada.PYTHON)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON))
                 .build();
 
         // Act & Assert
@@ -344,7 +387,7 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -369,7 +412,7 @@ class ExperienciaTest {
                 .descripcion(descripcion)
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -392,7 +435,7 @@ class ExperienciaTest {
                 .descripcion("1234")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -400,6 +443,30 @@ class ExperienciaTest {
 
         // Assert
         assertFalse(violations.isEmpty(), "Debe haber violaciones para descripción demasiado corta");
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("descripcion")),
+                "Debe haber violación específica para el campo descripcion");
+    }
+
+    @Test
+    @DisplayName("Validación - Debe tener violaciones cuando descripción es muy larga")
+    void validation_ShouldHaveViolations_WhenDescripcionIsTooLong() {
+        // Arrange - Descripción muy larga (más de 300 caracteres)
+        String descripcionLarga = "A".repeat(301);
+        Experiencia experiencia = Experiencia.builder()
+                .titulo("Título Válido")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion(descripcionLarga)
+                .link("https://github.com/usuario/test")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .build();
+
+        // Act
+        Set<ConstraintViolation<Experiencia>> violations = validator.validate(experiencia);
+
+        // Assert
+        assertFalse(violations.isEmpty(), "Debe haber violaciones para descripción demasiado larga");
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("descripcion")),
                 "Debe haber violación específica para el campo descripcion");
     }
@@ -417,7 +484,7 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link(link)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -440,7 +507,7 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("http")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -448,6 +515,30 @@ class ExperienciaTest {
 
         // Assert
         assertFalse(violations.isEmpty(), "Debe haber violaciones para link demasiado corto");
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("link")),
+                "Debe haber violación específica para el campo link");
+    }
+
+    @Test
+    @DisplayName("Validación - Debe tener violaciones cuando link es muy largo")
+    void validation_ShouldHaveViolations_WhenLinkIsTooLong() {
+        // Arrange - Link muy largo (más de 300 caracteres)
+        String linkLargo = "A".repeat(301);
+        Experiencia experiencia = Experiencia.builder()
+                .titulo("Título Válido")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link(linkLargo)
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .build();
+
+        // Act
+        Set<ConstraintViolation<Experiencia>> violations = validator.validate(experiencia);
+
+        // Assert
+        assertFalse(violations.isEmpty(), "Debe haber violaciones para link demasiado largo");
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("link")),
                 "Debe haber violación específica para el campo link");
     }
@@ -463,7 +554,7 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -486,7 +577,7 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(null)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -499,9 +590,9 @@ class ExperienciaTest {
     }
 
     @Test
-    @DisplayName("Validación - Debe tener violaciones cuando tecnologiaUsada es nulo")
-    void validation_ShouldHaveViolations_WhenTecnologiaUsadaIsNull() {
-        // Arrange - Tecnología usada nula
+    @DisplayName("Validación - Debe tener violaciones cuando tecnologiasUsadas es nulo")
+    void validation_ShouldHaveViolations_WhenTecnologiasUsadasIsNull() {
+        // Arrange - Tecnologías usadas nulas
         Experiencia experiencia = Experiencia.builder()
                 .titulo("Título Válido")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
@@ -509,16 +600,16 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(null)
+                .tecnologiasUsadas(null)
                 .build();
 
         // Act
         Set<ConstraintViolation<Experiencia>> violations = validator.validate(experiencia);
 
         // Assert
-        assertFalse(violations.isEmpty(), "Debe haber violaciones para tecnología usada nula");
-        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("tecnologiaUsada")),
-                "Debe haber violación específica para el campo tecnologiaUsada");
+        assertFalse(violations.isEmpty(), "Debe haber violaciones para tecnologías usadas nulas");
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("tecnologiasUsadas")),
+                "Debe haber violación específica para el campo tecnologiasUsadas");
     }
 
     @ParameterizedTest
@@ -533,7 +624,7 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -573,7 +664,7 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act - Validar título mínimo
@@ -592,7 +683,7 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act - Validar título máximo
@@ -615,15 +706,17 @@ class ExperienciaTest {
                 .descripcion(textoMinimo)
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act - Validar texto mínimo
         Set<ConstraintViolation<Experiencia>> violationsMinimo = validator.validate(experienciaMinimo);
 
         // Assert
-        assertTrue(violationsMinimo.isEmpty(), "No debería haber violaciones para descripción exactamente de 5 caracteres");
-        assertEquals(5, experienciaMinimo.getDescripcion().length(), "La descripción debería tener exactamente 5 caracteres");
+        assertTrue(violationsMinimo.isEmpty(),
+                "No debería haber violaciones para descripción exactamente de 5 caracteres");
+        assertEquals(5, experienciaMinimo.getDescripcion().length(),
+                "La descripción debería tener exactamente 5 caracteres");
 
         // Arrange - Texto exactamente de 300 caracteres (máximo)
         String textoMaximo = "A".repeat(300);
@@ -634,15 +727,17 @@ class ExperienciaTest {
                 .descripcion("Descripción válida")
                 .link(textoMaximo)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act - Validar texto máximo
         Set<ConstraintViolation<Experiencia>> violationsMaximo = validator.validate(experienciaMaximo);
 
         // Assert
-        assertTrue(violationsMaximo.isEmpty(), "No debería haber violaciones para link exactamente de 300 caracteres");
-        assertEquals(300, experienciaMaximo.getLink().length(), "El link debería tener exactamente 300 caracteres");
+        assertTrue(violationsMaximo.isEmpty(),
+                "No debería haber violaciones para link exactamente de 300 caracteres");
+        assertEquals(300, experienciaMaximo.getLink().length(),
+                "El link debería tener exactamente 300 caracteres");
     }
 
     @Test
@@ -660,7 +755,7 @@ class ExperienciaTest {
                 .descripcion(descripcionEspecial)
                 .link(linkEspecial)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -668,9 +763,12 @@ class ExperienciaTest {
 
         // Assert
         assertTrue(violations.isEmpty(), "No debería haber violaciones para caracteres especiales");
-        assertEquals(tituloEspecial, experiencia.getTitulo(), "El título con caracteres especiales debería mantenerse");
-        assertEquals(descripcionEspecial, experiencia.getDescripcion(), "La descripción con caracteres especiales debería mantenerse");
-        assertEquals(linkEspecial, experiencia.getLink(), "El link con caracteres especiales debería mantenerse");
+        assertEquals(tituloEspecial, experiencia.getTitulo(),
+                "El título con caracteres especiales debería mantenerse");
+        assertEquals(descripcionEspecial, experiencia.getDescripcion(),
+                "La descripción con caracteres especiales debería mantenerse");
+        assertEquals(linkEspecial, experiencia.getLink(),
+                "El link con caracteres especiales debería mantenerse");
     }
 
     @Test
@@ -688,17 +786,18 @@ class ExperienciaTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/test")
                     .tipoExperiencia(tipo)
-                    .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                    .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                     .build();
 
             // Assert
             assertNotNull(experiencia, "La Experiencia no debería ser nula para tipo: " + tipo);
-            assertEquals(tipo, experiencia.getTipoExperiencia(), "Debería manejar correctamente el tipo: " + tipo);
+            assertEquals(tipo, experiencia.getTipoExperiencia(),
+                    "Debería manejar correctamente el tipo: " + tipo);
         }
     }
 
     @Test
-    @DisplayName("Validación - Debe manejar todas las tecnologías del enum")
+    @DisplayName("Validación - Debe manejar todas las tecnologías del enum en lista")
     void validation_ShouldHandleAllTecnologiasUsada() {
         // Arrange - Probar todas las tecnologías
         TecnologiaUsada[] tecnologias = TecnologiaUsada.values();
@@ -712,13 +811,48 @@ class ExperienciaTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/test")
                     .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                    .tecnologiaUsada(tecnologia)
+                    .tecnologiasUsadas(List.of(tecnologia))
                     .build();
 
             // Assert
             assertNotNull(experiencia, "La Experiencia no debería ser nula para tecnología: " + tecnologia);
-            assertEquals(tecnologia, experiencia.getTecnologiaUsada(), "Debería manejar correctamente la tecnología: " + tecnologia);
+            assertTrue(experiencia.getTecnologiasUsadas().contains(tecnologia),
+                    "Debería manejar correctamente la tecnología: " + tecnologia);
         }
+    }
+
+    @Test
+    @DisplayName("Validación - Debe manejar múltiples tecnologías en la lista")
+    void validation_ShouldHandleMultipleTecnologiasUsada() {
+        // Arrange
+        List<TecnologiaUsada> tecnologiasMultiples = Arrays.asList(
+                TecnologiaUsada.JAVA,
+                TecnologiaUsada.SPRINGBOOT,
+                TecnologiaUsada.REACT,
+                TecnologiaUsada.TYPESCRIPT
+        );
+
+        // Act
+        Experiencia experiencia = Experiencia.builder()
+                .titulo("Proyecto con múltiples tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://github.com/usuario/test")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(tecnologiasMultiples)
+                .build();
+
+        // Assert
+        assertNotNull(experiencia, "La Experiencia no debería ser nula");
+        assertNotNull(experiencia.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(4, experiencia.getTecnologiasUsadas().size(), "Debería tener 4 tecnologías");
+        assertTrue(experiencia.getTecnologiasUsadas().containsAll(tecnologiasMultiples),
+                "Debería contener todas las tecnologías");
+
+        // Validar con Bean Validation
+        Set<ConstraintViolation<Experiencia>> violations = validator.validate(experiencia);
+        assertTrue(violations.isEmpty(), "No debería haber violaciones con múltiples tecnologías");
     }
 
     @Test
@@ -735,7 +869,7 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act
@@ -743,8 +877,10 @@ class ExperienciaTest {
 
         // Assert
         assertTrue(violations.isEmpty(), "No debería haber violaciones para fechas válidas");
-        assertEquals(fechaInicioPasado, experiencia.getFechaInicioProyecto(), "La fecha de inicio debería mantenerse");
-        assertEquals(fechaFinReciente, experiencia.getFechaFinProyecto(), "La fecha de fin debería mantenerse");
+        assertEquals(fechaInicioPasado, experiencia.getFechaInicioProyecto(),
+                "La fecha de inicio debería mantenerse");
+        assertEquals(fechaFinReciente, experiencia.getFechaFinProyecto(),
+                "La fecha de fin debería mantenerse");
     }
 
     @Test
@@ -761,12 +897,13 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act & Assert
         Set<ConstraintViolation<Experiencia>> violationsIgual = validator.validate(experienciaIgual);
-        assertTrue(violationsIgual.isEmpty(), "No debería haber violaciones para fecha fin igual a fecha inicio");
+        assertTrue(violationsIgual.isEmpty(),
+                "No debería haber violaciones para fecha fin igual a fecha inicio");
 
         // Arrange - Fecha fin posterior a fecha inicio
         LocalDate fechaFinPosterior = LocalDate.of(2024, 6, 1);
@@ -778,11 +915,55 @@ class ExperienciaTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         // Act & Assert
         Set<ConstraintViolation<Experiencia>> violationsPosterior = validator.validate(experienciaPosterior);
-        assertTrue(violationsPosterior.isEmpty(), "No debería haber violaciones para fecha fin posterior a fecha inicio");
+        assertTrue(violationsPosterior.isEmpty(),
+                "No debería haber violaciones para fecha fin posterior a fecha inicio");
+    }
+
+    // ==================== TESTS DE toString ====================
+
+    @Test
+    @DisplayName("toString debería incluir información relevante de Experiencia")
+    void toString_ShouldIncludeRelevantInformation() {
+        // Arrange
+        Experiencia experiencia = Experiencia.builder()
+                .id(1)
+                .titulo("Proyecto Test")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida")
+                .link("https://github.com/usuario/test")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .build();
+
+        // Act
+        String toStringResult = experiencia.toString();
+
+        // Assert
+        assertNotNull(toStringResult, "toString no debería ser nulo");
+        assertTrue(toStringResult.contains("1"), "toString debería contener el ID");
+        assertTrue(toStringResult.contains("Proyecto Test"), "toString debería contener el título");
+        assertTrue(toStringResult.contains("PROYECTO_PERSONAL"),
+                "toString debería contener el tipo de experiencia");
+        assertTrue(toStringResult.contains("SPRINGBOOT"),
+                "toString debería contener la tecnología usada");
+    }
+
+    @Test
+    @DisplayName("toString no debería lanzar excepción cuando hay campos nulos")
+    void toString_ShouldNotThrowException_WhenFieldsAreNull() {
+        // Arrange - Experiencia con campos nulos
+        Experiencia experiencia = new Experiencia();
+
+        // Act & Assert
+        assertDoesNotThrow(() -> {
+            String result = experiencia.toString();
+            assertNotNull(result, "toString no debería ser nulo");
+        }, "toString no debería lanzar excepción con campos nulos");
     }
 }
