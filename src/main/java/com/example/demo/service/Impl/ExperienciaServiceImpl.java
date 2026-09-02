@@ -2,8 +2,6 @@ package com.example.demo.service.Impl;
 
 import com.example.demo.dto.ExperienciaDto;
 import com.example.demo.mapper.ExperienciaMapper;
-import com.example.demo.model.Conocimiento;
-import com.example.demo.model.Educacion;
 import com.example.demo.model.Experiencia;
 import com.example.demo.repository.ExperienciaRepository;
 import com.example.demo.service.ExperienciaService;
@@ -13,8 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Slf4j // remplaza el  Sout
-@Service // indica que es un servicio
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class ExperienciaServiceImpl implements ExperienciaService {
 
@@ -28,7 +26,6 @@ public class ExperienciaServiceImpl implements ExperienciaService {
         return experienciaMapper.toExperienciaDto(saveExperiencia);
     }
 
-
     @Override
     public ExperienciaDto actualizarExperienciaPorId(Integer id, ExperienciaDto experienciaDto) {
         log.info("Actualizando experiencia con id: " + id);
@@ -38,7 +35,8 @@ public class ExperienciaServiceImpl implements ExperienciaService {
             experienciaExistente.setFechaFinProyecto(experienciaDto.getFechaFinProyecto());
             experienciaExistente.setDescripcion(experienciaDto.getDescripcion());
             experienciaExistente.setTipoExperiencia(experienciaDto.getTipoExperiencia());
-            experienciaExistente.setTecnologiaUsada(experienciaDto.getTecnologiaUsada());
+            // 🔥 CAMBIO: asignar la lista de tecnologías
+            experienciaExistente.setTecnologiasUsadas(experienciaDto.getTecnologiasUsadas());
 
             Experiencia experienciaActualizada = experienciaRepository.save(experienciaExistente);
             return experienciaMapper.toExperienciaDto(experienciaActualizada);
