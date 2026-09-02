@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,7 +64,7 @@ class ExperienciaRepositoryTest {
                 .alt("Captura del proyecto")
                 .build();
 
-        // Crear experiencia válida
+        // 🔥 Crear experiencia válida con lista de tecnologías
         experienciaValida = Experiencia.builder()
                 .titulo("Sistema de Gestión de Usuarios")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 15))
@@ -71,12 +72,12 @@ class ExperienciaRepositoryTest {
                 .descripcion("Desarrollo de API REST con Spring Boot y JWT para gestión de usuarios")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
 
-        // Crear experiencia en curso (con fechaFinProyecto nula)
+        // 🔥 Crear experiencia en curso (con fechaFinProyecto nula)
         experienciaEnCurso = Experiencia.builder()
                 .titulo("Proyecto en Desarrollo")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
@@ -84,12 +85,12 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción del proyecto en desarrollo con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .usuario(usuario)
                 .build();
 
-        // Crear experiencia colaborativa
+        // 🔥 Crear experiencia colaborativa con lista de tecnologías
         experienciaColaborativa = Experiencia.builder()
                 .titulo("App de E-commerce Colaborativa")
                 .fechaInicioProyecto(LocalDate.of(2024, 2, 1))
@@ -97,7 +98,7 @@ class ExperienciaRepositoryTest {
                 .descripcion("Desarrollo colaborativo de tienda online con carrito de compras")
                 .link("https://github.com/usuario/ecommerce-colaborativo")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                .tecnologiaUsada(TecnologiaUsada.REACT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
@@ -118,7 +119,8 @@ class ExperienciaRepositoryTest {
         // Assert
         assertNotNull(experienciaGuardada, "La experiencia guardada no debería ser nula");
         assertNotNull(experienciaGuardada.getId(), "El ID de la experiencia guardada no debería ser nulo");
-        assertEquals("Sistema de Gestión de Usuarios", experienciaGuardada.getTitulo(), "El título debería coincidir");
+        assertEquals("Sistema de Gestión de Usuarios", experienciaGuardada.getTitulo(),
+                "El título debería coincidir");
         assertEquals(LocalDate.of(2024, 1, 15), experienciaGuardada.getFechaInicioProyecto(),
                 "La fecha de inicio debería coincidir");
         assertEquals(LocalDate.of(2024, 6, 30), experienciaGuardada.getFechaFinProyecto(),
@@ -129,8 +131,17 @@ class ExperienciaRepositoryTest {
                 "El link debería coincidir");
         assertEquals(TipoExperiencia.PROYECTO_PERSONAL, experienciaGuardada.getTipoExperiencia(),
                 "El tipo de experiencia debería ser PROYECTO_PERSONAL");
-        assertEquals(TecnologiaUsada.SPRINGBOOT, experienciaGuardada.getTecnologiaUsada(),
-                "La tecnología usada debería ser SPRINGBOOT");
+
+        // 🔥 Verificar lista de tecnologías
+        assertNotNull(experienciaGuardada.getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, experienciaGuardada.getTecnologiasUsadas().size(),
+                "Debería tener 2 tecnologías");
+        assertTrue(experienciaGuardada.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT),
+                "Debería contener SPRINGBOOT");
+        assertTrue(experienciaGuardada.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
+                "Debería contener JAVA");
+
         assertNotNull(experienciaGuardada.getImagen(), "La imagen no debería ser nula");
         assertNotNull(experienciaGuardada.getUsuario(), "El usuario no debería ser nulo");
 
@@ -152,7 +163,7 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción del proyecto sin imagen con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-sin-imagen")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.PYTHON)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .usuario(usuario)
                 .build();
@@ -165,6 +176,12 @@ class ExperienciaRepositoryTest {
         assertNotNull(experienciaGuardada.getId(), "El ID de la experiencia guardada no debería ser nulo");
         assertNull(experienciaGuardada.getImagen(), "La imagen debería ser nula");
         assertNotNull(experienciaGuardada.getUsuario(), "El usuario no debería ser nulo");
+
+        // 🔥 Verificar tecnologías
+        assertNotNull(experienciaGuardada.getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(experienciaGuardada.getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON),
+                "Debería contener PYTHON");
 
         // Verificar que se guardó en la base de datos
         Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
@@ -181,8 +198,16 @@ class ExperienciaRepositoryTest {
         // Assert
         assertNotNull(experienciaGuardada, "La experiencia guardada no debería ser nula");
         assertNotNull(experienciaGuardada.getId(), "El ID de la experiencia guardada no debería ser nulo");
-        assertNull(experienciaGuardada.getFechaFinProyecto(), "La fecha de fin debería ser nula para proyecto en curso");
-        assertEquals("Proyecto en Desarrollo", experienciaGuardada.getTitulo(), "El título debería coincidir");
+        assertNull(experienciaGuardada.getFechaFinProyecto(),
+                "La fecha de fin debería ser nula para proyecto en curso");
+        assertEquals("Proyecto en Desarrollo", experienciaGuardada.getTitulo(),
+                "El título debería coincidir");
+
+        // 🔥 Verificar tecnologías
+        assertNotNull(experienciaGuardada.getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(experienciaGuardada.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
+                "Debería contener JAVA");
 
         // Verificar que se guardó en la base de datos
         Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
@@ -201,7 +226,7 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción del proyecto independiente con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-independiente")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVASCRIPT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVASCRIPT, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(null)
                 .build();
@@ -215,10 +240,55 @@ class ExperienciaRepositoryTest {
         assertNull(experienciaGuardada.getUsuario(), "El usuario debería ser nulo");
         assertNotNull(experienciaGuardada.getImagen(), "La imagen no debería ser nula");
 
+        // 🔥 Verificar tecnologías
+        assertNotNull(experienciaGuardada.getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, experienciaGuardada.getTecnologiasUsadas().size(),
+                "Debería tener 2 tecnologías");
+        assertTrue(experienciaGuardada.getTecnologiasUsadas().containsAll(
+                        List.of(TecnologiaUsada.JAVASCRIPT, TecnologiaUsada.TYPESCRIPT)),
+                "Debería contener JAVASCRIPT y TYPESCRIPT");
+
         // Verificar que se guardó en la base de datos
         Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
         assertNotNull(experienciaEncontrada, "La experiencia debería existir en la BD");
         assertNull(experienciaEncontrada.getUsuario(), "El usuario en la BD debería ser nulo");
+    }
+
+    @Test
+    @DisplayName("save - Debería guardar una experiencia con lista vacía de tecnologías")
+    void save_ShouldSaveExperienciaWithEmptyTecnologiasUsadas() {
+        // Arrange - Experiencia con lista vacía de tecnologías
+        Experiencia experienciaSinTecnologias = Experiencia.builder()
+                .titulo("Proyecto sin tecnologías definidas")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto sin tecnologías con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-sin-tecnologias")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of()) // Lista vacía
+                .imagen(imagen)
+                .usuario(usuario)
+                .build();
+
+        // Act
+        Experiencia experienciaGuardada = experienciaRepository.save(experienciaSinTecnologias);
+
+        // Assert
+        assertNotNull(experienciaGuardada, "La experiencia guardada no debería ser nula");
+        assertNotNull(experienciaGuardada.getId(), "El ID de la experiencia guardada no debería ser nulo");
+        assertNotNull(experienciaGuardada.getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(experienciaGuardada.getTecnologiasUsadas().isEmpty(),
+                "La lista de tecnologías debería estar vacía");
+
+        // Verificar que se guardó en la base de datos
+        Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
+        assertNotNull(experienciaEncontrada, "La experiencia debería existir en la BD");
+        assertNotNull(experienciaEncontrada.getTecnologiasUsadas(),
+                "Las tecnologías usadas en la BD no deberían ser nulas");
+        assertTrue(experienciaEncontrada.getTecnologiasUsadas().isEmpty(),
+                "La lista de tecnologías en la BD debería estar vacía");
     }
 
     // ==================== TESTS DE BÚSQUEDA ====================
@@ -235,11 +305,19 @@ class ExperienciaRepositoryTest {
 
         // Assert
         assertTrue(experienciaEncontrada.isPresent(), "La experiencia debería ser encontrada");
-        assertEquals(experienciaGuardada.getId(), experienciaEncontrada.get().getId(), "El ID debería coincidir");
+        assertEquals(experienciaGuardada.getId(), experienciaEncontrada.get().getId(),
+                "El ID debería coincidir");
         assertEquals(experienciaGuardada.getTitulo(), experienciaEncontrada.get().getTitulo(),
                 "El título debería coincidir");
         assertEquals(experienciaGuardada.getLink(), experienciaEncontrada.get().getLink(),
                 "El link debería coincidir");
+
+        // 🔥 Verificar tecnologías
+        assertNotNull(experienciaEncontrada.get().getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(experienciaEncontrada.get().getTecnologiasUsadas().containsAll(
+                        experienciaGuardada.getTecnologiasUsadas()),
+                "Las tecnologías usadas deberían coincidir");
     }
 
     @Test
@@ -268,6 +346,12 @@ class ExperienciaRepositoryTest {
                 "La fecha de fin debería ser nula para proyecto en curso");
         assertEquals(experienciaGuardada.getTitulo(), experienciaEncontrada.get().getTitulo(),
                 "El título debería coincidir");
+
+        // 🔥 Verificar tecnologías
+        assertNotNull(experienciaEncontrada.get().getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(experienciaEncontrada.get().getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
+                "Debería contener JAVA");
     }
 
     @Test
@@ -297,6 +381,31 @@ class ExperienciaRepositoryTest {
         assertTrue(foundProyectoPersonal, "La experiencia personal debería estar en la lista");
         assertTrue(foundProyectoEnCurso, "La experiencia en curso debería estar en la lista");
         assertTrue(foundProyectoColaborativo, "La experiencia colaborativa debería estar en la lista");
+
+        // 🔥 Verificar que las tecnologías se guardaron correctamente
+        experiencias.stream()
+                .filter(e -> e.getTitulo().equals("Sistema de Gestión de Usuarios"))
+                .findFirst()
+                .ifPresent(e -> {
+                    assertNotNull(e.getTecnologiasUsadas(),
+                            "Las tecnologías usadas no deberían ser nulas");
+                    assertTrue(e.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT),
+                            "Debería contener SPRINGBOOT");
+                    assertTrue(e.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
+                            "Debería contener JAVA");
+                });
+
+        experiencias.stream()
+                .filter(e -> e.getTitulo().equals("App de E-commerce Colaborativa"))
+                .findFirst()
+                .ifPresent(e -> {
+                    assertNotNull(e.getTecnologiasUsadas(),
+                            "Las tecnologías usadas no deberían ser nulas");
+                    assertTrue(e.getTecnologiasUsadas().contains(TecnologiaUsada.REACT),
+                            "Debería contener REACT");
+                    assertTrue(e.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT),
+                            "Debería contener TYPESCRIPT");
+                });
     }
 
     @Test
@@ -324,7 +433,7 @@ class ExperienciaRepositoryTest {
         experienciaGuardada.setDescripcion("Descripción actualizada con más de 5 caracteres para prueba");
         experienciaGuardada.setLink("https://github.com/usuario/proyecto-actualizado");
         experienciaGuardada.setTipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_FREELANCE);
-        experienciaGuardada.setTecnologiaUsada(TecnologiaUsada.ANGULAR);
+        experienciaGuardada.setTecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR, TecnologiaUsada.TYPESCRIPT));
 
         Experiencia experienciaActualizada = experienciaRepository.save(experienciaGuardada);
 
@@ -339,8 +448,16 @@ class ExperienciaRepositoryTest {
                 "El link debería estar actualizado");
         assertEquals(TipoExperiencia.TRABAJO_LABORAL_FREELANCE, experienciaActualizada.getTipoExperiencia(),
                 "El tipo de experiencia debería estar actualizado");
-        assertEquals(TecnologiaUsada.ANGULAR, experienciaActualizada.getTecnologiaUsada(),
-                "La tecnología usada debería estar actualizada");
+
+        // 🔥 Verificar tecnologías actualizadas
+        assertNotNull(experienciaActualizada.getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, experienciaActualizada.getTecnologiasUsadas().size(),
+                "Debería tener 2 tecnologías");
+        assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.ANGULAR),
+                "Debería contener ANGULAR");
+        assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT),
+                "Debería contener TYPESCRIPT");
 
         // Verificar en la base de datos
         Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
@@ -374,7 +491,8 @@ class ExperienciaRepositoryTest {
 
         // Verificar en la base de datos
         Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
-        assertNotNull(experienciaEncontrada.getFechaFinProyecto(), "La fecha de fin en la BD no debería ser nula");
+        assertNotNull(experienciaEncontrada.getFechaFinProyecto(),
+                "La fecha de fin en la BD no debería ser nula");
         assertEquals(nuevaFechaFin, experienciaEncontrada.getFechaFinProyecto(),
                 "La fecha de fin en la BD debería estar actualizada");
     }
@@ -432,6 +550,46 @@ class ExperienciaRepositoryTest {
         assertNull(experienciaEncontrada.getImagen(), "La imagen en la BD debería ser nula");
     }
 
+    @Test
+    @DisplayName("save - Debería actualizar la lista de tecnologías de una experiencia")
+    void save_ShouldUpdateTecnologiasUsadasOfExperiencia() {
+        // Arrange - Guardar experiencia en la base de datos
+        Experiencia experienciaGuardada = entityManager.persist(experienciaValida);
+        entityManager.flush();
+
+        // Verificar tecnologías iniciales
+        assertNotNull(experienciaGuardada.getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, experienciaGuardada.getTecnologiasUsadas().size(),
+                "Debería tener 2 tecnologías inicialmente");
+
+        // Act - Actualizar tecnologías
+        List<TecnologiaUsada> nuevasTecnologias = List.of(
+                TecnologiaUsada.PYTHON,
+                TecnologiaUsada.DJANGO,
+                TecnologiaUsada.POSTGRESQL
+        );
+        experienciaGuardada.setTecnologiasUsadas(nuevasTecnologias);
+        Experiencia experienciaActualizada = experienciaRepository.save(experienciaGuardada);
+
+        // Assert - Verificar nuevas tecnologías
+        assertNotNull(experienciaActualizada.getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(3, experienciaActualizada.getTecnologiasUsadas().size(),
+                "Debería tener 3 tecnologías");
+        assertTrue(experienciaActualizada.getTecnologiasUsadas().containsAll(nuevasTecnologias),
+                "Las tecnologías usadas deberían estar actualizadas");
+
+        // Verificar en la base de datos
+        Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
+        assertNotNull(experienciaEncontrada.getTecnologiasUsadas(),
+                "Las tecnologías usadas en la BD no deberían ser nulas");
+        assertEquals(3, experienciaEncontrada.getTecnologiasUsadas().size(),
+                "Debería tener 3 tecnologías en la BD");
+        assertTrue(experienciaEncontrada.getTecnologiasUsadas().containsAll(nuevasTecnologias),
+                "Las tecnologías usadas en la BD deberían estar actualizadas");
+    }
+
     // ==================== TESTS DE ELIMINACIÓN ====================
 
     @Test
@@ -443,7 +601,8 @@ class ExperienciaRepositoryTest {
         Integer id = experienciaGuardada.getId();
 
         // Verificar que existe antes de eliminar
-        assertNotNull(entityManager.find(Experiencia.class, id), "La experiencia debería existir antes de eliminar");
+        assertNotNull(entityManager.find(Experiencia.class, id),
+                "La experiencia debería existir antes de eliminar");
 
         // Act
         experienciaRepository.deleteById(id);
@@ -462,7 +621,8 @@ class ExperienciaRepositoryTest {
         Integer id = experienciaGuardada.getId();
 
         // Verificar que existe antes de eliminar
-        assertNotNull(entityManager.find(Experiencia.class, id), "La experiencia debería existir antes de eliminar");
+        assertNotNull(entityManager.find(Experiencia.class, id),
+                "La experiencia debería existir antes de eliminar");
 
         // Act
         experienciaRepository.delete(experienciaGuardada);
@@ -491,15 +651,19 @@ class ExperienciaRepositoryTest {
         Integer idImagen = experienciaGuardada.getImagen().getId();
 
         // Verificar que existen antes de eliminar
-        assertNotNull(entityManager.find(Experiencia.class, idExperiencia), "La experiencia debería existir");
-        assertNotNull(entityManager.find(Imagen.class, idImagen), "La imagen debería existir");
+        assertNotNull(entityManager.find(Experiencia.class, idExperiencia),
+                "La experiencia debería existir");
+        assertNotNull(entityManager.find(Imagen.class, idImagen),
+                "La imagen debería existir");
 
         // Act
         experienciaRepository.delete(experienciaGuardada);
 
         // Assert - Verificar que no existen
-        assertNull(entityManager.find(Experiencia.class, idExperiencia), "La experiencia no debería existir");
-        assertNull(entityManager.find(Imagen.class, idImagen), "La imagen no debería existir");
+        assertNull(entityManager.find(Experiencia.class, idExperiencia),
+                "La experiencia no debería existir");
+        assertNull(entityManager.find(Imagen.class, idImagen),
+                "La imagen no debería existir");
     }
 
     // ==================== TESTS DE CASOS BORDE ====================
@@ -516,7 +680,7 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-largo")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
@@ -528,12 +692,14 @@ class ExperienciaRepositoryTest {
         assertNotNull(experienciaGuardada, "La experiencia guardada no debería ser nula");
         assertNotNull(experienciaGuardada.getId(), "El ID no debería ser nulo");
         assertEquals(tituloLargo, experienciaGuardada.getTitulo(), "El título largo debería mantenerse");
-        assertEquals(145, experienciaGuardada.getTitulo().length(), "El título debería tener 145 caracteres");
+        assertEquals(145, experienciaGuardada.getTitulo().length(),
+                "El título debería tener 145 caracteres");
 
         // Verificar en la base de datos
         Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
         assertNotNull(experienciaEncontrada, "La experiencia debería existir en la BD");
-        assertEquals(tituloLargo, experienciaEncontrada.getTitulo(), "El título largo debería mantenerse en la BD");
+        assertEquals(tituloLargo, experienciaEncontrada.getTitulo(),
+                "El título largo debería mantenerse en la BD");
     }
 
     @Test
@@ -548,7 +714,7 @@ class ExperienciaRepositoryTest {
                 .descripcion(descripcionLarga)
                 .link("https://github.com/usuario/proyecto-descripcion-larga")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
@@ -583,7 +749,7 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link(linkLargo)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
@@ -599,7 +765,8 @@ class ExperienciaRepositoryTest {
         // Verificar en la base de datos
         Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
         assertNotNull(experienciaEncontrada, "La experiencia debería existir en la BD");
-        assertEquals(linkLargo, experienciaEncontrada.getLink(), "El link largo debería mantenerse en la BD");
+        assertEquals(linkLargo, experienciaEncontrada.getLink(),
+                "El link largo debería mantenerse en la BD");
     }
 
     @Test
@@ -613,7 +780,7 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción de proyecto personal con más de 5 caracteres")
                 .link("https://github.com/usuario/personal")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
@@ -625,7 +792,7 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción de contribución open source con más de 5 caracteres")
                 .link("https://github.com/usuario/open-source")
                 .tipoExperiencia(TipoExperiencia.APORTE_CODIGO_ABIERTO)
-                .tecnologiaUsada(TecnologiaUsada.PYTHON)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
@@ -637,7 +804,7 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción de práctica profesional con más de 5 caracteres")
                 .link("https://github.com/usuario/practica")
                 .tipoExperiencia(TipoExperiencia.PRACTICA_PROFESIONAL)
-                .tecnologiaUsada(TecnologiaUsada.REACT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
@@ -671,22 +838,49 @@ class ExperienciaRepositoryTest {
     @DisplayName("findAll - Debería retornar experiencias con diferentes tecnologías")
     void findAll_ShouldReturnExperienciasWithDifferentTecnologias() {
         // Arrange - Guardar experiencias con diferentes tecnologías
-        TecnologiaUsada[] tecnologias = {TecnologiaUsada.JAVA, TecnologiaUsada.PYTHON, TecnologiaUsada.REACT};
+        List<TecnologiaUsada> tecnologias1 = List.of(TecnologiaUsada.JAVA, TecnologiaUsada.SPRINGBOOT);
+        List<TecnologiaUsada> tecnologias2 = List.of(TecnologiaUsada.PYTHON, TecnologiaUsada.DJANGO);
+        List<TecnologiaUsada> tecnologias3 = List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT);
 
-        for (int i = 0; i < tecnologias.length; i++) {
-            Experiencia experiencia = Experiencia.builder()
-                    .titulo("Proyecto con " + tecnologias[i].name())
-                    .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
-                    .fechaFinProyecto(LocalDate.of(2024, 6, 1))
-                    .descripcion("Descripción para tecnología " + tecnologias[i].name() + " con más de 5 caracteres")
-                    .link("https://github.com/usuario/proyecto-" + i)
-                    .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                    .tecnologiaUsada(tecnologias[i])
-                    .imagen(imagen)
-                    .usuario(usuario)
-                    .build();
-            entityManager.persist(experiencia);
-        }
+        Experiencia exp1 = Experiencia.builder()
+                .titulo("Proyecto con Java y Spring")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción para proyecto con Java y Spring con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-1")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(tecnologias1)
+                .imagen(imagen)
+                .usuario(usuario)
+                .build();
+
+        Experiencia exp2 = Experiencia.builder()
+                .titulo("Proyecto con Python y Django")
+                .fechaInicioProyecto(LocalDate.of(2024, 2, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 7, 1))
+                .descripcion("Descripción para proyecto con Python y Django con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-2")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(tecnologias2)
+                .imagen(imagen)
+                .usuario(usuario)
+                .build();
+
+        Experiencia exp3 = Experiencia.builder()
+                .titulo("Proyecto con React y TypeScript")
+                .fechaInicioProyecto(LocalDate.of(2024, 3, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 8, 1))
+                .descripcion("Descripción para proyecto con React y TypeScript con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-3")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(tecnologias3)
+                .imagen(imagen)
+                .usuario(usuario)
+                .build();
+
+        entityManager.persist(exp1);
+        entityManager.persist(exp2);
+        entityManager.persist(exp3);
         entityManager.flush();
 
         // Act
@@ -694,13 +888,25 @@ class ExperienciaRepositoryTest {
 
         // Assert
         assertNotNull(experiencias, "La lista no debería ser nula");
+        assertTrue(experiencias.size() >= 3, "Debería haber al menos 3 experiencias");
 
         // Verificar que existen experiencias con cada tecnología
-        for (TecnologiaUsada tecnologia : tecnologias) {
-            boolean found = experiencias.stream()
-                    .anyMatch(e -> e.getTecnologiaUsada() == tecnologia);
-            assertTrue(found, "Debería haber experiencia con tecnología: " + tecnologia);
-        }
+        boolean foundJava = experiencias.stream()
+                .anyMatch(e -> e.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA));
+        boolean foundPython = experiencias.stream()
+                .anyMatch(e -> e.getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON));
+        boolean foundReact = experiencias.stream()
+                .anyMatch(e -> e.getTecnologiasUsadas().contains(TecnologiaUsada.REACT));
+
+        assertTrue(foundJava, "Debería haber experiencia con JAVA");
+        assertTrue(foundPython, "Debería haber experiencia con PYTHON");
+        assertTrue(foundReact, "Debería haber experiencia con REACT");
+
+        // Verificar combinaciones específicas
+        boolean foundJavaSpring = experiencias.stream()
+                .anyMatch(e -> e.getTecnologiasUsadas().containsAll(
+                        List.of(TecnologiaUsada.JAVA, TecnologiaUsada.SPRINGBOOT)));
+        assertTrue(foundJavaSpring, "Debería haber experiencia con JAVA y SPRINGBOOT");
     }
 
     // ==================== TESTS NEGATIVOS ====================
@@ -715,7 +921,7 @@ class ExperienciaRepositoryTest {
                 .descripcion(null)
                 .link(null)
                 .tipoExperiencia(null)
-                .tecnologiaUsada(null)
+                .tecnologiasUsadas(null)
                 .imagen(null)
                 .usuario(usuario)
                 .build();
@@ -747,7 +953,7 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
@@ -769,7 +975,7 @@ class ExperienciaRepositoryTest {
                 .descripcion("")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
@@ -791,7 +997,7 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
@@ -818,19 +1024,25 @@ class ExperienciaRepositoryTest {
         // 3. Actualizar experiencia
         experienciaEncontrada.get().setTitulo("Título Actualizado");
         experienciaEncontrada.get().setDescripcion("Descripción actualizada con más de 5 caracteres");
+        experienciaEncontrada.get().setTecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR));
         Experiencia experienciaActualizada = experienciaRepository.save(experienciaEncontrada.get());
-        assertEquals("Título Actualizado", experienciaActualizada.getTitulo(), "El título debería estar actualizado");
+        assertEquals("Título Actualizado", experienciaActualizada.getTitulo(),
+                "El título debería estar actualizado");
+        assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.ANGULAR),
+                "Las tecnologías deberían estar actualizadas");
 
         // 4. Verificar actualización
         Optional<Experiencia> experienciaVerificada = experienciaRepository.findById(experienciaGuardada.getId());
-        assertTrue(experienciaVerificada.isPresent(), "La experiencia debería existir después de actualizar");
+        assertTrue(experienciaVerificada.isPresent(),
+                "La experiencia debería existir después de actualizar");
         assertEquals("Título Actualizado", experienciaVerificada.get().getTitulo(),
                 "El título debería estar actualizado");
 
         // 5. Eliminar experiencia
         experienciaRepository.deleteById(experienciaGuardada.getId());
         Optional<Experiencia> experienciaEliminada = experienciaRepository.findById(experienciaGuardada.getId());
-        assertFalse(experienciaEliminada.isPresent(), "La experiencia no debería existir después de eliminar");
+        assertFalse(experienciaEliminada.isPresent(),
+                "La experiencia no debería existir después de eliminar");
     }
 
     // ==================== TESTS DE CONSISTENCIA ====================
@@ -862,6 +1074,13 @@ class ExperienciaRepositoryTest {
         assertNotNull(experienciaEncontrada.getUsuario(), "El usuario no debería ser nulo");
         assertEquals(usuario.getNombre(), experienciaEncontrada.getUsuario().getNombre(),
                 "El nombre del usuario debería coincidir");
+
+        // 🔥 Verificar tecnologías
+        assertNotNull(experienciaEncontrada.getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(experienciaEncontrada.getTecnologiasUsadas().containsAll(
+                        experienciaGuardada.getTecnologiasUsadas()),
+                "Las tecnologías usadas deberían coincidir");
     }
 
     @Test
@@ -881,7 +1100,7 @@ class ExperienciaRepositoryTest {
                         .descripcion("Descripción para enum test con más de 5 caracteres")
                         .link("https://github.com/usuario/enum-test")
                         .tipoExperiencia(tipo)
-                        .tecnologiaUsada(tecnologia)
+                        .tecnologiasUsadas(List.of(tecnologia)) // 🔥 Cambiado a lista
                         .imagen(imagen)
                         .usuario(usuario)
                         .build();
@@ -892,7 +1111,7 @@ class ExperienciaRepositoryTest {
                 assertNotNull(experienciaGuardada, "La experiencia guardada no debería ser nula");
                 assertEquals(tipo, experienciaGuardada.getTipoExperiencia(),
                         "El tipo de experiencia debería ser " + tipo);
-                assertEquals(tecnologia, experienciaGuardada.getTecnologiaUsada(),
+                assertTrue(experienciaGuardada.getTecnologiasUsadas().contains(tecnologia),
                         "La tecnología usada debería ser " + tecnologia);
             }
         }
@@ -912,7 +1131,7 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/fechas-limite")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
@@ -935,5 +1154,53 @@ class ExperienciaRepositoryTest {
                 "La fecha de inicio en la BD debería ser la misma");
         assertEquals(fechaFin, experienciaEncontrada.getFechaFinProyecto(),
                 "La fecha de fin en la BD debería ser la misma");
+    }
+
+    @Test
+    @DisplayName("save - Debería manejar múltiples tecnologías correctamente")
+    void save_ShouldHandleMultipleTecnologiasCorrectly() {
+        // Arrange - Experiencia con múltiples tecnologías
+        List<TecnologiaUsada> tecnologiasMultiples = Arrays.asList(
+                TecnologiaUsada.JAVA,
+                TecnologiaUsada.SPRINGBOOT,
+                TecnologiaUsada.REACT,
+                TecnologiaUsada.TYPESCRIPT,
+                TecnologiaUsada.MYSQL
+        );
+
+        Experiencia experienciaMultiples = Experiencia.builder()
+                .titulo("Proyecto con múltiples tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 12, 31))
+                .descripcion("Descripción del proyecto con múltiples tecnologías con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-multiples")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(tecnologiasMultiples)
+                .imagen(imagen)
+                .usuario(usuario)
+                .build();
+
+        // Act
+        Experiencia experienciaGuardada = experienciaRepository.save(experienciaMultiples);
+
+        // Assert
+        assertNotNull(experienciaGuardada, "La experiencia guardada no debería ser nula");
+        assertNotNull(experienciaGuardada.getId(), "El ID no debería ser nulo");
+        assertNotNull(experienciaGuardada.getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(5, experienciaGuardada.getTecnologiasUsadas().size(),
+                "Debería tener 5 tecnologías");
+        assertTrue(experienciaGuardada.getTecnologiasUsadas().containsAll(tecnologiasMultiples),
+                "Debería contener todas las tecnologías");
+
+        // Verificar en la base de datos
+        Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
+        assertNotNull(experienciaEncontrada, "La experiencia debería existir en la BD");
+        assertNotNull(experienciaEncontrada.getTecnologiasUsadas(),
+                "Las tecnologías usadas en la BD no deberían ser nulas");
+        assertEquals(5, experienciaEncontrada.getTecnologiasUsadas().size(),
+                "Debería tener 5 tecnologías en la BD");
+        assertTrue(experienciaEncontrada.getTecnologiasUsadas().containsAll(tecnologiasMultiples),
+                "Debería contener todas las tecnologías en la BD");
     }
 }
