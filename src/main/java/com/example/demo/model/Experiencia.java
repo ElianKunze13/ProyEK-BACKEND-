@@ -35,10 +35,9 @@ public class Experiencia {
     @NotNull
     private LocalDate fechaInicioProyecto;
 
-    //modificar fechaFinProyecto para que pueda ser null o un valor especial
-    // en caso de proyectos en curso
+    ///modificar fechaFinProyecto para que pueda ser null o un valor especial
+    /// en caso de proyectos en curso
     @Column(name = "fechaFinProyecto")
-    //@NotNull
     private LocalDate fechaFinProyecto;
 
     /// incluir aporte personal especifico en caso de ser un proyecto colaborativo
@@ -48,22 +47,23 @@ public class Experiencia {
     private String descripcion;
 
     /// INCLUIR LINK A PROYECTO ((GITHUB, LINKEDIN, PORTFOLIO))
-    /// private String link;
     @NotNull
     @NotEmpty
     @Size(min = 5, max = 300, message = "Link debe tener entre 5 y 301 caracteres")
     private String link;
 
-    ///incluir tecnologias y tipo de experiencia como tags
+    ///tipoExperiencia definida como tags
     @NotNull
     @Enumerated(EnumType.STRING)
     private TipoExperiencia tipoExperiencia;
 
+    // tecnologiausada debe cambiarse y redefinirse como lista,
+    // para poder incluir varias tecnologias usadas en un proyecto
     @NotNull
     @Enumerated(EnumType.STRING)
     private TecnologiaUsada tecnologiaUsada;
 
-    /// para incluir captura de pantalla o imagen representativa del proyecto
+    /// para imagen representativa del proyecto
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "imagen_id", referencedColumnName = "id")
     @JsonManagedReference
