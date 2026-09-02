@@ -83,7 +83,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Apasionado por la tecnología y el desarrollo de software.")
                 .build();
 
-        // Crear experiencia válida
+        // 🔥 Crear experiencia válida con lista de tecnologías
         experienciaValida = Experiencia.builder()
                 .id(1)
                 .titulo("Sistema de Gestión de Usuarios")
@@ -92,12 +92,12 @@ class ExperienciaServiceImplTest {
                 .descripcion("Desarrollo de API REST con Spring Boot y JWT para gestión de usuarios")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
 
-        // Crear ExperienciaDto válido
+        // 🔥 Crear ExperienciaDto válido con lista de tecnologías
         experienciaDtoValido = ExperienciaDto.builder()
                 .id(1)
                 .titulo("Sistema de Gestión de Usuarios")
@@ -106,11 +106,11 @@ class ExperienciaServiceImplTest {
                 .descripcion("Desarrollo de API REST con Spring Boot y JWT para gestión de usuarios")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(imagenDto)
                 .build();
 
-        // Crear experiencia en curso (con fechaFinProyecto nula)
+        // 🔥 Crear experiencia en curso (con fechaFinProyecto nula)
         experienciaEnCurso = Experiencia.builder()
                 .id(2)
                 .titulo("Proyecto en Desarrollo")
@@ -119,12 +119,12 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción del proyecto en desarrollo con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .usuario(usuario)
                 .build();
 
-        // Crear ExperienciaDto en curso
+        // 🔥 Crear ExperienciaDto en curso
         experienciaDtoEnCurso = ExperienciaDto.builder()
                 .id(2)
                 .titulo("Proyecto en Desarrollo")
@@ -133,7 +133,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción del proyecto en desarrollo con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .build();
     }
@@ -151,7 +151,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Desarrollo de API REST con Spring Boot y JWT para gestión de usuarios")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
@@ -164,7 +164,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Desarrollo de API REST con Spring Boot y JWT para gestión de usuarios")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
@@ -183,8 +183,14 @@ class ExperienciaServiceImplTest {
         assertEquals("https://github.com/usuario/proyecto", resultado.getLink(), "El link debería coincidir");
         assertEquals(TipoExperiencia.PROYECTO_PERSONAL, resultado.getTipoExperiencia(),
                 "El tipo de experiencia debería ser PROYECTO_PERSONAL");
-        assertEquals(TecnologiaUsada.SPRINGBOOT, resultado.getTecnologiaUsada(),
-                "La tecnología usada debería ser SPRINGBOOT");
+
+        // 🔥 Verificar lista de tecnologías
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, resultado.getTecnologiasUsadas().size(), "Debería tener 2 tecnologías");
+        assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT),
+                "Debería contener SPRINGBOOT");
+        assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
+                "Debería contener JAVA");
 
         verify(experienciaMapper, times(1)).toExperiencia(experienciaDtoValido);
         verify(experienciaRepository, times(1)).save(experienciaParaGuardar);
@@ -202,7 +208,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción del proyecto sin imagen con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-sin-imagen")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.PYTHON)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .build();
 
@@ -213,7 +219,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción del proyecto sin imagen con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-sin-imagen")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.PYTHON)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .usuario(null)
                 .build();
@@ -226,7 +232,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción del proyecto sin imagen con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-sin-imagen")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.PYTHON)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .usuario(null)
                 .build();
@@ -242,6 +248,11 @@ class ExperienciaServiceImplTest {
         assertNotNull(resultado, "El resultado no debería ser nulo");
         assertNull(resultado.getImagen(), "La imagen debería ser nula");
         assertEquals("Proyecto sin Imagen", resultado.getTitulo(), "El título debería coincidir");
+
+        // 🔥 Verificar tecnologías
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON),
+                "Debería contener PYTHON");
 
         verify(experienciaMapper, times(1)).toExperiencia(experienciaDtoSinImagen);
         verify(experienciaRepository, times(1)).save(experienciaSinImagen);
@@ -259,7 +270,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción del proyecto en desarrollo con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .usuario(null)
                 .build();
@@ -272,7 +283,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción del proyecto en desarrollo con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .usuario(null)
                 .build();
@@ -289,8 +300,136 @@ class ExperienciaServiceImplTest {
         assertNull(resultado.getFechaFinProyecto(), "La fecha de fin debería ser nula para proyecto en curso");
         assertEquals("Proyecto en Desarrollo", resultado.getTitulo(), "El título debería coincidir");
 
+        // 🔥 Verificar tecnologías
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
+                "Debería contener JAVA");
+
         verify(experienciaMapper, times(1)).toExperiencia(experienciaDtoEnCurso);
         verify(experienciaRepository, times(1)).save(experienciaParaGuardar);
+        verify(experienciaMapper, times(1)).toExperienciaDto(experienciaGuardada);
+    }
+
+    @Test
+    @DisplayName("saveExperiencia - Debería guardar una experiencia con múltiples tecnologías")
+    void saveExperiencia_ShouldSaveExperienciaWithMultipleTecnologias() {
+        // Arrange
+        List<TecnologiaUsada> tecnologiasMultiples = Arrays.asList(
+                TecnologiaUsada.JAVA,
+                TecnologiaUsada.SPRINGBOOT,
+                TecnologiaUsada.REACT,
+                TecnologiaUsada.TYPESCRIPT
+        );
+
+        ExperienciaDto experienciaDtoMultiples = ExperienciaDto.builder()
+                .titulo("Proyecto con múltiples tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto con múltiples tecnologías con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-multiples")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(tecnologiasMultiples)
+                .imagen(imagenDto)
+                .build();
+
+        Experiencia experienciaMultiples = Experiencia.builder()
+                .titulo("Proyecto con múltiples tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto con múltiples tecnologías con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-multiples")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(tecnologiasMultiples)
+                .imagen(imagen)
+                .usuario(null)
+                .build();
+
+        Experiencia experienciaGuardada = Experiencia.builder()
+                .id(10)
+                .titulo("Proyecto con múltiples tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto con múltiples tecnologías con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-multiples")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(tecnologiasMultiples)
+                .imagen(imagen)
+                .usuario(null)
+                .build();
+
+        when(experienciaMapper.toExperiencia(experienciaDtoMultiples)).thenReturn(experienciaMultiples);
+        when(experienciaRepository.save(experienciaMultiples)).thenReturn(experienciaGuardada);
+        when(experienciaMapper.toExperienciaDto(experienciaGuardada)).thenReturn(experienciaDtoMultiples);
+
+        // Act
+        ExperienciaDto resultado = experienciaService.saveExperiencia(experienciaDtoMultiples);
+
+        // Assert
+        assertNotNull(resultado, "El resultado no debería ser nulo");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(4, resultado.getTecnologiasUsadas().size(), "Debería tener 4 tecnologías");
+        assertTrue(resultado.getTecnologiasUsadas().containsAll(tecnologiasMultiples),
+                "Debería contener todas las tecnologías");
+
+        verify(experienciaMapper, times(1)).toExperiencia(experienciaDtoMultiples);
+        verify(experienciaRepository, times(1)).save(experienciaMultiples);
+        verify(experienciaMapper, times(1)).toExperienciaDto(experienciaGuardada);
+    }
+
+    @Test
+    @DisplayName("saveExperiencia - Debería guardar una experiencia con lista vacía de tecnologías")
+    void saveExperiencia_ShouldSaveExperienciaWithEmptyTecnologias() {
+        // Arrange
+        ExperienciaDto experienciaDtoSinTecnologias = ExperienciaDto.builder()
+                .titulo("Proyecto sin tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto sin tecnologías con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-sin-tecnologias")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of()) // Lista vacía
+                .imagen(imagenDto)
+                .build();
+
+        Experiencia experienciaSinTecnologias = Experiencia.builder()
+                .titulo("Proyecto sin tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto sin tecnologías con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-sin-tecnologias")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of())
+                .imagen(imagen)
+                .usuario(null)
+                .build();
+
+        Experiencia experienciaGuardada = Experiencia.builder()
+                .id(11)
+                .titulo("Proyecto sin tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto sin tecnologías con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-sin-tecnologias")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of())
+                .imagen(imagen)
+                .usuario(null)
+                .build();
+
+        when(experienciaMapper.toExperiencia(experienciaDtoSinTecnologias)).thenReturn(experienciaSinTecnologias);
+        when(experienciaRepository.save(experienciaSinTecnologias)).thenReturn(experienciaGuardada);
+        when(experienciaMapper.toExperienciaDto(experienciaGuardada)).thenReturn(experienciaDtoSinTecnologias);
+
+        // Act
+        ExperienciaDto resultado = experienciaService.saveExperiencia(experienciaDtoSinTecnologias);
+
+        // Assert
+        assertNotNull(resultado, "El resultado no debería ser nulo");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(resultado.getTecnologiasUsadas().isEmpty(), "La lista de tecnologías debería estar vacía");
+
+        verify(experienciaMapper, times(1)).toExperiencia(experienciaDtoSinTecnologias);
+        verify(experienciaRepository, times(1)).save(experienciaSinTecnologias);
         verify(experienciaMapper, times(1)).toExperienciaDto(experienciaGuardada);
     }
 
@@ -324,7 +463,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción actualizada con más de 5 caracteres para prueba")
                 .link("https://github.com/usuario/proyecto-actualizado")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_FREELANCE)
-                .tecnologiaUsada(TecnologiaUsada.ANGULAR)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
                 .imagen(imagenDto)
                 .build();
 
@@ -336,7 +475,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción actualizada con más de 5 caracteres para prueba")
                 .link("https://github.com/usuario/proyecto-actualizado")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_FREELANCE)
-                .tecnologiaUsada(TecnologiaUsada.ANGULAR)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(usuario)
                 .build();
@@ -359,8 +498,14 @@ class ExperienciaServiceImplTest {
                 "El link debería estar actualizado");
         assertEquals(TipoExperiencia.TRABAJO_LABORAL_FREELANCE, resultado.getTipoExperiencia(),
                 "El tipo de experiencia debería estar actualizado");
-        assertEquals(TecnologiaUsada.ANGULAR, resultado.getTecnologiaUsada(),
-                "La tecnología usada debería estar actualizada");
+
+        // 🔥 Verificar tecnologías actualizadas
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, resultado.getTecnologiasUsadas().size(), "Debería tener 2 tecnologías");
+        assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.ANGULAR),
+                "Debería contener ANGULAR");
+        assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT),
+                "Debería contener TYPESCRIPT");
 
         // Verificar que se actualizaron los campos en la entidad existente
         assertEquals("Sistema de Gestión de Usuarios Actualizado", experienciaValida.getTitulo(),
@@ -386,7 +531,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagenDto)
                 .build();
 
@@ -418,7 +563,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Nueva descripción con más de 5 caracteres")
                 .link("https://github.com/usuario/nuevo-link")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                .tecnologiaUsada(TecnologiaUsada.REACT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
                 .imagen(imagenDto)
                 .build();
 
@@ -439,11 +584,65 @@ class ExperienciaServiceImplTest {
                 "El link debería estar actualizado");
         assertEquals(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO, experienciaValida.getTipoExperiencia(),
                 "El tipo de experiencia debería estar actualizado");
-        assertEquals(TecnologiaUsada.REACT, experienciaValida.getTecnologiaUsada(),
-                "La tecnología usada debería estar actualizada");
+
+        // 🔥 Verificar tecnologías actualizadas
+        assertNotNull(experienciaValida.getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, experienciaValida.getTecnologiasUsadas().size(),
+                "Debería tener 2 tecnologías");
+        assertTrue(experienciaValida.getTecnologiasUsadas().contains(TecnologiaUsada.REACT),
+                "Debería contener REACT");
+        assertTrue(experienciaValida.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT),
+                "Debería contener TYPESCRIPT");
 
         // Verificar que el ID no se modifica
         assertEquals(1, experienciaValida.getId(), "El ID no debería cambiar");
+
+        verify(experienciaRepository, times(1)).findById(id);
+        verify(experienciaRepository, times(1)).save(experienciaValida);
+    }
+
+    @Test
+    @DisplayName("actualizarExperienciaPorId - Debería actualizar la lista de tecnologías correctamente")
+    void actualizarExperienciaPorId_ShouldUpdateTecnologiasUsadasCorrectly() {
+        // Arrange
+        Integer id = 1;
+        List<TecnologiaUsada> nuevasTecnologias = List.of(
+                TecnologiaUsada.PYTHON,
+                TecnologiaUsada.DJANGO,
+                TecnologiaUsada.POSTGRESQL
+        );
+
+        ExperienciaDto experienciaDtoActualizado = ExperienciaDto.builder()
+                .id(id)
+                .titulo("Sistema de Gestión de Usuarios")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 15))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 30))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(nuevasTecnologias)
+                .imagen(imagenDto)
+                .build();
+
+        when(experienciaRepository.findById(id)).thenReturn(Optional.of(experienciaValida));
+        when(experienciaRepository.save(any(Experiencia.class))).thenReturn(experienciaValida);
+        when(experienciaMapper.toExperienciaDto(any(Experiencia.class))).thenReturn(experienciaDtoActualizado);
+
+        // Act
+        experienciaService.actualizarExperienciaPorId(id, experienciaDtoActualizado);
+
+        // Assert - Verificar que las tecnologías se actualizaron
+        assertNotNull(experienciaValida.getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(3, experienciaValida.getTecnologiasUsadas().size(),
+                "Debería tener 3 tecnologías");
+        assertTrue(experienciaValida.getTecnologiasUsadas().containsAll(nuevasTecnologias),
+                "Las tecnologías usadas deberían estar actualizadas");
+        assertFalse(experienciaValida.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT),
+                "SPRINGBOOT ya no debería estar en la lista");
+        assertFalse(experienciaValida.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
+                "JAVA ya no debería estar en la lista");
 
         verify(experienciaRepository, times(1)).findById(id);
         verify(experienciaRepository, times(1)).save(experienciaValida);
@@ -547,7 +746,8 @@ class ExperienciaServiceImplTest {
             experienciaService.deleteExperienciaPorId(id);
         }, "Debería propagar RuntimeException");
 
-        assertEquals("Error al eliminar", exception.getMessage(), "El mensaje de excepción debería ser el mismo");
+        assertEquals("Error al eliminar", exception.getMessage(),
+                "El mensaje de excepción debería ser el mismo");
 
         verify(experienciaRepository, times(1)).deleteById(id);
     }
@@ -573,10 +773,24 @@ class ExperienciaServiceImplTest {
         assertEquals(2, resultado.size(), "Debería haber 2 experiencias");
 
         // Verificar que los elementos se mapearon correctamente
-        assertEquals(experienciaDtoValido.getId(), resultado.get(0).getId(), "El ID del primer elemento debería coincidir");
-        assertEquals(experienciaDtoEnCurso.getId(), resultado.get(1).getId(), "El ID del segundo elemento debería coincidir");
-        assertEquals(experienciaDtoValido.getTitulo(), resultado.get(0).getTitulo(), "El título del primer elemento debería coincidir");
-        assertEquals(experienciaDtoEnCurso.getTitulo(), resultado.get(1).getTitulo(), "El título del segundo elemento debería coincidir");
+        assertEquals(experienciaDtoValido.getId(), resultado.get(0).getId(),
+                "El ID del primer elemento debería coincidir");
+        assertEquals(experienciaDtoEnCurso.getId(), resultado.get(1).getId(),
+                "El ID del segundo elemento debería coincidir");
+        assertEquals(experienciaDtoValido.getTitulo(), resultado.get(0).getTitulo(),
+                "El título del primer elemento debería coincidir");
+        assertEquals(experienciaDtoEnCurso.getTitulo(), resultado.get(1).getTitulo(),
+                "El título del segundo elemento debería coincidir");
+
+        // 🔥 Verificar tecnologías del primer elemento
+        assertNotNull(resultado.get(0).getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(2, resultado.get(0).getTecnologiasUsadas().size(),
+                "Debería tener 2 tecnologías");
+        assertTrue(resultado.get(0).getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT),
+                "Debería contener SPRINGBOOT");
+        assertTrue(resultado.get(0).getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
+                "Debería contener JAVA");
 
         verify(experienciaRepository, times(1)).findAll();
         verify(experienciaMapper, times(1)).toExperienciaDto(experienciaValida);
@@ -612,7 +826,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción del proyecto sin imagen con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-sin-imagen")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.PYTHON)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .usuario(null)
                 .build();
@@ -625,7 +839,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción del proyecto sin imagen con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-sin-imagen")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.PYTHON)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
                 .imagen(null)
                 .build();
 
@@ -643,6 +857,12 @@ class ExperienciaServiceImplTest {
         assertNotNull(resultado, "El resultado no debería ser nulo");
         assertEquals(2, resultado.size(), "Debería haber 2 experiencias");
         assertNull(resultado.get(1).getImagen(), "La imagen del segundo elemento debería ser nula");
+
+        // 🔥 Verificar tecnologías del segundo elemento
+        assertNotNull(resultado.get(1).getTecnologiasUsadas(),
+                "Las tecnologías usadas no deberían ser nulas");
+        assertTrue(resultado.get(1).getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON),
+                "Debería contener PYTHON");
 
         verify(experienciaRepository, times(1)).findAll();
         verify(experienciaMapper, times(1)).toExperienciaDto(experienciaValida);
@@ -663,7 +883,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-largo")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagenDto)
                 .build();
 
@@ -674,7 +894,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-largo")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(null)
                 .build();
@@ -708,7 +928,7 @@ class ExperienciaServiceImplTest {
                 .descripcion(descripcionLarga)
                 .link("https://github.com/usuario/proyecto-descripcion-larga")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagenDto)
                 .build();
 
@@ -719,7 +939,7 @@ class ExperienciaServiceImplTest {
                 .descripcion(descripcionLarga)
                 .link("https://github.com/usuario/proyecto-descripcion-larga")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(null)
                 .build();
@@ -753,7 +973,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link(linkLargo)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagenDto)
                 .build();
 
@@ -764,7 +984,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link(linkLargo)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                 .imagen(imagen)
                 .usuario(null)
                 .build();
@@ -848,7 +1068,8 @@ class ExperienciaServiceImplTest {
             experienciaService.saveExperiencia(experienciaDtoValido);
         }, "Debería propagar RuntimeException");
 
-        assertEquals("Error al guardar", exception.getMessage(), "El mensaje de excepción debería ser el mismo");
+        assertEquals("Error al guardar", exception.getMessage(),
+                "El mensaje de excepción debería ser el mismo");
 
         verify(experienciaMapper, times(1)).toExperiencia(experienciaDtoValido);
         verify(experienciaRepository, times(1)).save(experienciaValida);
@@ -867,7 +1088,8 @@ class ExperienciaServiceImplTest {
             experienciaService.actualizarExperienciaPorId(id, experienciaDtoValido);
         }, "Debería propagar RuntimeException");
 
-        assertEquals("Error al actualizar", exception.getMessage(), "El mensaje de excepción debería ser el mismo");
+        assertEquals("Error al actualizar", exception.getMessage(),
+                "El mensaje de excepción debería ser el mismo");
 
         verify(experienciaRepository, times(1)).findById(id);
         verify(experienciaRepository, times(1)).save(experienciaValida);
@@ -907,7 +1129,7 @@ class ExperienciaServiceImplTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/proyecto")
                     .tipoExperiencia(tipo)
-                    .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                    .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                     .imagen(imagenDto)
                     .build();
 
@@ -918,7 +1140,7 @@ class ExperienciaServiceImplTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/proyecto")
                     .tipoExperiencia(tipo)
-                    .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
+                    .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
                     .imagen(imagen)
                     .usuario(null)
                     .build();
@@ -932,12 +1154,13 @@ class ExperienciaServiceImplTest {
 
             // Assert
             assertNotNull(resultado, "El resultado no debería ser nulo para tipo: " + tipo);
-            assertEquals(tipo, resultado.getTipoExperiencia(), "El tipo de experiencia debería coincidir para: " + tipo);
+            assertEquals(tipo, resultado.getTipoExperiencia(),
+                    "El tipo de experiencia debería coincidir para: " + tipo);
         }
     }
 
     @Test
-    @DisplayName("saveExperiencia - Debería manejar todas las tecnologías")
+    @DisplayName("saveExperiencia - Debería manejar todas las tecnologías en lista")
     void saveExperiencia_ShouldHandleAllTecnologiasUsada() {
         // Arrange - Probar todas las tecnologías
         TecnologiaUsada[] tecnologias = TecnologiaUsada.values();
@@ -950,7 +1173,7 @@ class ExperienciaServiceImplTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/proyecto")
                     .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                    .tecnologiaUsada(tecnologia)
+                    .tecnologiasUsadas(List.of(tecnologia)) // 🔥 Cambiado a lista
                     .imagen(imagenDto)
                     .build();
 
@@ -961,7 +1184,7 @@ class ExperienciaServiceImplTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/proyecto")
                     .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                    .tecnologiaUsada(tecnologia)
+                    .tecnologiasUsadas(List.of(tecnologia)) // 🔥 Cambiado a lista
                     .imagen(imagen)
                     .usuario(null)
                     .build();
@@ -975,8 +1198,62 @@ class ExperienciaServiceImplTest {
 
             // Assert
             assertNotNull(resultado, "El resultado no debería ser nulo para tecnología: " + tecnologia);
-            assertEquals(tecnologia, resultado.getTecnologiaUsada(),
+            assertTrue(resultado.getTecnologiasUsadas().contains(tecnologia),
                     "La tecnología usada debería coincidir para: " + tecnologia);
         }
+    }
+
+    @Test
+    @DisplayName("saveExperiencia - Debería manejar múltiples tecnologías correctamente")
+    void saveExperiencia_ShouldHandleMultipleTecnologiasCorrectly() {
+        // Arrange
+        List<TecnologiaUsada> tecnologiasMultiples = Arrays.asList(
+                TecnologiaUsada.JAVA,
+                TecnologiaUsada.SPRINGBOOT,
+                TecnologiaUsada.REACT,
+                TecnologiaUsada.TYPESCRIPT,
+                TecnologiaUsada.MYSQL
+        );
+
+        ExperienciaDto dto = ExperienciaDto.builder()
+                .titulo("Proyecto con múltiples tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(tecnologiasMultiples)
+                .imagen(imagenDto)
+                .build();
+
+        Experiencia experiencia = Experiencia.builder()
+                .titulo("Proyecto con múltiples tecnologías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(tecnologiasMultiples)
+                .imagen(imagen)
+                .usuario(null)
+                .build();
+
+        when(experienciaMapper.toExperiencia(dto)).thenReturn(experiencia);
+        when(experienciaRepository.save(experiencia)).thenReturn(experiencia);
+        when(experienciaMapper.toExperienciaDto(experiencia)).thenReturn(dto);
+
+        // Act
+        ExperienciaDto resultado = experienciaService.saveExperiencia(dto);
+
+        // Assert
+        assertNotNull(resultado, "El resultado no debería ser nulo");
+        assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(5, resultado.getTecnologiasUsadas().size(), "Debería tener 5 tecnologías");
+        assertTrue(resultado.getTecnologiasUsadas().containsAll(tecnologiasMultiples),
+                "Debería contener todas las tecnologías");
+
+        verify(experienciaMapper, times(1)).toExperiencia(dto);
+        verify(experienciaRepository, times(1)).save(experiencia);
+        verify(experienciaMapper, times(1)).toExperienciaDto(experiencia);
     }
 }
