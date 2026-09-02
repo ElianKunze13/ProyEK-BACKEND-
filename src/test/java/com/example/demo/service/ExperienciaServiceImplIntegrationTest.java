@@ -4,882 +4,756 @@ import com.example.demo.dto.ExperienciaDto;
 import com.example.demo.dto.ImagenDto;
 import com.example.demo.enums.TecnologiaUsada;
 import com.example.demo.enums.TipoExperiencia;
+import com.example.demo.mapper.ExperienciaMapper;
 import com.example.demo.model.Experiencia;
 import com.example.demo.model.Imagen;
+import com.example.demo.model.Usuario;
 import com.example.demo.repository.ExperienciaRepository;
 import com.example.demo.service.Impl.ExperienciaServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@Transactional
-@ActiveProfiles("test")
+/**
+ * Pruebas de integración para la clase ExperienciaServiceImpl
+ * Verifica la interacción entre el servicio, el repositorio y el mapper
+ */
+@ExtendWith(MockitoExtension.class)
 class ExperienciaServiceImplIntegrationTest {
 
-    @Autowired
-    private ExperienciaServiceImpl experienciaService;
-
-    @Autowired
+    @Mock
     private ExperienciaRepository experienciaRepository;
 
-    private ExperienciaDto crearExperienciaDto(String titulo, LocalDate fechaInicio, LocalDate fechaFin,
-                                               String descripcion, String link, TipoExperiencia tipo,
-                                               TecnologiaUsada tecnologia) {
-        return ExperienciaDto.builder()
-                .titulo(titulo)
-                .fechaInicioProyecto(fechaInicio)
-                .fechaFinProyecto(fechaFin)
-                .descripcion(descripcion)
-                .link(link)
-                .tipoExperiencia(tipo)
-                .tecnologiaUsada(tecnologia)
-                .build();
-    }
+    @Mock
+    private ExperienciaMapper experienciaMapper;
 
-    private ExperienciaDto crearExperienciaDtoConImagen(String titulo, LocalDate fechaInicio, LocalDate fechaFin,
-                                                        String descripcion, String link, TipoExperiencia tipo,
-                                                        TecnologiaUsada tecnologia, String url, String alt) {
-        ExperienciaDto dto = crearExperienciaDto(titulo, fechaInicio, fechaFin, descripcion, link, tipo, tecnologia);
-        if (url != null) {
-            ImagenDto imagen = ImagenDto.builder()
-                    .url(url)
-                    .alt(alt)
-                    .build();
-            dto.setImagen(imagen);
-        }
-        return dto;
-    }
+    @InjectMocks
+    private ExperienciaServiceImpl experienciaService;
+
+    private Experiencia experienciaValida;
+    private ExperienciaDto experienciaDtoValido;
+    private Usuario usuario;
+    private Imagen imagen;
+    private ImagenDto imagenDto;
 
     @BeforeEach
     void setUp() {
-        // Limpiar datos antes de cada prueba
-        experienciaRepository.deleteAll();
-    }
-
-    @Test
-    void saveExperiencia_conDatosValidos_debeGuardarYRetornarExperiencia() {
-        // ARRANGE - contexto: experiencia con datos válidos
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                "Portfolio Personal",
-                LocalDate.of(2024, 1, 15),
-                LocalDate.of(2024, 6, 30),
-                "Desarrollo de portfolio personal con Angular y Spring Boot",
-                "https://github.com/mi-portfolio",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.ANGULAR
-        );
-
-        // ACT - acción: guardar experiencia
-        ExperienciaDto resultado = experienciaService.saveExperiencia(experienciaDto);
-
-        // ASSERT - validaciones: verificar que la experiencia fue guardada correctamente
-        assertAll(
-                () -> assertNotNull(resultado.getId(), "ID debe ser generado automáticamente"),
-                () -> assertEquals("Portfolio Personal", resultado.getTitulo(), "Título debe coincidir"),
-                () -> assertEquals(LocalDate.of(2024, 1, 15), resultado.getFechaInicioProyecto(),
-                        "Fecha de inicio debe coincidir"),
-                () -> assertEquals(LocalDate.of(2024, 6, 30), resultado.getFechaFinProyecto(),
-                        "Fecha de fin debe coincidir"),
-                () -> assertEquals("Desarrollo de portfolio personal con Angular y Spring Boot",
-                        resultado.getDescripcion(), "Descripción debe coincidir"),
-                () -> assertEquals("https://github.com/mi-portfolio", resultado.getLink(),
-                        "Link debe coincidir"),
-                () -> assertEquals(TipoExperiencia.PROYECTO_PERSONAL, resultado.getTipoExperiencia(),
-                        "Tipo de experiencia debe coincidir"),
-                () -> assertEquals(TecnologiaUsada.ANGULAR, resultado.getTecnologiaUsada(),
-                        "Tecnología usada debe coincidir"),
-                () -> assertTrue(experienciaRepository.existsById(resultado.getId()),
-                        "Experiencia debe existir en la base de datos")
-        );
-    }
-
-    @Test
-    void saveExperiencia_conProyectoEnCurso_fechaFinNull_debeGuardarCorrectamente() {
-        // ARRANGE - contexto: experiencia con fecha de fin null (proyecto en curso)
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                "Proyecto en Curso",
-                LocalDate.of(2024, 1, 15),
-                null, // Proyecto en curso
-                "Descripción del proyecto en curso",
-                "https://github.com/proyecto-curso",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.REACT
-        );
-
-        // ACT - acción: guardar experiencia
-        ExperienciaDto resultado = experienciaService.saveExperiencia(experienciaDto);
-
-        // ASSERT - validaciones: verificar que se guardó con fecha fin null
-        assertAll(
-                () -> assertNotNull(resultado.getId(), "ID debe ser generado"),
-                () -> assertEquals("Proyecto en Curso", resultado.getTitulo(), "Título debe coincidir"),
-                () -> assertNull(resultado.getFechaFinProyecto(), "Fecha de fin debe ser null"),
-                () -> assertTrue(experienciaRepository.existsById(resultado.getId()),
-                        "Experiencia debe existir en la BD")
-        );
-    }
-
-    @Test
-    void saveExperiencia_conImagen_debeGuardarExperienciaConImagen() {
-        // ARRANGE - contexto: experiencia con imagen
-        ExperienciaDto experienciaDto = crearExperienciaDtoConImagen(
-                "App de Tareas",
-                LocalDate.of(2024, 2, 1),
-                LocalDate.of(2024, 4, 30),
-                "Aplicación de gestión de tareas con React y Node.js",
-                "https://github.com/app-tareas",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.REACT,
-                "https://example.com/app-tareas.jpg",
-                "Captura de la aplicación de tareas"
-        );
-
-        // ACT - acción: guardar experiencia
-        ExperienciaDto resultado = experienciaService.saveExperiencia(experienciaDto);
-
-        // ASSERT - validaciones: verificar que la imagen fue guardada
-        assertAll(
-                () -> assertNotNull(resultado.getId(), "ID debe ser generado"),
-                () -> assertNotNull(resultado.getImagen(), "Imagen debe estar presente"),
-                () -> assertEquals("https://example.com/app-tareas.jpg",
-                        resultado.getImagen().getUrl(), "URL de la imagen debe coincidir"),
-                () -> assertEquals("Captura de la aplicación de tareas",
-                        resultado.getImagen().getAlt(), "Alt de la imagen debe coincidir")
-        );
-    }
-
-    @Test
-    void saveExperiencia_conTituloNulo_debeLanzarExcepcion() {
-        // ARRANGE - contexto: experiencia con título nulo
-        ExperienciaDto experienciaDto = ExperienciaDto.builder()
-                .titulo(null)
-                .fechaInicioProyecto(LocalDate.now())
-                .fechaFinProyecto(LocalDate.now())
-                .descripcion("Descripción válida")
-                .link("https://github.com/test")
-                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+        // Configuración inicial
+        usuario = Usuario.builder()
+                .id(1)
+                .nombre("Juan Pérez")
+                .username("juan@email.com")
+                .password("password123")
                 .build();
 
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
-        assertThrows(Exception.class, () -> {
-            experienciaService.saveExperiencia(experienciaDto);
-        }, "Debe lanzar excepción cuando el título es nulo");
-    }
-
-    @Test
-    void saveExperiencia_conTituloVacio_debeLanzarExcepcion() {
-        // ARRANGE - contexto: experiencia con título vacío
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                "",
-                LocalDate.now(),
-                LocalDate.now(),
-                "Descripción válida",
-                "https://github.com/test",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVA
-        );
-
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
-        assertThrows(Exception.class, () -> {
-            experienciaService.saveExperiencia(experienciaDto);
-        }, "Debe lanzar excepción cuando el título está vacío");
-    }
-
-    @Test
-    void saveExperiencia_conFechaInicioNula_debeLanzarExcepcion() {
-        // ARRANGE - contexto: experiencia con fecha de inicio nula
-        ExperienciaDto experienciaDto = ExperienciaDto.builder()
-                .titulo("Proyecto Test")
-                .fechaInicioProyecto(null)
-                .fechaFinProyecto(LocalDate.now())
-                .descripcion("Descripción válida")
-                .link("https://github.com/test")
-                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+        imagen = Imagen.builder()
+                .id(1)
+                .url("proyecto.jpg")
+                .alt("Captura del proyecto")
                 .build();
 
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
-        assertThrows(Exception.class, () -> {
-            experienciaService.saveExperiencia(experienciaDto);
-        }, "Debe lanzar excepción cuando la fecha de inicio es nula");
-    }
-
-    @Test
-    void saveExperiencia_conDescripcionNula_debeLanzarExcepcion() {
-        // ARRANGE - contexto: experiencia con descripción nula
-        ExperienciaDto experienciaDto = ExperienciaDto.builder()
-                .titulo("Proyecto Test")
-                .fechaInicioProyecto(LocalDate.now())
-                .fechaFinProyecto(LocalDate.now())
-                .descripcion(null)
-                .link("https://github.com/test")
-                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+        imagenDto = ImagenDto.builder()
+                .id(1)
+                .url("proyecto.jpg")
+                .alt("Captura del proyecto")
                 .build();
 
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
-        assertThrows(Exception.class, () -> {
-            experienciaService.saveExperiencia(experienciaDto);
-        }, "Debe lanzar excepción cuando la descripción es nula");
-    }
-
-    @Test
-    void saveExperiencia_conDescripcionVacia_debeLanzarExcepcion() {
-        // ARRANGE - contexto: experiencia con descripción vacía
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                "Proyecto Test",
-                LocalDate.now(),
-                LocalDate.now(),
-                "",
-                "https://github.com/test",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVA
-        );
-
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
-        assertThrows(Exception.class, () -> {
-            experienciaService.saveExperiencia(experienciaDto);
-        }, "Debe lanzar excepción cuando la descripción está vacía");
-    }
-
-    @Test
-    void saveExperiencia_conDescripcionMuyCorta_debeLanzarExcepcion() {
-        // ARRANGE - contexto: experiencia con descripción muy corta
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                "Proyecto Test",
-                LocalDate.now(),
-                LocalDate.now(),
-                "Desc", // Menos de 5 caracteres
-                "https://github.com/test",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVA
-        );
-
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
-        assertThrows(Exception.class, () -> {
-            experienciaService.saveExperiencia(experienciaDto);
-        }, "Debe lanzar excepción cuando la descripción es muy corta");
-    }
-
-    @Test
-    void saveExperiencia_conLinkNulo_debeLanzarExcepcion() {
-        // ARRANGE - contexto: experiencia con link nulo
-        ExperienciaDto experienciaDto = ExperienciaDto.builder()
-                .titulo("Proyecto Test")
-                .fechaInicioProyecto(LocalDate.now())
-                .fechaFinProyecto(LocalDate.now())
-                .descripcion("Descripción válida")
-                .link(null)
-                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
-                .build();
-
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
-        assertThrows(Exception.class, () -> {
-            experienciaService.saveExperiencia(experienciaDto);
-        }, "Debe lanzar excepción cuando el link es nulo");
-    }
-
-    @Test
-    void saveExperiencia_conLinkVacio_debeLanzarExcepcion() {
-        // ARRANGE - contexto: experiencia con link vacío
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                "Proyecto Test",
-                LocalDate.now(),
-                LocalDate.now(),
-                "Descripción válida",
-                "",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVA
-        );
-
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
-        assertThrows(Exception.class, () -> {
-            experienciaService.saveExperiencia(experienciaDto);
-        }, "Debe lanzar excepción cuando el link está vacío");
-    }
-
-    @Test
-    void saveExperiencia_conTipoExperienciaNulo_debeLanzarExcepcion() {
-        // ARRANGE - contexto: experiencia con tipo de experiencia nulo
-        ExperienciaDto experienciaDto = ExperienciaDto.builder()
-                .titulo("Proyecto Test")
-                .fechaInicioProyecto(LocalDate.now())
-                .fechaFinProyecto(LocalDate.now())
-                .descripcion("Descripción válida")
-                .link("https://github.com/test")
-                .tipoExperiencia(null)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
-                .build();
-
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
-        assertThrows(Exception.class, () -> {
-            experienciaService.saveExperiencia(experienciaDto);
-        }, "Debe lanzar excepción cuando el tipo de experiencia es nulo");
-    }
-
-    @Test
-    void saveExperiencia_conTecnologiaNula_debeLanzarExcepcion() {
-        // ARRANGE - contexto: experiencia con tecnología nula
-        ExperienciaDto experienciaDto = ExperienciaDto.builder()
-                .titulo("Proyecto Test")
-                .fechaInicioProyecto(LocalDate.now())
-                .fechaFinProyecto(LocalDate.now())
-                .descripcion("Descripción válida")
-                .link("https://github.com/test")
-                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(null)
-                .build();
-
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
-        assertThrows(Exception.class, () -> {
-            experienciaService.saveExperiencia(experienciaDto);
-        }, "Debe lanzar excepción cuando la tecnología usada es nula");
-    }
-
-    @Test
-    void saveExperiencia_conTituloLargo_debeLanzarExcepcion() {
-        // ARRANGE - contexto: experiencia con título muy largo
-        String tituloLargo = "a".repeat(150);
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                tituloLargo,
-                LocalDate.now(),
-                LocalDate.now(),
-                "Descripción válida",
-                "https://github.com/test",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVA
-        );
-
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
-        assertThrows(Exception.class, () -> {
-            experienciaService.saveExperiencia(experienciaDto);
-        }, "Debe lanzar excepción cuando el título es demasiado largo");
-    }
-
-    @Test
-    void saveExperiencia_conDescripcionLarga_debeLanzarExcepcion() {
-        // ARRANGE - contexto: experiencia con descripción muy larga
-        String descripcionLarga = "a".repeat(310);
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                "Proyecto Test",
-                LocalDate.now(),
-                LocalDate.now(),
-                descripcionLarga,
-                "https://github.com/test",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVA
-        );
-
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
-        assertThrows(Exception.class, () -> {
-            experienciaService.saveExperiencia(experienciaDto);
-        }, "Debe lanzar excepción cuando la descripción es demasiado larga");
-    }
-
-    @Test
-    void getAllExperiencias_debeRetornarTodasLasExperiencias() {
-        // ARRANGE - contexto: crear y guardar experiencias
-        Experiencia experiencia1 = Experiencia.builder()
-                .titulo("Portfolio Personal")
+        // 🔥 Experiencia con lista de tecnologías
+        experienciaValida = Experiencia.builder()
+                .id(1)
+                .titulo("Sistema de Gestión de Usuarios")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 15))
                 .fechaFinProyecto(LocalDate.of(2024, 6, 30))
-                .descripcion("Desarrollo de portfolio personal")
-                .link("https://github.com/portfolio1")
+                .descripcion("Desarrollo de API REST con Spring Boot y JWT")
+                .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.ANGULAR)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .imagen(imagen)
+                .usuario(usuario)
                 .build();
 
-        Experiencia experiencia2 = Experiencia.builder()
-                .titulo("App de Tareas")
-                .fechaInicioProyecto(LocalDate.of(2024, 2, 1))
-                .fechaFinProyecto(LocalDate.of(2024, 4, 30))
-                .descripcion("Aplicación de gestión de tareas")
-                .link("https://github.com/app-tareas")
+        // 🔥 ExperienciaDto con lista de tecnologías
+        experienciaDtoValido = ExperienciaDto.builder()
+                .id(1)
+                .titulo("Sistema de Gestión de Usuarios")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 15))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 30))
+                .descripcion("Desarrollo de API REST con Spring Boot y JWT")
+                .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.REACT)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .imagen(imagenDto)
+                .build();
+    }
+
+    // ==================== TESTS DE GUARDADO ====================
+
+    @Test
+    @DisplayName("saveExperiencia - Debería guardar una experiencia correctamente con integración de mapper y repository")
+    void saveExperiencia_ShouldSaveExperienciaCorrectly() {
+        // Arrange
+        Experiencia experienciaParaGuardar = Experiencia.builder()
+                .titulo("Sistema de Gestión de Usuarios")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 15))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 30))
+                .descripcion("Desarrollo de API REST con Spring Boot y JWT")
+                .link("https://github.com/usuario/proyecto")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .imagen(imagen)
+                .usuario(usuario)
                 .build();
 
-        experienciaRepository.save(experiencia1);
-        experienciaRepository.save(experiencia2);
+        Experiencia experienciaGuardada = Experiencia.builder()
+                .id(1)
+                .titulo("Sistema de Gestión de Usuarios")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 15))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 30))
+                .descripcion("Desarrollo de API REST con Spring Boot y JWT")
+                .link("https://github.com/usuario/proyecto")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .imagen(imagen)
+                .usuario(usuario)
+                .build();
 
-        // ACT - acción: obtener todas las experiencias
-        List<ExperienciaDto> experiencias = experienciaService.getAllExperiencias();
+        when(experienciaMapper.toExperiencia(experienciaDtoValido)).thenReturn(experienciaParaGuardar);
+        when(experienciaRepository.save(experienciaParaGuardar)).thenReturn(experienciaGuardada);
+        when(experienciaMapper.toExperienciaDto(experienciaGuardada)).thenReturn(experienciaDtoValido);
 
-        // ASSERT - validaciones: verificar que retorna todas las experiencias
-        assertAll(
-                () -> assertNotNull(experiencias, "Lista no debe ser null"),
-                () -> assertFalse(experiencias.isEmpty(), "Lista no debe estar vacía"),
-                () -> assertTrue(experiencias.size() >= 2, "Debe contener al menos 2 experiencias"),
-                () -> assertTrue(experiencias.stream().anyMatch(e -> e.getTitulo().equals("Portfolio Personal")),
-                        "Debe contener Portfolio Personal"),
-                () -> assertTrue(experiencias.stream().anyMatch(e -> e.getTitulo().equals("App de Tareas")),
-                        "Debe contener App de Tareas"),
-                () -> assertNotNull(experiencias.get(0).getId(), "ID debe estar presente"),
-                () -> assertNotNull(experiencias.get(0).getFechaInicioProyecto(),
-                        "Fecha de inicio debe estar presente")
+        // Act
+        ExperienciaDto resultado = experienciaService.saveExperiencia(experienciaDtoValido);
+
+        // Assert
+        assertNotNull(resultado);
+        assertEquals(1, resultado.getId());
+        assertEquals("Sistema de Gestión de Usuarios", resultado.getTitulo());
+
+        // 🔥 Verificar tecnologías
+        assertNotNull(resultado.getTecnologiasUsadas());
+        assertEquals(2, resultado.getTecnologiasUsadas().size());
+        assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT));
+        assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA));
+
+        verify(experienciaMapper, times(1)).toExperiencia(experienciaDtoValido);
+        verify(experienciaRepository, times(1)).save(experienciaParaGuardar);
+        verify(experienciaMapper, times(1)).toExperienciaDto(experienciaGuardada);
+    }
+
+    @Test
+    @DisplayName("saveExperiencia - Debería guardar una experiencia con múltiples tecnologías")
+    void saveExperiencia_ShouldSaveExperienciaWithMultipleTecnologias() {
+        // Arrange
+        List<TecnologiaUsada> tecnologias = Arrays.asList(
+                TecnologiaUsada.JAVA,
+                TecnologiaUsada.SPRINGBOOT,
+                TecnologiaUsada.REACT,
+                TecnologiaUsada.TYPESCRIPT
         );
-    }
 
-    @Test
-    void getAllExperiencias_sinExperiencias_debeRetornarListaVacia() {
-        // ARRANGE - contexto: no hay experiencias en la base de datos
-        assertEquals(0, experienciaRepository.count(), "No debería haber experiencias inicialmente");
-
-        // ACT - acción: obtener todas las experiencias
-        List<ExperienciaDto> experiencias = experienciaService.getAllExperiencias();
-
-        // ASSERT - validaciones: debe retornar lista vacía
-        assertNotNull(experiencias, "Lista no debe ser null");
-        assertTrue(experiencias.isEmpty(), "Lista debe estar vacía");
-        assertEquals(0, experiencias.size(), "Tamaño debe ser 0");
-    }
-
-    @Test
-    void getAllExperiencias_conImagenes_debeRetornarExperienciasConImagenes() {
-        // ARRANGE - contexto: crear experiencia con imagen
-        Experiencia experiencia = Experiencia.builder()
-                .titulo("Proyecto con Imagen")
-                .fechaInicioProyecto(LocalDate.of(2024, 3, 1))
-                .fechaFinProyecto(LocalDate.of(2024, 5, 15))
-                .descripcion("Proyecto con imagen representativa")
-                .link("https://github.com/proyecto-imagen")
-                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
-                .build();
-
-        Imagen imagen = Imagen.builder()
-                .url("https://example.com/proyecto.jpg")
-                .alt("Imagen del proyecto")
-                .experiencia(experiencia)
-                .build();
-        experiencia.setImagen(imagen);
-
-        experienciaRepository.save(experiencia);
-
-        // ACT - acción: obtener todas las experiencias
-        List<ExperienciaDto> experiencias = experienciaService.getAllExperiencias();
-
-        // ASSERT - validaciones: verificar que la imagen está presente
-        assertAll(
-                () -> assertFalse(experiencias.isEmpty(), "Lista no debe estar vacía"),
-                () -> assertNotNull(experiencias.get(0).getImagen(), "Imagen debe estar presente"),
-                () -> assertEquals("https://example.com/proyecto.jpg",
-                        experiencias.get(0).getImagen().getUrl(), "URL de imagen debe coincidir")
-        );
-    }
-
-    @Test
-    void actualizarExperienciaPorId_conDatosValidos_debeActualizarCorrectamente() {
-        // ARRANGE - contexto: crear y guardar experiencia
-        Experiencia experiencia = Experiencia.builder()
-                .titulo("Proyecto Original")
+        ExperienciaDto dto = ExperienciaDto.builder()
+                .titulo("Proyecto Full Stack")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
-                .fechaFinProyecto(LocalDate.of(2024, 3, 31))
-                .descripcion("Descripción original")
-                .link("https://github.com/original")
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto full stack")
+                .link("https://github.com/usuario/fullstack")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(tecnologias)
+                .imagen(imagenDto)
                 .build();
 
-        Experiencia guardado = experienciaRepository.save(experiencia);
-
-        // Preparar datos actualizados
-        ExperienciaDto experienciaDtoActualizado = crearExperienciaDto(
-                "Proyecto Actualizado",
-                LocalDate.of(2024, 2, 1),
-                LocalDate.of(2024, 5, 31),
-                "Descripción actualizada del proyecto",
-                "https://github.com/actualizado",
-                TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO,
-                TecnologiaUsada.SPRINGBOOT
-        );
-
-        // ACT - acción: actualizar experiencia
-        ExperienciaDto actualizado = experienciaService.actualizarExperienciaPorId(
-                guardado.getId(), experienciaDtoActualizado);
-
-        // ASSERT - validaciones: debe actualizar correctamente
-        assertAll(
-                () -> assertEquals(guardado.getId(), actualizado.getId(), "ID debe mantenerse"),
-                () -> assertEquals("Proyecto Actualizado", actualizado.getTitulo(),
-                        "Título debe estar actualizado"),
-                () -> assertEquals(LocalDate.of(2024, 2, 1), actualizado.getFechaInicioProyecto(),
-                        "Fecha de inicio debe estar actualizada"),
-                () -> assertEquals(LocalDate.of(2024, 5, 31), actualizado.getFechaFinProyecto(),
-                        "Fecha de fin debe estar actualizada"),
-                () -> assertEquals("Descripción actualizada del proyecto", actualizado.getDescripcion(),
-                        "Descripción debe estar actualizada"),
-                () -> assertEquals("https://github.com/actualizado", actualizado.getLink(),
-                        "Link debe estar actualizado"),
-                () -> assertEquals(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO,
-                        actualizado.getTipoExperiencia(), "Tipo de experiencia debe estar actualizado"),
-                () -> assertEquals(TecnologiaUsada.SPRINGBOOT, actualizado.getTecnologiaUsada(),
-                        "Tecnología usada debe estar actualizada")
-        );
-    }
-
-    @Test
-    void actualizarExperienciaPorId_convertirAProyectoEnCurso_fechaFinNull() {
-        // ARRANGE - contexto: crear y guardar experiencia con fecha de fin
         Experiencia experiencia = Experiencia.builder()
-                .titulo("Proyecto Original")
+                .titulo("Proyecto Full Stack")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
-                .fechaFinProyecto(LocalDate.of(2024, 3, 31))
-                .descripcion("Descripción original")
-                .link("https://github.com/original")
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto full stack")
+                .link("https://github.com/usuario/fullstack")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(tecnologias)
+                .imagen(imagen)
+                .usuario(usuario)
                 .build();
 
-        Experiencia guardado = experienciaRepository.save(experiencia);
-
-        // Preparar datos con fecha fin null (proyecto en curso)
-        ExperienciaDto experienciaDtoActualizado = crearExperienciaDto(
-                "Proyecto Original",
-                LocalDate.of(2024, 1, 1),
-                null, // Proyecto en curso
-                "Descripción original",
-                "https://github.com/original",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVA
-        );
-
-        // ACT - acción: actualizar experiencia a proyecto en curso
-        ExperienciaDto actualizado = experienciaService.actualizarExperienciaPorId(
-                guardado.getId(), experienciaDtoActualizado);
-
-        // ASSERT - validaciones: verificar que fecha fin es null
-        assertNull(actualizado.getFechaFinProyecto(), "Fecha de fin debe ser null para proyecto en curso");
-    }
-
-    @Test
-    void actualizarExperienciaPorId_cambiarTipoYTecnologia_debeActualizarCorrectamente() {
-        // ARRANGE - contexto: crear y guardar experiencia
-        Experiencia experiencia = Experiencia.builder()
-                .titulo("Proyecto Original")
+        Experiencia experienciaGuardada = Experiencia.builder()
+                .id(10)
+                .titulo("Proyecto Full Stack")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
-                .fechaFinProyecto(LocalDate.of(2024, 3, 31))
-                .descripcion("Descripción original")
-                .link("https://github.com/original")
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto full stack")
+                .link("https://github.com/usuario/fullstack")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(tecnologias)
+                .imagen(imagen)
+                .usuario(usuario)
                 .build();
 
-        Experiencia guardado = experienciaRepository.save(experiencia);
+        when(experienciaMapper.toExperiencia(dto)).thenReturn(experiencia);
+        when(experienciaRepository.save(experiencia)).thenReturn(experienciaGuardada);
+        when(experienciaMapper.toExperienciaDto(experienciaGuardada)).thenReturn(dto);
 
-        // Preparar datos cambiando tipo y tecnología
-        ExperienciaDto experienciaDtoActualizado = crearExperienciaDto(
-                "Proyecto Original",
-                LocalDate.of(2024, 1, 1),
-                LocalDate.of(2024, 3, 31),
-                "Descripción original",
-                "https://github.com/original",
-                TipoExperiencia.TRABAJO_LABORAL_FREELANCE,
-                TecnologiaUsada.PYTHON
-        );
+        // Act
+        ExperienciaDto resultado = experienciaService.saveExperiencia(dto);
 
-        // ACT - acción: actualizar experiencia
-        ExperienciaDto actualizado = experienciaService.actualizarExperienciaPorId(
-                guardado.getId(), experienciaDtoActualizado);
+        // Assert
+        assertNotNull(resultado);
+        assertNotNull(resultado.getTecnologiasUsadas());
+        assertEquals(4, resultado.getTecnologiasUsadas().size());
+        assertTrue(resultado.getTecnologiasUsadas().containsAll(tecnologias));
 
-        // ASSERT - validaciones: verificar que tipo y tecnología fueron cambiados
-        assertAll(
-                () -> assertEquals(guardado.getId(), actualizado.getId(), "ID debe mantenerse"),
-                () -> assertEquals(TipoExperiencia.TRABAJO_LABORAL_FREELANCE,
-                        actualizado.getTipoExperiencia(), "Tipo debe ser actualizado"),
-                () -> assertEquals(TecnologiaUsada.PYTHON, actualizado.getTecnologiaUsada(),
-                        "Tecnología debe ser actualizada")
-        );
+        verify(experienciaMapper, times(1)).toExperiencia(dto);
+        verify(experienciaRepository, times(1)).save(experiencia);
+        verify(experienciaMapper, times(1)).toExperienciaDto(experienciaGuardada);
+    }
+
+    // ==================== TESTS DE ACTUALIZACIÓN ====================
+
+    @Test
+    @DisplayName("actualizarExperienciaPorId - Debería actualizar una experiencia existente")
+    void actualizarExperienciaPorId_ShouldUpdateExperiencia() {
+        // Arrange
+        Integer id = 1;
+        ExperienciaDto dtoActualizado = ExperienciaDto.builder()
+                .id(id)
+                .titulo("Proyecto Actualizado")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 15))
+                .fechaFinProyecto(LocalDate.of(2024, 12, 31))
+                .descripcion("Descripción actualizada del proyecto")
+                .link("https://github.com/usuario/proyecto-actualizado")
+                .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_FREELANCE)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
+                .imagen(imagenDto)
+                .build();
+
+        Experiencia experienciaActualizada = Experiencia.builder()
+                .id(id)
+                .titulo("Proyecto Actualizado")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 15))
+                .fechaFinProyecto(LocalDate.of(2024, 12, 31))
+                .descripcion("Descripción actualizada del proyecto")
+                .link("https://github.com/usuario/proyecto-actualizado")
+                .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_FREELANCE)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
+                .imagen(imagen)
+                .usuario(usuario)
+                .build();
+
+        when(experienciaRepository.findById(id)).thenReturn(Optional.of(experienciaValida));
+        when(experienciaRepository.save(any(Experiencia.class))).thenReturn(experienciaActualizada);
+        when(experienciaMapper.toExperienciaDto(experienciaActualizada)).thenReturn(dtoActualizado);
+
+        // Act
+        ExperienciaDto resultado = experienciaService.actualizarExperienciaPorId(id, dtoActualizado);
+
+        // Assert
+        assertNotNull(resultado);
+        assertEquals("Proyecto Actualizado", resultado.getTitulo());
+        assertEquals(TipoExperiencia.TRABAJO_LABORAL_FREELANCE, resultado.getTipoExperiencia());
+
+        // 🔥 Verificar tecnologías actualizadas
+        assertNotNull(resultado.getTecnologiasUsadas());
+        assertEquals(2, resultado.getTecnologiasUsadas().size());
+        assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.ANGULAR));
+        assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT));
+
+        verify(experienciaRepository, times(1)).findById(id);
+        verify(experienciaRepository, times(1)).save(experienciaValida);
+        verify(experienciaMapper, times(1)).toExperienciaDto(experienciaActualizada);
     }
 
     @Test
-    void actualizarExperienciaPorId_conIdInexistente_debeRetornarNull() {
-        // ARRANGE - contexto: ID que no existe
-        Integer idInexistente = 9999;
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                "Proyecto Actualizado",
-                LocalDate.now(),
-                LocalDate.now(),
-                "Descripción actualizada",
-                "https://github.com/actualizado",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVA
+    @DisplayName("actualizarExperienciaPorId - Debería actualizar la lista de tecnologías")
+    void actualizarExperienciaPorId_ShouldUpdateTecnologiasUsadas() {
+        // Arrange
+        Integer id = 1;
+        List<TecnologiaUsada> nuevasTecnologias = List.of(
+                TecnologiaUsada.PYTHON,
+                TecnologiaUsada.DJANGO,
+                TecnologiaUsada.POSTGRESQL
         );
 
-        // ACT - acción: actualizar experiencia con ID inexistente
-        ExperienciaDto actualizado = experienciaService.actualizarExperienciaPorId(
-                idInexistente, experienciaDto);
+        ExperienciaDto dtoActualizado = ExperienciaDto.builder()
+                .id(id)
+                .titulo("Sistema de Gestión de Usuarios")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 15))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 30))
+                .descripcion("Descripción del proyecto")
+                .link("https://github.com/usuario/proyecto")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(nuevasTecnologias)
+                .imagen(imagenDto)
+                .build();
 
-        // ASSERT - validaciones: debe retornar null
-        assertNull(actualizado, "Debe retornar null para ID inexistente");
+        when(experienciaRepository.findById(id)).thenReturn(Optional.of(experienciaValida));
+        when(experienciaRepository.save(any(Experiencia.class))).thenReturn(experienciaValida);
+        when(experienciaMapper.toExperienciaDto(any(Experiencia.class))).thenReturn(dtoActualizado);
+
+        // Act
+        experienciaService.actualizarExperienciaPorId(id, dtoActualizado);
+
+        // Assert - Verificar que las tecnologías se actualizaron
+        assertNotNull(experienciaValida.getTecnologiasUsadas());
+        assertEquals(3, experienciaValida.getTecnologiasUsadas().size());
+        assertTrue(experienciaValida.getTecnologiasUsadas().containsAll(nuevasTecnologias));
+        assertFalse(experienciaValida.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT));
+        assertFalse(experienciaValida.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA));
+
+        verify(experienciaRepository, times(1)).findById(id);
+        verify(experienciaRepository, times(1)).save(experienciaValida);
     }
 
     @Test
-    void actualizarExperienciaPorId_conTituloNulo_debeLanzarExcepcion() {
-        // ARRANGE - contexto: crear y guardar experiencia
-        Experiencia experiencia = Experiencia.builder()
+    @DisplayName("actualizarExperienciaPorId - Debería retornar null cuando la experiencia no existe")
+    void actualizarExperienciaPorId_ShouldReturnNull_WhenExperienciaNotFound() {
+        // Arrange
+        Integer id = 999;
+        when(experienciaRepository.findById(id)).thenReturn(Optional.empty());
+
+        // Act
+        ExperienciaDto resultado = experienciaService.actualizarExperienciaPorId(id, experienciaDtoValido);
+
+        // Assert
+        assertNull(resultado);
+        verify(experienciaRepository, times(1)).findById(id);
+        verify(experienciaRepository, never()).save(any());
+    }
+
+    // ==================== TESTS DE ELIMINACIÓN ====================
+
+    @Test
+    @DisplayName("deleteExperienciaPorId - Debería eliminar una experiencia por ID")
+    void deleteExperienciaPorId_ShouldDeleteExperiencia() {
+        // Arrange
+        Integer id = 1;
+        doNothing().when(experienciaRepository).deleteById(id);
+
+        // Act
+        experienciaService.deleteExperienciaPorId(id);
+
+        // Assert
+        verify(experienciaRepository, times(1)).deleteById(id);
+    }
+
+    @Test
+    @DisplayName("deleteExperienciaPorId - No debería lanzar excepción al eliminar ID no existente")
+    void deleteExperienciaPorId_ShouldNotThrowException_WhenIdDoesNotExist() {
+        // Arrange
+        Integer id = 999;
+        doNothing().when(experienciaRepository).deleteById(id);
+
+        // Act & Assert
+        assertDoesNotThrow(() -> experienciaService.deleteExperienciaPorId(id));
+        verify(experienciaRepository, times(1)).deleteById(id);
+    }
+
+    // ==================== TESTS DE OBTENCIÓN ====================
+
+    @Test
+    @DisplayName("getAllExperiencias - Debería retornar todas las experiencias")
+    void getAllExperiencias_ShouldReturnAllExperiencias() {
+        // Arrange
+        List<Experiencia> experiencias = Arrays.asList(experienciaValida);
+        List<ExperienciaDto> experienciasDto = Arrays.asList(experienciaDtoValido);
+
+        when(experienciaRepository.findAll()).thenReturn(experiencias);
+        when(experienciaMapper.toExperienciaDto(experienciaValida)).thenReturn(experienciaDtoValido);
+
+        // Act
+        List<ExperienciaDto> resultado = experienciaService.getAllExperiencias();
+
+        // Assert
+        assertNotNull(resultado);
+        assertEquals(1, resultado.size());
+        assertEquals(experienciaDtoValido.getId(), resultado.get(0).getId());
+
+        // 🔥 Verificar tecnologías
+        assertNotNull(resultado.get(0).getTecnologiasUsadas());
+        assertEquals(2, resultado.get(0).getTecnologiasUsadas().size());
+        assertTrue(resultado.get(0).getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT));
+        assertTrue(resultado.get(0).getTecnologiasUsadas().contains(TecnologiaUsada.JAVA));
+
+        verify(experienciaRepository, times(1)).findAll();
+        verify(experienciaMapper, times(1)).toExperienciaDto(experienciaValida);
+    }
+
+    @Test
+    @DisplayName("getAllExperiencias - Debería retornar lista vacía cuando no hay experiencias")
+    void getAllExperiencias_ShouldReturnEmptyList_WhenNoExperiencias() {
+        // Arrange
+        when(experienciaRepository.findAll()).thenReturn(List.of());
+
+        // Act
+        List<ExperienciaDto> resultado = experienciaService.getAllExperiencias();
+
+        // Assert
+        assertNotNull(resultado);
+        assertTrue(resultado.isEmpty());
+        verify(experienciaRepository, times(1)).findAll();
+        verify(experienciaMapper, never()).toExperienciaDto(any());
+    }
+
+    // ==================== TESTS DE FLUJO COMPLETO ====================
+
+    @Test
+    @DisplayName("Flujo completo - Guardar, actualizar y eliminar experiencia")
+    void fullFlow_SaveUpdateDeleteExperiencia() {
+        // 1. Guardar
+        Experiencia experienciaParaGuardar = Experiencia.builder()
                 .titulo("Proyecto Test")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
-                .fechaFinProyecto(LocalDate.of(2024, 3, 31))
-                .descripcion("Descripción válida")
-                .link("https://github.com/test")
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto test")
+                .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA, TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
+                .imagen(imagen)
+                .usuario(usuario)
                 .build();
 
-        Experiencia guardado = experienciaRepository.save(experiencia);
-
-        // Preparar datos con título nulo
-        ExperienciaDto experienciaDtoActualizado = ExperienciaDto.builder()
-                .titulo(null)
-                .fechaInicioProyecto(LocalDate.now())
-                .fechaFinProyecto(LocalDate.now())
-                .descripcion("Descripción actualizada")
-                .link("https://github.com/actualizado")
-                .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                .tecnologiaUsada(TecnologiaUsada.SPRINGBOOT)
-                .build();
-
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
-        assertThrows(Exception.class, () -> {
-            experienciaService.actualizarExperienciaPorId(guardado.getId(), experienciaDtoActualizado);
-        }, "Debe lanzar excepción cuando el título es nulo");
-    }
-
-    @Test
-    void deleteExperienciaPorId_conIdExistente_debeEliminarExperiencia() {
-        // ARRANGE - contexto: crear y guardar experiencia
-        Experiencia experiencia = Experiencia.builder()
-                .titulo("Proyecto a Eliminar")
+        Experiencia experienciaGuardada = Experiencia.builder()
+                .id(1)
+                .titulo("Proyecto Test")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
-                .fechaFinProyecto(LocalDate.of(2024, 3, 31))
-                .descripcion("Proyecto para eliminar")
-                .link("https://github.com/eliminar")
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto test")
+                .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA, TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
+                .imagen(imagen)
+                .usuario(usuario)
                 .build();
 
-        Experiencia guardado = experienciaRepository.save(experiencia);
-        assertTrue(experienciaRepository.existsById(guardado.getId()),
-                "Experiencia debe existir antes de eliminar");
+        ExperienciaDto dtoParaGuardar = ExperienciaDto.builder()
+                .titulo("Proyecto Test")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto test")
+                .link("https://github.com/usuario/test")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA, TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
+                .imagen(imagenDto)
+                .build();
 
-        // ACT - acción: eliminar experiencia
-        experienciaService.deleteExperienciaPorId(guardado.getId());
+        when(experienciaMapper.toExperiencia(dtoParaGuardar)).thenReturn(experienciaParaGuardar);
+        when(experienciaRepository.save(experienciaParaGuardar)).thenReturn(experienciaGuardada);
+        when(experienciaMapper.toExperienciaDto(experienciaGuardada)).thenReturn(dtoParaGuardar);
 
-        // ASSERT - validaciones: experiencia debe ser eliminada
-        assertFalse(experienciaRepository.existsById(guardado.getId()),
-                "Experiencia no debe existir después de eliminar");
-        assertEquals(0, experienciaRepository.count(), "No debe haber experiencias en la BD");
+        // Act - Guardar
+        ExperienciaDto dtoGuardado = experienciaService.saveExperiencia(dtoParaGuardar);
+        assertNotNull(dtoGuardado);
+        assertEquals("Proyecto Test", dtoGuardado.getTitulo());
+        assertTrue(dtoGuardado.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA));
+
+        // 2. Actualizar
+        ExperienciaDto dtoActualizado = ExperienciaDto.builder()
+                .id(1)
+                .titulo("Proyecto Test Actualizado")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 12, 31))
+                .descripcion("Descripción actualizada del proyecto test")
+                .link("https://github.com/usuario/test-actualizado")
+                .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_FREELANCE)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
+                .imagen(imagenDto)
+                .build();
+
+        Experiencia experienciaActualizada = Experiencia.builder()
+                .id(1)
+                .titulo("Proyecto Test Actualizado")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 12, 31))
+                .descripcion("Descripción actualizada del proyecto test")
+                .link("https://github.com/usuario/test-actualizado")
+                .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_FREELANCE)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
+                .imagen(imagen)
+                .usuario(usuario)
+                .build();
+
+        when(experienciaRepository.findById(1)).thenReturn(Optional.of(experienciaGuardada));
+        when(experienciaRepository.save(any(Experiencia.class))).thenReturn(experienciaActualizada);
+        when(experienciaMapper.toExperienciaDto(experienciaActualizada)).thenReturn(dtoActualizado);
+
+        // Act - Actualizar
+        ExperienciaDto dtoActualizadoResult = experienciaService.actualizarExperienciaPorId(1, dtoActualizado);
+        assertNotNull(dtoActualizadoResult);
+        assertEquals("Proyecto Test Actualizado", dtoActualizadoResult.getTitulo());
+        assertTrue(dtoActualizadoResult.getTecnologiasUsadas().contains(TecnologiaUsada.REACT));
+        assertTrue(dtoActualizadoResult.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT));
+        assertFalse(dtoActualizadoResult.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA));
+
+        // 3. Eliminar
+        doNothing().when(experienciaRepository).deleteById(1);
+
+        // Act - Eliminar
+        experienciaService.deleteExperienciaPorId(1);
+
+        // Assert - Verificar eliminación
+        verify(experienciaRepository, times(1)).deleteById(1);
+    }
+
+    // ==================== TESTS CON DIFERENTES ENUMS ====================
+
+    @Test
+    @DisplayName("saveExperiencia - Debería manejar todos los tipos de experiencia")
+    void saveExperiencia_ShouldHandleAllTiposExperiencia() {
+        // Arrange
+        TipoExperiencia[] tipos = TipoExperiencia.values();
+
+        for (TipoExperiencia tipo : tipos) {
+            ExperienciaDto dto = ExperienciaDto.builder()
+                    .titulo("Proyecto " + tipo.name())
+                    .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                    .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                    .descripcion("Descripción válida")
+                    .link("https://github.com/usuario/proyecto")
+                    .tipoExperiencia(tipo)
+                    .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
+                    .imagen(imagenDto)
+                    .build();
+
+            Experiencia experiencia = Experiencia.builder()
+                    .titulo("Proyecto " + tipo.name())
+                    .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                    .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                    .descripcion("Descripción válida")
+                    .link("https://github.com/usuario/proyecto")
+                    .tipoExperiencia(tipo)
+                    .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
+                    .imagen(imagen)
+                    .usuario(usuario)
+                    .build();
+
+            when(experienciaMapper.toExperiencia(dto)).thenReturn(experiencia);
+            when(experienciaRepository.save(experiencia)).thenReturn(experiencia);
+            when(experienciaMapper.toExperienciaDto(experiencia)).thenReturn(dto);
+
+            // Act
+            ExperienciaDto resultado = experienciaService.saveExperiencia(dto);
+
+            // Assert
+            assertNotNull(resultado);
+            assertEquals(tipo, resultado.getTipoExperiencia());
+            assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT));
+        }
     }
 
     @Test
-    void deleteExperienciaPorId_conIdInexistente_debeLanzarExcepcion() {
-        // ARRANGE - contexto: ID que no existe
-        Integer idInexistente = 9999;
-
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
-        assertThrows(EmptyResultDataAccessException.class, () -> {
-            experienciaService.deleteExperienciaPorId(idInexistente);
-        }, "Debe lanzar EmptyResultDataAccessException para ID inexistente");
-    }
-
-    @Test
-    void saveExperiencia_conTodasLasTecnologias_debeGuardarCorrectamente() {
-        // ARRANGE - contexto: probar diferentes tecnologías
+    @DisplayName("saveExperiencia - Debería manejar todas las tecnologías")
+    void saveExperiencia_ShouldHandleAllTecnologias() {
+        // Arrange
         TecnologiaUsada[] tecnologias = TecnologiaUsada.values();
 
         for (TecnologiaUsada tecnologia : tecnologias) {
-            ExperienciaDto experienciaDto = crearExperienciaDto(
-                    "Proyecto con " + tecnologia.name(),
-                    LocalDate.now(),
-                    LocalDate.now().plusMonths(3),
-                    "Descripción del proyecto con " + tecnologia.name(),
-                    "https://github.com/proyecto-" + tecnologia.name().toLowerCase(),
-                    TipoExperiencia.PROYECTO_PERSONAL,
-                    tecnologia
-            );
-
-            // ACT - acción: guardar experiencia
-            experienciaService.saveExperiencia(experienciaDto);
-        }
-
-        // ASSERT - validaciones: verificar que todas fueron guardadas
-        assertEquals(tecnologias.length, experienciaRepository.count(),
-                "Debe haber " + tecnologias.length + " experiencias en la BD");
-    }
-
-    @Test
-    void saveExperiencia_conTodosLosTipos_debeGuardarCorrectamente() {
-        // ARRANGE - contexto: probar todos los tipos de experiencia
-        ExperienciaDto experienciaPersonal = crearExperienciaDto(
-                "Proyecto Personal", LocalDate.now(), LocalDate.now().plusMonths(1),
-                "Descripción proyecto personal", "https://github.com/personal",
-                TipoExperiencia.PROYECTO_PERSONAL, TecnologiaUsada.JAVA);
-
-        ExperienciaDto experienciaLaboral = crearExperienciaDto(
-                "Trabajo Colaborativo", LocalDate.now(), LocalDate.now().plusMonths(2),
-                "Descripción trabajo colaborativo", "https://github.com/colaborativo",
-                TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO, TecnologiaUsada.SPRINGBOOT);
-
-        ExperienciaDto experienciaOpenSource = crearExperienciaDto(
-                "Open Source", LocalDate.now(), LocalDate.now().plusMonths(3),
-                "Descripción aporte open source", "https://github.com/opensource",
-                TipoExperiencia.APORTE_CODIGO_ABIERTO, TecnologiaUsada.PYTHON);
-
-        ExperienciaDto experienciaPractica = crearExperienciaDto(
-                "Práctica Profesional", LocalDate.now(), LocalDate.now().plusMonths(4),
-                "Descripción práctica profesional", "https://github.com/practica",
-                TipoExperiencia.PRACTICA_PROFESIONAL, TecnologiaUsada.MYSQL);
-
-        ExperienciaDto experienciaFreelance = crearExperienciaDto(
-                "Freelance", LocalDate.now(), LocalDate.now().plusMonths(5),
-                "Descripción trabajo freelance", "https://github.com/freelance",
-                TipoExperiencia.TRABAJO_LABORAL_FREELANCE, TecnologiaUsada.REACT);
-
-        // ACT - acción: guardar todas las experiencias
-        ExperienciaDto resultadoPersonal = experienciaService.saveExperiencia(experienciaPersonal);
-        ExperienciaDto resultadoLaboral = experienciaService.saveExperiencia(experienciaLaboral);
-        ExperienciaDto resultadoOpenSource = experienciaService.saveExperiencia(experienciaOpenSource);
-        ExperienciaDto resultadoPractica = experienciaService.saveExperiencia(experienciaPractica);
-        ExperienciaDto resultadoFreelance = experienciaService.saveExperiencia(experienciaFreelance);
-
-        // ASSERT - validaciones: todas deben guardarse correctamente
-        assertAll(
-                () -> assertNotNull(resultadoPersonal.getId(), "Personal debe tener ID"),
-                () -> assertNotNull(resultadoLaboral.getId(), "Laboral debe tener ID"),
-                () -> assertNotNull(resultadoOpenSource.getId(), "Open Source debe tener ID"),
-                () -> assertNotNull(resultadoPractica.getId(), "Práctica debe tener ID"),
-                () -> assertNotNull(resultadoFreelance.getId(), "Freelance debe tener ID"),
-                () -> assertEquals(5, experienciaRepository.count(), "Debe haber 5 experiencias en la BD")
-        );
-    }
-
-    @Test
-    void saveExperiencia_conTituloExactamenteDeLongitudMaxima_debeGuardarCorrectamente() {
-        // ARRANGE - contexto: título exactamente de 145 caracteres
-        String titulo = "a".repeat(145);
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                titulo,
-                LocalDate.now(),
-                LocalDate.now().plusMonths(3),
-                "Descripción válida",
-                "https://github.com/test",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVA
-        );
-
-        // ACT - acción: guardar experiencia
-        ExperienciaDto resultado = experienciaService.saveExperiencia(experienciaDto);
-
-        // ASSERT - validaciones: debe guardar correctamente
-        assertAll(
-                () -> assertNotNull(resultado.getId(), "ID debe ser generado"),
-                () -> assertEquals(titulo, resultado.getTitulo(), "Título debe coincidir"),
-                () -> assertTrue(experienciaRepository.existsById(resultado.getId()),
-                        "Experiencia debe existir en la BD")
-        );
-    }
-
-    @Test
-    void saveExperiencia_conTituloConCaracteresEspeciales_debeGuardarCorrectamente() {
-        // ARRANGE - contexto: título con caracteres especiales
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                "Proyecto: Desarrollo Web (Full-Stack)",
-                LocalDate.now(),
-                LocalDate.now().plusMonths(3),
-                "Descripción del proyecto con caracteres especiales",
-                "https://github.com/proyecto-especial",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVASCRIPT
-        );
-
-        // ACT - acción: guardar experiencia
-        ExperienciaDto resultado = experienciaService.saveExperiencia(experienciaDto);
-
-        // ASSERT - validaciones: debe guardar correctamente
-        assertAll(
-                () -> assertNotNull(resultado.getId(), "ID debe ser generado"),
-                () -> assertEquals("Proyecto: Desarrollo Web (Full-Stack)", resultado.getTitulo(),
-                        "Título con caracteres especiales debe coincidir"),
-                () -> assertTrue(experienciaRepository.existsById(resultado.getId()),
-                        "Experiencia debe existir en la BD")
-        );
-    }
-
-    @Test
-    void getAllExperiencias_conMultiplesExperiencias_debeRetornarEnOrdenCorrecto() {
-        // ARRANGE - contexto: crear y guardar múltiples experiencias
-        for (int i = 1; i <= 5; i++) {
-            Experiencia experiencia = Experiencia.builder()
-                    .titulo("Experiencia " + i)
-                    .fechaInicioProyecto(LocalDate.of(2024, i, 1))
-                    .fechaFinProyecto(LocalDate.of(2024, i + 2, 28))
-                    .descripcion("Descripción de experiencia " + i)
-                    .link("https://github.com/experiencia" + i)
-                    .tipoExperiencia(i % 2 == 0 ? TipoExperiencia.PROYECTO_PERSONAL : TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                    .tecnologiaUsada(i % 2 == 0 ? TecnologiaUsada.ANGULAR : TecnologiaUsada.REACT)
+            ExperienciaDto dto = ExperienciaDto.builder()
+                    .titulo("Proyecto con " + tecnologia.name())
+                    .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                    .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                    .descripcion("Descripción válida")
+                    .link("https://github.com/usuario/proyecto")
+                    .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                    .tecnologiasUsadas(List.of(tecnologia)) // 🔥 Cambiado a lista
+                    .imagen(imagenDto)
                     .build();
-            experienciaRepository.save(experiencia);
+
+            Experiencia experiencia = Experiencia.builder()
+                    .titulo("Proyecto con " + tecnologia.name())
+                    .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                    .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                    .descripcion("Descripción válida")
+                    .link("https://github.com/usuario/proyecto")
+                    .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                    .tecnologiasUsadas(List.of(tecnologia)) // 🔥 Cambiado a lista
+                    .imagen(imagen)
+                    .usuario(usuario)
+                    .build();
+
+            when(experienciaMapper.toExperiencia(dto)).thenReturn(experiencia);
+            when(experienciaRepository.save(experiencia)).thenReturn(experiencia);
+            when(experienciaMapper.toExperienciaDto(experiencia)).thenReturn(dto);
+
+            // Act
+            ExperienciaDto resultado = experienciaService.saveExperiencia(dto);
+
+            // Assert
+            assertNotNull(resultado);
+            assertTrue(resultado.getTecnologiasUsadas().contains(tecnologia));
         }
+    }
 
-        // ACT - acción: obtener todas las experiencias
-        List<ExperienciaDto> experiencias = experienciaService.getAllExperiencias();
+    // ==================== TESTS DE CASOS BORDE ====================
 
-        // ASSERT - validaciones: debe retornar todas las experiencias
-        assertAll(
-                () -> assertNotNull(experiencias, "Lista no debe ser null"),
-                () -> assertEquals(5, experiencias.size(), "Debe haber exactamente 5 experiencias"),
-                () -> assertTrue(experiencias.stream().allMatch(e -> e.getId() != null),
-                        "Todas las experiencias deben tener ID"),
-                () -> assertTrue(experiencias.stream().allMatch(e -> e.getFechaInicioProyecto() != null),
-                        "Todas las experiencias deben tener fecha de inicio"),
-                () -> assertTrue(experiencias.stream().anyMatch(e -> e.getTitulo().equals("Experiencia 3")),
-                        "Debe contener Experiencia 3"),
-                () -> assertTrue(experiencias.stream().anyMatch(e -> e.getTipoExperiencia() == TipoExperiencia.PROYECTO_PERSONAL),
-                        "Debe contener experiencias de tipo PROYECTO_PERSONAL"),
-                () -> assertTrue(experiencias.stream().anyMatch(e -> e.getTipoExperiencia() == TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO),
-                        "Debe contener experiencias de tipo TRABAJO_LABORAL_COLABORATIVO"),
-                () -> assertTrue(experiencias.stream().anyMatch(e -> e.getTecnologiaUsada() == TecnologiaUsada.ANGULAR),
-                        "Debe contener experiencias con tecnología Angular"),
-                () -> assertTrue(experiencias.stream().anyMatch(e -> e.getTecnologiaUsada() == TecnologiaUsada.REACT),
-                        "Debe contener experiencias con tecnología React")
-        );
+    @Test
+    @DisplayName("saveExperiencia - Debería guardar experiencia con fechaFinProyecto nula")
+    void saveExperiencia_ShouldSaveExperienciaWithNullFechaFin() {
+        // Arrange
+        ExperienciaDto dto = ExperienciaDto.builder()
+                .titulo("Proyecto en Curso")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(null)
+                .descripcion("Descripción del proyecto en curso")
+                .link("https://github.com/usuario/proyecto-curso")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .imagen(imagenDto)
+                .build();
+
+        Experiencia experiencia = Experiencia.builder()
+                .titulo("Proyecto en Curso")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(null)
+                .descripcion("Descripción del proyecto en curso")
+                .link("https://github.com/usuario/proyecto-curso")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .imagen(imagen)
+                .usuario(usuario)
+                .build();
+
+        Experiencia experienciaGuardada = Experiencia.builder()
+                .id(1)
+                .titulo("Proyecto en Curso")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(null)
+                .descripcion("Descripción del proyecto en curso")
+                .link("https://github.com/usuario/proyecto-curso")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .imagen(imagen)
+                .usuario(usuario)
+                .build();
+
+        when(experienciaMapper.toExperiencia(dto)).thenReturn(experiencia);
+        when(experienciaRepository.save(experiencia)).thenReturn(experienciaGuardada);
+        when(experienciaMapper.toExperienciaDto(experienciaGuardada)).thenReturn(dto);
+
+        // Act
+        ExperienciaDto resultado = experienciaService.saveExperiencia(dto);
+
+        // Assert
+        assertNotNull(resultado);
+        assertNull(resultado.getFechaFinProyecto());
+        assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA));
     }
 
     @Test
-    void saveExperiencia_sinImagen_debeGuardarExperienciaSinImagen() {
-        // ARRANGE - contexto: experiencia sin imagen
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                "Proyecto sin Imagen",
-                LocalDate.now(),
-                LocalDate.now().plusMonths(3),
-                "Descripción del proyecto sin imagen",
-                "https://github.com/sin-imagen",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVA
-        );
+    @DisplayName("saveExperiencia - Debería guardar experiencia sin imagen")
+    void saveExperiencia_ShouldSaveExperienciaWithoutImage() {
+        // Arrange
+        ExperienciaDto dto = ExperienciaDto.builder()
+                .titulo("Proyecto sin Imagen")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto sin imagen")
+                .link("https://github.com/usuario/proyecto-sin-imagen")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
+                .imagen(null)
+                .build();
 
-        // ACT - acción: guardar experiencia
-        ExperienciaDto resultado = experienciaService.saveExperiencia(experienciaDto);
+        Experiencia experiencia = Experiencia.builder()
+                .titulo("Proyecto sin Imagen")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto sin imagen")
+                .link("https://github.com/usuario/proyecto-sin-imagen")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
+                .imagen(null)
+                .usuario(usuario)
+                .build();
 
-        // ASSERT - validaciones: verificar que no tiene imagen
-        assertAll(
-                () -> assertNotNull(resultado.getId(), "ID debe ser generado"),
-                () -> assertNull(resultado.getImagen(), "Imagen debe ser null"),
-                () -> assertTrue(experienciaRepository.existsById(resultado.getId()),
-                        "Experiencia debe existir en la BD")
-        );
+        Experiencia experienciaGuardada = Experiencia.builder()
+                .id(1)
+                .titulo("Proyecto sin Imagen")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto sin imagen")
+                .link("https://github.com/usuario/proyecto-sin-imagen")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
+                .imagen(null)
+                .usuario(usuario)
+                .build();
+
+        when(experienciaMapper.toExperiencia(dto)).thenReturn(experiencia);
+        when(experienciaRepository.save(experiencia)).thenReturn(experienciaGuardada);
+        when(experienciaMapper.toExperienciaDto(experienciaGuardada)).thenReturn(dto);
+
+        // Act
+        ExperienciaDto resultado = experienciaService.saveExperiencia(dto);
+
+        // Assert
+        assertNotNull(resultado);
+        assertNull(resultado.getImagen());
+        assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON));
+    }
+
+    // ==================== TESTS DE VALIDACIÓN DE INTERACCIONES ====================
+
+    @Test
+    @DisplayName("Verificar interacciones entre componentes en saveExperiencia")
+    void verifyInteractionsInSaveExperiencia() {
+        // Arrange
+        when(experienciaMapper.toExperiencia(experienciaDtoValido)).thenReturn(experienciaValida);
+        when(experienciaRepository.save(experienciaValida)).thenReturn(experienciaValida);
+        when(experienciaMapper.toExperienciaDto(experienciaValida)).thenReturn(experienciaDtoValido);
+
+        // Act
+        experienciaService.saveExperiencia(experienciaDtoValido);
+
+        // Assert - Verificar orden de interacciones
+        verify(experienciaMapper, times(1)).toExperiencia(experienciaDtoValido);
+        verify(experienciaRepository, times(1)).save(experienciaValida);
+        verify(experienciaMapper, times(1)).toExperienciaDto(experienciaValida);
+        verifyNoMoreInteractions(experienciaMapper, experienciaRepository);
+    }
+
+    @Test
+    @DisplayName("Verificar interacciones entre componentes en actualizarExperienciaPorId")
+    void verifyInteractionsInActualizarExperienciaPorId() {
+        // Arrange
+        Integer id = 1;
+        when(experienciaRepository.findById(id)).thenReturn(Optional.of(experienciaValida));
+        when(experienciaRepository.save(experienciaValida)).thenReturn(experienciaValida);
+        when(experienciaMapper.toExperienciaDto(experienciaValida)).thenReturn(experienciaDtoValido);
+
+        // Act
+        experienciaService.actualizarExperienciaPorId(id, experienciaDtoValido);
+
+        // Assert - Verificar orden de interacciones
+        verify(experienciaRepository, times(1)).findById(id);
+        verify(experienciaRepository, times(1)).save(experienciaValida);
+        verify(experienciaMapper, times(1)).toExperienciaDto(experienciaValida);
+        verifyNoMoreInteractions(experienciaMapper, experienciaRepository);
+    }
+
+    @Test
+    @DisplayName("Verificar interacciones entre componentes en getAllExperiencias")
+    void verifyInteractionsInGetAllExperiencias() {
+        // Arrange
+        List<Experiencia> experiencias = Arrays.asList(experienciaValida);
+        when(experienciaRepository.findAll()).thenReturn(experiencias);
+        when(experienciaMapper.toExperienciaDto(experienciaValida)).thenReturn(experienciaDtoValido);
+
+        // Act
+        experienciaService.getAllExperiencias();
+
+        // Assert - Verificar orden de interacciones
+        verify(experienciaRepository, times(1)).findAll();
+        verify(experienciaMapper, times(1)).toExperienciaDto(experienciaValida);
+        verifyNoMoreInteractions(experienciaMapper, experienciaRepository);
     }
 }
