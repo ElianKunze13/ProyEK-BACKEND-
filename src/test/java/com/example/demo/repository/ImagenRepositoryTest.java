@@ -82,7 +82,7 @@ class ImagenRepositoryTest {
                 .descripcion("Desarrollo de un sistema de gestión empresarial")
                 .link("https://github.com/proyecto-gestion")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiaUsada(TecnologiaUsada.JAVA)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .usuario(usuario)
                 .build();
 
