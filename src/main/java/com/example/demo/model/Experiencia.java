@@ -40,8 +40,8 @@ public class Experiencia {
     @Size(min = 5, max = 300, message = "La descripción debe tener entre 5 y 301 caracteres")
     private String descripcion;
 
-    @NotNull
-    @NotEmpty
+    //@NotNull
+    //@NotEmpty
     @Size(min = 5, max = 300, message = "Link debe tener entre 5 y 301 caracteres")
     private String link;
 
