@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -51,12 +52,19 @@ class ExperienciaDtoTest {
         TipoExperiencia expectedTipo = TipoExperiencia.PROYECTO_PERSONAL;
         List<TecnologiaUsada> expectedTecnologias = List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA);
 
-        // Crear imagen para prueba
-        ImagenDto imagen = ImagenDto.builder()
-                .id(1)
-                .url("proyecto.jpg")
-                .alt("Captura del proyecto")
-                .build();
+        // Crear lista de imágenes para prueba
+        List<ImagenDto> imagenes = Arrays.asList(
+                ImagenDto.builder()
+                        .id(1)
+                        .url("proyecto-principal.jpg")
+                        .alt("Captura principal del proyecto")
+                        .build(),
+                ImagenDto.builder()
+                        .id(2)
+                        .url("proyecto-detalle.jpg")
+                        .alt("Detalle del proyecto")
+                        .build()
+        );
 
         // Act - Ejecutar la acción a probar
         ExperienciaDto experienciaDto = ExperienciaDto.builder()
@@ -68,7 +76,7 @@ class ExperienciaDtoTest {
                 .link(expectedLink)
                 .tipoExperiencia(expectedTipo)
                 .tecnologiasUsadas(expectedTecnologias)
-                .imagen(imagen)
+                .imagenes(imagenes) // 🔥 Cambiado a lista de imágenes
                 .build();
 
         // Assert - Verificar resultados
@@ -83,8 +91,12 @@ class ExperienciaDtoTest {
         assertNotNull(experienciaDto.getTecnologiasUsadas(), "La lista de tecnologías no debería ser nula");
         assertTrue(experienciaDto.getTecnologiasUsadas().containsAll(expectedTecnologias),
                 "Las tecnologías usadas deberían coincidir");
-        assertNotNull(experienciaDto.getImagen(), "La imagen no debería ser nula");
-        assertEquals("proyecto.jpg", experienciaDto.getImagen().getUrl(), "La URL de la imagen debería coincidir");
+        assertNotNull(experienciaDto.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(2, experienciaDto.getImagenes().size(), "Debería tener 2 imágenes");
+        assertEquals("proyecto-principal.jpg", experienciaDto.getImagenes().get(0).getUrl(),
+                "La URL de la primera imagen debería coincidir");
+        assertEquals("proyecto-detalle.jpg", experienciaDto.getImagenes().get(1).getUrl(),
+                "La URL de la segunda imagen debería coincidir");
 
         // Validar con Bean Validation
         Set<ConstraintViolation<ExperienciaDto>> violations = validator.validate(experienciaDto);
@@ -107,7 +119,7 @@ class ExperienciaDtoTest {
         assertNull(experienciaDto.getLink(), "El link debería ser nulo por defecto");
         assertNull(experienciaDto.getTipoExperiencia(), "El tipo de experiencia debería ser nulo por defecto");
         assertNull(experienciaDto.getTecnologiasUsadas(), "Las tecnologías usadas deberían ser nulas por defecto");
-        assertNull(experienciaDto.getImagen(), "La imagen debería ser nula por defecto");
+        assertNull(experienciaDto.getImagenes(), "La lista de imágenes debería ser nula por defecto");
     }
 
     @Test
@@ -122,16 +134,29 @@ class ExperienciaDtoTest {
         String link = "https://github.com/usuario/ecommerce";
         TipoExperiencia tipo = TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO;
         List<TecnologiaUsada> tecnologias = List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT);
-        ImagenDto imagen = ImagenDto.builder()
-                .id(1)
-                .url("ecommerce.jpg")
-                .alt("Tienda online")
-                .build();
+
+        List<ImagenDto> imagenes = Arrays.asList(
+                ImagenDto.builder()
+                        .id(1)
+                        .url("ecommerce-home.jpg")
+                        .alt("Página principal de la tienda")
+                        .build(),
+                ImagenDto.builder()
+                        .id(2)
+                        .url("ecommerce-checkout.jpg")
+                        .alt("Proceso de checkout")
+                        .build(),
+                ImagenDto.builder()
+                        .id(3)
+                        .url("ecommerce-admin.jpg")
+                        .alt("Panel de administración")
+                        .build()
+        );
 
         // Act
         ExperienciaDto experienciaDto = new ExperienciaDto(
                 id, titulo, fechaInicio, fechaFin, descripcion,
-                link, imagen, tipo, tecnologias
+                link, imagenes, tipo, tecnologias // 🔥 Cambiado a lista de imágenes
         );
 
         // Assert
@@ -146,8 +171,11 @@ class ExperienciaDtoTest {
         assertNotNull(experienciaDto.getTecnologiasUsadas(), "La lista de tecnologías no debería ser nula");
         assertTrue(experienciaDto.getTecnologiasUsadas().containsAll(tecnologias),
                 "Las tecnologías usadas deberían coincidir");
-        assertNotNull(experienciaDto.getImagen(), "La imagen no debería ser nula");
-        assertEquals("ecommerce.jpg", experienciaDto.getImagen().getUrl(), "La URL de la imagen debería coincidir");
+        assertNotNull(experienciaDto.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(3, experienciaDto.getImagenes().size(), "Debería tener 3 imágenes");
+        assertEquals("ecommerce-home.jpg", experienciaDto.getImagenes().get(0).getUrl());
+        assertEquals("ecommerce-checkout.jpg", experienciaDto.getImagenes().get(1).getUrl());
+        assertEquals("ecommerce-admin.jpg", experienciaDto.getImagenes().get(2).getUrl());
     }
 
     @Test
@@ -163,16 +191,16 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
-                .imagen(null)
+                .imagenes(null) // 🔥 Lista de imágenes nula (opcional)
                 .build();
 
         // Assert
         assertNotNull(experienciaDto, "El objeto ExperienciaDto no debería ser nulo");
-        assertNull(experienciaDto.getImagen(), "La imagen debería ser nula");
+        assertNull(experienciaDto.getImagenes(), "La lista de imágenes debería ser nula");
 
-        // Validar que no hay violaciones (imagen es opcional)
+        // Validar que no hay violaciones (imagenes es opcional)
         Set<ConstraintViolation<ExperienciaDto>> violations = validator.validate(experienciaDto);
-        assertTrue(violations.isEmpty(), "No debería haber violaciones con imagen nula");
+        assertTrue(violations.isEmpty(), "No debería haber violaciones con lista de imágenes nula");
     }
 
     @Test
@@ -188,6 +216,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(Collections.emptyList()) // Lista vacía
                 .build();
 
         // Act & Assert
@@ -212,6 +241,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/proyecto-sin-tecnologias")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of()) // Lista vacía
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act & Assert
@@ -220,12 +250,38 @@ class ExperienciaDtoTest {
         assertTrue(experienciaDto.getTecnologiasUsadas().isEmpty(), "La lista de tecnologías debería estar vacía");
     }
 
+    @Test
+    @DisplayName("Debería permitir lista vacía de imágenes")
+    void shouldAllowEmptyImagenesList() {
+        // Arrange - Experiencia con lista vacía de imágenes
+        ExperienciaDto experienciaDto = ExperienciaDto.builder()
+                .id(1)
+                .titulo("Proyecto sin imágenes")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-sin-imagenes")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(Collections.emptyList()) // Lista vacía de imágenes
+                .build();
+
+        // Act & Assert
+        assertNotNull(experienciaDto, "El objeto ExperienciaDto no debería ser nulo");
+        assertNotNull(experienciaDto.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertTrue(experienciaDto.getImagenes().isEmpty(), "La lista de imágenes debería estar vacía");
+    }
+
     // ==================== TESTS DE VALIDACIONES ====================
 
     @Test
     @DisplayName("Validación - No debería tener violaciones para campos válidos")
     void validation_ShouldNotHaveViolations_WhenAllFieldsAreValid() {
         // Arrange - ExperienciaDto con todos los campos válidos
+        List<ImagenDto> imagenes = List.of(
+                ImagenDto.builder().url("test.jpg").alt("Test image").build()
+        );
+
         ExperienciaDto experienciaDto = ExperienciaDto.builder()
                 .id(1)
                 .titulo("Proyecto Válido")
@@ -235,6 +291,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(imagenes)
                 .build();
 
         // Act
@@ -257,6 +314,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act
@@ -281,6 +339,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act
@@ -306,6 +365,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act
@@ -330,6 +390,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act
@@ -354,6 +415,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act
@@ -379,6 +441,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act
@@ -403,6 +466,7 @@ class ExperienciaDtoTest {
                 .link(null)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act
@@ -427,6 +491,7 @@ class ExperienciaDtoTest {
                 .link("http")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act
@@ -452,6 +517,7 @@ class ExperienciaDtoTest {
                 .link(linkLargo)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act
@@ -476,6 +542,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act
@@ -500,6 +567,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(null)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act
@@ -524,6 +592,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(null)
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act
@@ -554,6 +623,7 @@ class ExperienciaDtoTest {
                     .link("https://github.com/usuario/test")
                     .tipoExperiencia(tipo)
                     .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                    .imagenes(Collections.emptyList())
                     .build();
 
             // Assert
@@ -579,6 +649,7 @@ class ExperienciaDtoTest {
                     .link("https://github.com/usuario/test")
                     .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                     .tecnologiasUsadas(List.of(tecnologia))
+                    .imagenes(Collections.emptyList())
                     .build();
 
             // Assert
@@ -609,6 +680,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(tecnologiasMultiples)
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Assert
@@ -622,48 +694,63 @@ class ExperienciaDtoTest {
     // ==================== TESTS DE RELACIONES ====================
 
     @Test
-    @DisplayName("Debe manejar relación con ImagenDto correctamente")
-    void shouldHandleRelationshipWithImagenDtoCorrectly() {
+    @DisplayName("Debe manejar relación con lista de ImagenDto correctamente")
+    void shouldHandleRelationshipWithImagenDtoListCorrectly() {
         // Arrange
-        ImagenDto imagen = ImagenDto.builder()
-                .id(1)
-                .url("proyecto.jpg")
-                .alt("Captura del proyecto")
-                .build();
+        List<ImagenDto> imagenes = Arrays.asList(
+                ImagenDto.builder()
+                        .id(1)
+                        .url("imagen-1.jpg")
+                        .alt("Primera imagen del proyecto")
+                        .build(),
+                ImagenDto.builder()
+                        .id(2)
+                        .url("imagen-2.jpg")
+                        .alt("Segunda imagen del proyecto")
+                        .build()
+        );
 
         ExperienciaDto experienciaDto = ExperienciaDto.builder()
                 .id(1)
-                .titulo("Proyecto Con Imagen")
+                .titulo("Proyecto Con Imágenes")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
                 .fechaFinProyecto(LocalDate.of(2024, 6, 1))
                 .descripcion("Descripción válida con más de 5 caracteres")
-                .link("https://github.com/usuario/proyecto-con-imagen")
+                .link("https://github.com/usuario/proyecto-con-imagenes")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
-                .imagen(imagen)
+                .imagenes(imagenes)
                 .build();
 
         // Act & Assert
-        assertNotNull(experienciaDto.getImagen(), "La imagen no debería ser nula");
-        assertEquals(1, experienciaDto.getImagen().getId(), "El ID de la imagen debería coincidir");
-        assertEquals("proyecto.jpg", experienciaDto.getImagen().getUrl(), "La URL de la imagen debería coincidir");
-        assertEquals("Captura del proyecto", experienciaDto.getImagen().getAlt(), "El alt de la imagen debería coincidir");
+        assertNotNull(experienciaDto.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(2, experienciaDto.getImagenes().size(), "Debería tener 2 imágenes");
+        assertEquals(1, experienciaDto.getImagenes().get(0).getId(), "El ID de la primera imagen debería coincidir");
+        assertEquals("imagen-1.jpg", experienciaDto.getImagenes().get(0).getUrl(),
+                "La URL de la primera imagen debería coincidir");
+        assertEquals("Primera imagen del proyecto", experienciaDto.getImagenes().get(0).getAlt(),
+                "El alt de la primera imagen debería coincidir");
+        assertEquals(2, experienciaDto.getImagenes().get(1).getId(), "El ID de la segunda imagen debería coincidir");
+        assertEquals("imagen-2.jpg", experienciaDto.getImagenes().get(1).getUrl(),
+                "La URL de la segunda imagen debería coincidir");
+        assertEquals("Segunda imagen del proyecto", experienciaDto.getImagenes().get(1).getAlt(),
+                "El alt de la segunda imagen debería coincidir");
     }
 
     @Test
-    @DisplayName("Debe manejar creación de ExperienciaDto sin imagen")
-    void shouldHandleExperienciaDtoWithoutImagen() {
-        // Arrange - ExperienciaDto sin imagen
+    @DisplayName("Debe manejar creación de ExperienciaDto sin imágenes")
+    void shouldHandleExperienciaDtoWithoutImagenes() {
+        // Arrange - ExperienciaDto sin imágenes
         ExperienciaDto experienciaDto = ExperienciaDto.builder()
                 .id(1)
-                .titulo("Proyecto Sin Imagen")
+                .titulo("Proyecto Sin Imágenes")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
                 .fechaFinProyecto(LocalDate.of(2024, 6, 1))
                 .descripcion("Descripción válida con más de 5 caracteres")
-                .link("https://github.com/usuario/proyecto-sin-imagen")
+                .link("https://github.com/usuario/proyecto-sin-imagenes")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
-                .imagen(null)
+                .imagenes(null)
                 .build();
 
         // Act
@@ -671,8 +758,39 @@ class ExperienciaDtoTest {
 
         // Assert
         assertNotNull(experienciaDto, "La ExperienciaDto no debería ser nula");
-        assertNull(experienciaDto.getImagen(), "La imagen debería ser nula");
+        assertNull(experienciaDto.getImagenes(), "La lista de imágenes debería ser nula");
         assertTrue(violations.isEmpty(), "No debería haber violaciones de validación");
+    }
+
+    @Test
+    @DisplayName("Debe manejar lista de imágenes con elementos nulos")
+    void shouldHandleImagenesListWithNullElements() {
+        // Arrange - Lista de imágenes con elementos nulos
+        List<ImagenDto> imagenesConNull = Arrays.asList(
+                ImagenDto.builder().id(1).url("img1.jpg").alt("Imagen 1").build(),
+                null,
+                ImagenDto.builder().id(3).url("img3.jpg").alt("Imagen 3").build()
+        );
+
+        ExperienciaDto experienciaDto = ExperienciaDto.builder()
+                .id(1)
+                .titulo("Proyecto con imágenes nulas")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://github.com/usuario/test")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(imagenesConNull)
+                .build();
+
+        // Act & Assert
+        assertNotNull(experienciaDto, "La ExperienciaDto no debería ser nula");
+        assertNotNull(experienciaDto.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(3, experienciaDto.getImagenes().size(), "Debería tener 3 elementos");
+        assertNull(experienciaDto.getImagenes().get(1), "El segundo elemento debería ser nulo");
+        assertNotNull(experienciaDto.getImagenes().get(0), "El primer elemento no debería ser nulo");
+        assertNotNull(experienciaDto.getImagenes().get(2), "El tercer elemento no debería ser nulo");
     }
 
     // ==================== TESTS DE ACTUALIZACIÓN (Setters) ====================
@@ -690,14 +808,22 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/inicial")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(Collections.emptyList())
                 .build();
 
-        // Crear nueva imagen
-        ImagenDto nuevaImagen = ImagenDto.builder()
-                .id(2)
-                .url("nuevo-proyecto.jpg")
-                .alt("Nuevo proyecto")
-                .build();
+        // Crear nuevas imágenes
+        List<ImagenDto> nuevasImagenes = Arrays.asList(
+                ImagenDto.builder()
+                        .id(2)
+                        .url("nuevo-proyecto-1.jpg")
+                        .alt("Nuevo proyecto imagen 1")
+                        .build(),
+                ImagenDto.builder()
+                        .id(3)
+                        .url("nuevo-proyecto-2.jpg")
+                        .alt("Nuevo proyecto imagen 2")
+                        .build()
+        );
 
         List<TecnologiaUsada> nuevasTecnologias = List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT);
 
@@ -710,7 +836,7 @@ class ExperienciaDtoTest {
         experienciaDto.setLink("https://github.com/usuario/actualizado");
         experienciaDto.setTipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_FREELANCE);
         experienciaDto.setTecnologiasUsadas(nuevasTecnologias);
-        experienciaDto.setImagen(nuevaImagen);
+        experienciaDto.setImagenes(nuevasImagenes);
 
         // Assert
         assertEquals(2, experienciaDto.getId(), "El ID debería estar actualizado");
@@ -729,9 +855,39 @@ class ExperienciaDtoTest {
         assertEquals(2, experienciaDto.getTecnologiasUsadas().size(), "Debería tener 2 tecnologías");
         assertTrue(experienciaDto.getTecnologiasUsadas().containsAll(nuevasTecnologias),
                 "Las tecnologías usadas deberían estar actualizadas");
-        assertNotNull(experienciaDto.getImagen(), "La imagen no debería ser nula");
-        assertEquals("nuevo-proyecto.jpg", experienciaDto.getImagen().getUrl(),
-                "La URL de la imagen debería estar actualizada");
+        assertNotNull(experienciaDto.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(2, experienciaDto.getImagenes().size(), "Debería tener 2 imágenes");
+        assertEquals("nuevo-proyecto-1.jpg", experienciaDto.getImagenes().get(0).getUrl(),
+                "La URL de la primera imagen debería estar actualizada");
+        assertEquals("nuevo-proyecto-2.jpg", experienciaDto.getImagenes().get(1).getUrl(),
+                "La URL de la segunda imagen debería estar actualizada");
+    }
+
+    @Test
+    @DisplayName("Debería actualizar lista de imágenes a null")
+    void shouldUpdateImagenesListToNull() {
+        // Arrange
+        List<ImagenDto> imagenesIniciales = List.of(
+                ImagenDto.builder().id(1).url("img1.jpg").alt("Imagen 1").build()
+        );
+
+        ExperienciaDto experienciaDto = ExperienciaDto.builder()
+                .id(1)
+                .titulo("Proyecto Test")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida")
+                .link("https://github.com/usuario/test")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(imagenesIniciales)
+                .build();
+
+        // Act
+        experienciaDto.setImagenes(null);
+
+        // Assert
+        assertNull(experienciaDto.getImagenes(), "La lista de imágenes debería ser nula");
     }
 
     // ==================== TESTS DE IGUALDAD Y hashCode ====================
@@ -740,11 +896,18 @@ class ExperienciaDtoTest {
     @DisplayName("Debería ser igual cuando se comparan dos ExperienciaDto con los mismos valores")
     void shouldBeEqualWhenComparingTwoExperienciaDtosWithSameValues() {
         // Arrange
-        ImagenDto imagen = ImagenDto.builder()
-                .id(1)
-                .url("proyecto.jpg")
-                .alt("Captura del proyecto")
-                .build();
+        List<ImagenDto> imagenes = Arrays.asList(
+                ImagenDto.builder()
+                        .id(1)
+                        .url("proyecto.jpg")
+                        .alt("Captura del proyecto")
+                        .build(),
+                ImagenDto.builder()
+                        .id(2)
+                        .url("proyecto-detalle.jpg")
+                        .alt("Detalle del proyecto")
+                        .build()
+        );
 
         List<TecnologiaUsada> tecnologias = List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA);
 
@@ -757,7 +920,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(tecnologias)
-                .imagen(imagen)
+                .imagenes(imagenes)
                 .build();
 
         ExperienciaDto experienciaDto2 = ExperienciaDto.builder()
@@ -769,7 +932,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(tecnologias)
-                .imagen(imagen)
+                .imagenes(imagenes)
                 .build();
 
         // Act & Assert
@@ -781,6 +944,14 @@ class ExperienciaDtoTest {
     @DisplayName("No debería ser igual cuando se comparan dos ExperienciaDto con diferentes valores")
     void shouldNotBeEqualWhenComparingTwoExperienciaDtosWithDifferentValues() {
         // Arrange
+        List<ImagenDto> imagenes1 = List.of(
+                ImagenDto.builder().id(1).url("img1.jpg").alt("Imagen 1").build()
+        );
+
+        List<ImagenDto> imagenes2 = List.of(
+                ImagenDto.builder().id(2).url("img2.jpg").alt("Imagen 2").build()
+        );
+
         ExperienciaDto experienciaDto1 = ExperienciaDto.builder()
                 .id(1)
                 .titulo("Proyecto A")
@@ -790,6 +961,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/proyecto-a")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(imagenes1)
                 .build();
 
         ExperienciaDto experienciaDto2 = ExperienciaDto.builder()
@@ -801,12 +973,54 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/proyecto-b")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON))
+                .imagenes(imagenes2)
                 .build();
 
         // Act & Assert
         assertNotEquals(experienciaDto1, experienciaDto2, "Los objetos ExperienciaDto no deberían ser iguales");
         assertNotEquals(experienciaDto1.hashCode(), experienciaDto2.hashCode(),
                 "Los hashCodes no deberían ser iguales");
+    }
+
+    @Test
+    @DisplayName("Dos ExperienciaDto con diferentes listas de imágenes no deberían ser iguales")
+    void shouldNotBeEqual_WhenImagenesListsAreDifferent() {
+        // Arrange
+        List<ImagenDto> imagenes1 = Arrays.asList(
+                ImagenDto.builder().id(1).url("img1.jpg").alt("Imagen 1").build(),
+                ImagenDto.builder().id(2).url("img2.jpg").alt("Imagen 2").build()
+        );
+
+        List<ImagenDto> imagenes2 = List.of(
+                ImagenDto.builder().id(1).url("img1.jpg").alt("Imagen 1").build()
+        );
+
+        ExperienciaDto dto1 = ExperienciaDto.builder()
+                .id(1)
+                .titulo("Proyecto Test")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida")
+                .link("https://test.com")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(imagenes1)
+                .build();
+
+        ExperienciaDto dto2 = ExperienciaDto.builder()
+                .id(1)
+                .titulo("Proyecto Test")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida")
+                .link("https://test.com")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(imagenes2)
+                .build();
+
+        // Act & Assert
+        assertNotEquals(dto1, dto2, "Los objetos no deberían ser iguales con diferentes listas de imágenes");
     }
 
     // ==================== TESTS DE CASOS BORDE ====================
@@ -825,6 +1039,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act - Validar título mínimo
@@ -846,6 +1061,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act - Validar título máximo
@@ -871,6 +1087,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act - Validar texto mínimo
@@ -893,6 +1110,7 @@ class ExperienciaDtoTest {
                 .link(textoMaximo)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act - Validar texto máximo
@@ -913,6 +1131,13 @@ class ExperienciaDtoTest {
         String descripcionEspecial = "Descripción con acentos y ñ: áéíóú üñ y caracteres especiales !@#$%^&*()";
         String linkEspecial = "https://github.com/usuario/proyecto-con-acentos-y-caracteres-especiales";
 
+        List<ImagenDto> imagenes = List.of(
+                ImagenDto.builder()
+                        .url("imagen-con-acentos-áéíóú.jpg")
+                        .alt("Imagen con acentos")
+                        .build()
+        );
+
         ExperienciaDto experienciaDto = ExperienciaDto.builder()
                 .id(1)
                 .titulo(tituloEspecial)
@@ -922,6 +1147,7 @@ class ExperienciaDtoTest {
                 .link(linkEspecial)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(imagenes)
                 .build();
 
         // Act
@@ -935,6 +1161,8 @@ class ExperienciaDtoTest {
                 "La descripción con caracteres especiales debería mantenerse");
         assertEquals(linkEspecial, experienciaDto.getLink(),
                 "El link con caracteres especiales debería mantenerse");
+        assertEquals("imagen-con-acentos-áéíóú.jpg", experienciaDto.getImagenes().get(0).getUrl(),
+                "La URL de la imagen con acentos debería mantenerse");
     }
 
     @Test
@@ -953,6 +1181,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .build();
 
         // Act
@@ -964,6 +1193,36 @@ class ExperienciaDtoTest {
                 "La fecha de inicio debería mantenerse");
         assertEquals(fechaFinReciente, experienciaDto.getFechaFinProyecto(),
                 "La fecha de fin debería mantenerse");
+    }
+
+    @Test
+    @DisplayName("Validación - Debe manejar lista de imágenes con URLs vacías")
+    void validation_ShouldHandleImagenesWithEmptyUrls() {
+        // Arrange - Imágenes con URLs vacías (no hay validación en el DTO para esto)
+        List<ImagenDto> imagenes = Arrays.asList(
+                ImagenDto.builder().url("").alt("URL vacía").build(),
+                ImagenDto.builder().url("   ").alt("URL con espacios").build()
+        );
+
+        ExperienciaDto experienciaDto = ExperienciaDto.builder()
+                .id(1)
+                .titulo("Proyecto con URLs vacías")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://github.com/usuario/test")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(imagenes)
+                .build();
+
+        // Act
+        Set<ConstraintViolation<ExperienciaDto>> violations = validator.validate(experienciaDto);
+
+        // Assert - Nota: No hay validación específica para URLs de imágenes en el DTO
+        assertTrue(violations.isEmpty(), "No debería haber violaciones de validación");
+        assertEquals("", experienciaDto.getImagenes().get(0).getUrl(), "La URL vacía debería mantenerse");
+        assertEquals("   ", experienciaDto.getImagenes().get(1).getUrl(), "La URL con espacios debería mantenerse");
     }
 
     // ==================== TEST NEGATIVO ====================
@@ -986,6 +1245,10 @@ class ExperienciaDtoTest {
     @DisplayName("toString debería incluir información relevante del ExperienciaDto")
     void toString_ShouldIncludeRelevantInformation() {
         // Arrange
+        List<ImagenDto> imagenes = List.of(
+                ImagenDto.builder().id(1).url("test.jpg").alt("Test image").build()
+        );
+
         ExperienciaDto experienciaDto = ExperienciaDto.builder()
                 .id(1)
                 .titulo("Proyecto Test")
@@ -995,6 +1258,7 @@ class ExperienciaDtoTest {
                 .link("https://github.com/usuario/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(imagenes)
                 .build();
 
         // Act
@@ -1006,6 +1270,8 @@ class ExperienciaDtoTest {
         assertTrue(toStringResult.contains("Proyecto Test"), "toString debería contener el título");
         assertTrue(toStringResult.contains("PROYECTO_PERSONAL"), "toString debería contener el tipo de experiencia");
         assertTrue(toStringResult.contains("SPRINGBOOT"), "toString debería contener la tecnología usada");
+        assertTrue(toStringResult.contains("imagenes"), "toString debería contener el campo imagenes");
+        assertTrue(toStringResult.contains("test.jpg"), "toString debería contener la URL de la imagen");
     }
 
     @Test
@@ -1019,5 +1285,37 @@ class ExperienciaDtoTest {
             String result = experienciaDto.toString();
             assertNotNull(result, "toString no debería ser nulo");
         }, "toString no debería lanzar excepción con campos nulos");
+    }
+
+    @Test
+    @DisplayName("toString debería mostrar lista de imágenes correctamente")
+    void toString_ShouldShowImagenesListCorrectly() {
+        // Arrange
+        List<ImagenDto> imagenes = Arrays.asList(
+                ImagenDto.builder().id(1).url("img1.jpg").alt("Imagen 1").build(),
+                ImagenDto.builder().id(2).url("img2.jpg").alt("Imagen 2").build()
+        );
+
+        ExperienciaDto experienciaDto = ExperienciaDto.builder()
+                .id(1)
+                .titulo("Proyecto con imágenes")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción válida")
+                .link("https://github.com/usuario/test")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(imagenes)
+                .build();
+
+        // Act
+        String toStringResult = experienciaDto.toString();
+
+        // Assert
+        assertNotNull(toStringResult);
+        assertTrue(toStringResult.contains("img1.jpg"), "toString debería contener la URL de la primera imagen");
+        assertTrue(toStringResult.contains("img2.jpg"), "toString debería contener la URL de la segunda imagen");
+        assertTrue(toStringResult.contains("Imagen 1"), "toString debería contener el alt de la primera imagen");
+        assertTrue(toStringResult.contains("Imagen 2"), "toString debería contener el alt de la segunda imagen");
     }
 }

@@ -48,7 +48,9 @@ class ExperienciaControllerTest {
     private Validator validator;
 
     private ExperienciaDto experienciaDtoValida;
-    private ImagenDto imagenDto;
+    private ImagenDto imagenDto1;
+    private ImagenDto imagenDto2;
+    private List<ImagenDto> listaImagenes;
 
     @BeforeEach
     void setUp() {
@@ -56,11 +58,19 @@ class ExperienciaControllerTest {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
 
-        imagenDto = ImagenDto.builder()
+        imagenDto1 = ImagenDto.builder()
                 .id(1)
-                .url("https://ejemplo.com/imagen.jpg")
-                .alt("Imagen del proyecto")
+                .url("https://ejemplo.com/imagen-principal.jpg")
+                .alt("Imagen principal del proyecto")
                 .build();
+
+        imagenDto2 = ImagenDto.builder()
+                .id(2)
+                .url("https://ejemplo.com/imagen-secundaria.jpg")
+                .alt("Imagen secundaria del proyecto")
+                .build();
+
+        listaImagenes = Arrays.asList(imagenDto1, imagenDto2);
 
         experienciaDtoValida = ExperienciaDto.builder()
                 .id(1)
@@ -69,9 +79,9 @@ class ExperienciaControllerTest {
                 .fechaFinProyecto(LocalDate.of(2024, 6, 30))
                 .descripcion("Desarrollo de una aplicación web completa con Spring Boot y React")
                 .link("https://github.com/usuario/proyecto")
-                .imagen(imagenDto)
+                .imagenes(listaImagenes) // 🔥 Cambiado a lista de imágenes
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.REACT)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.REACT))
                 .build();
     }
 
@@ -89,7 +99,8 @@ class ExperienciaControllerTest {
                 .descripcion("Aplicación frontend con Angular 17")
                 .link("https://github.com/usuario/angular-project")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR)) // 🔥 Cambiado a lista
+                .imagenes(List.of(imagenDto1)) // 🔥 Lista con una imagen
+                .tecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR))
                 .build();
 
         List<ExperienciaDto> listaExperiencias = Arrays.asList(experienciaDtoValida, experienciaDto2);
@@ -105,6 +116,10 @@ class ExperienciaControllerTest {
         assertEquals(2, response.getBody().size(), "Debería retornar 2 experiencias");
         assertEquals("Proyecto Full Stack", response.getBody().get(0).getTitulo());
         assertEquals("Proyecto Angular", response.getBody().get(1).getTitulo());
+
+        // Verificar imágenes en la primera experiencia
+        assertNotNull(response.getBody().get(0).getImagenes(), "Las imágenes no deberían ser nulas");
+        assertEquals(2, response.getBody().get(0).getImagenes().size(), "Debería tener 2 imágenes");
 
         // Verificar que se llamó al servicio exactamente una vez
         verify(experienciaService, times(1)).getAllExperiencias();
@@ -149,6 +164,11 @@ class ExperienciaControllerTest {
     @DisplayName("POST /auth/guardar/experiencia - Debería crear experiencia y retornar 201 Created")
     void saveExperiencia_ShouldCreateExperienciaAndReturnCreated() {
         // Arrange
+        List<ImagenDto> imagenesNuevas = Arrays.asList(
+                ImagenDto.builder().url("https://ejemplo.com/nuevo-1.jpg").alt("Nueva imagen 1").build(),
+                ImagenDto.builder().url("https://ejemplo.com/nuevo-2.jpg").alt("Nueva imagen 2").build()
+        );
+
         ExperienciaDto experienciaDtoCrear = ExperienciaDto.builder()
                 .titulo("Nuevo Proyecto")
                 .fechaInicioProyecto(LocalDate.of(2024, 7, 1))
@@ -156,8 +176,8 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción del nuevo proyecto con más de 5 caracteres")
                 .link("https://github.com/usuario/nuevo-proyecto")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.DJANGO, TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
-                .imagen(imagenDto)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.DJANGO, TecnologiaUsada.PYTHON))
+                .imagenes(imagenesNuevas) // 🔥 Lista de imágenes
                 .build();
 
         ExperienciaDto experienciaDtoCreada = ExperienciaDto.builder()
@@ -168,8 +188,8 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción del nuevo proyecto con más de 5 caracteres")
                 .link("https://github.com/usuario/nuevo-proyecto")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.DJANGO, TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
-                .imagen(imagenDto)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.DJANGO, TecnologiaUsada.PYTHON))
+                .imagenes(imagenesNuevas) // 🔥 Lista de imágenes
                 .build();
 
         when(experienciaService.saveExperiencia(any(ExperienciaDto.class))).thenReturn(experienciaDtoCreada);
@@ -184,8 +204,13 @@ class ExperienciaControllerTest {
         assertEquals(2, response.getBody().getId(), "El ID generado debería ser 2");
         assertEquals("Nuevo Proyecto", response.getBody().getTitulo());
         assertEquals(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO, response.getBody().getTipoExperiencia());
-        assertTrue(response.getBody().getTecnologiasUsadas().contains(TecnologiaUsada.DJANGO)); // 🔥 Cambiado a contains
-        assertTrue(response.getBody().getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON)); // 🔥 Cambiado a contains
+        assertTrue(response.getBody().getTecnologiasUsadas().contains(TecnologiaUsada.DJANGO));
+        assertTrue(response.getBody().getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON));
+
+        // Verificar imágenes
+        assertNotNull(response.getBody().getImagenes(), "Las imágenes no deberían ser nulas");
+        assertEquals(2, response.getBody().getImagenes().size(), "Debería tener 2 imágenes");
+        assertEquals("https://ejemplo.com/nuevo-1.jpg", response.getBody().getImagenes().get(0).getUrl());
 
         verify(experienciaService, times(1)).saveExperiencia(experienciaDtoCrear);
     }
@@ -201,7 +226,8 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción mínima válida de más de 5 caracteres")
                 .link("https://minimo.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(null) // Sin imágenes
                 .build();
 
         when(experienciaService.saveExperiencia(any(ExperienciaDto.class))).thenReturn(experienciaDtoMinima);
@@ -213,37 +239,111 @@ class ExperienciaControllerTest {
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
+        assertNull(response.getBody().getImagenes(), "Las imágenes deberían ser nulas");
 
         verify(experienciaService, times(1)).saveExperiencia(experienciaDtoMinima);
     }
 
     @Test
-    @DisplayName("POST /auth/guardar/experiencia - Debería manejar experiencia sin imagen")
-    void saveExperiencia_ShouldHandleExperienciaWithoutImage() {
+    @DisplayName("POST /auth/guardar/experiencia - Debería manejar experiencia sin imágenes")
+    void saveExperiencia_ShouldHandleExperienciaWithoutImages() {
         // Arrange
-        ExperienciaDto experienciaDtoSinImagen = ExperienciaDto.builder()
-                .titulo("Proyecto sin imagen")
+        ExperienciaDto experienciaDtoSinImagenes = ExperienciaDto.builder()
+                .titulo("Proyecto sin imágenes")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
                 .fechaFinProyecto(LocalDate.of(2024, 3, 1))
-                .descripcion("Descripción válida de más de 5 caracteres para el proyecto sin imagen")
+                .descripcion("Descripción válida de más de 5 caracteres para el proyecto sin imágenes")
                 .link("https://sin-imagen.com")
                 .tipoExperiencia(TipoExperiencia.APORTE_CODIGO_ABIERTO)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
-                .imagen(null)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON))
+                .imagenes(null)
                 .build();
 
-        when(experienciaService.saveExperiencia(any(ExperienciaDto.class))).thenReturn(experienciaDtoSinImagen);
+        when(experienciaService.saveExperiencia(any(ExperienciaDto.class))).thenReturn(experienciaDtoSinImagenes);
 
         // Act
-        ResponseEntity<ExperienciaDto> response = experienciaController.saveExperiencia(experienciaDtoSinImagen);
+        ResponseEntity<ExperienciaDto> response = experienciaController.saveExperiencia(experienciaDtoSinImagenes);
 
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertNull(response.getBody().getImagen(), "La imagen debería ser nula");
+        assertNull(response.getBody().getImagenes(), "Las imágenes deberían ser nulas");
 
-        verify(experienciaService, times(1)).saveExperiencia(experienciaDtoSinImagen);
+        verify(experienciaService, times(1)).saveExperiencia(experienciaDtoSinImagenes);
+    }
+
+    @Test
+    @DisplayName("POST /auth/guardar/experiencia - Debería manejar experiencia con imagen única")
+    void saveExperiencia_ShouldHandleExperienciaWithSingleImage() {
+        // Arrange
+        List<ImagenDto> imagenUnica = List.of(imagenDto1);
+
+        ExperienciaDto experienciaDtoConUnaImagen = ExperienciaDto.builder()
+                .titulo("Proyecto con una imagen")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 3, 1))
+                .descripcion("Descripción válida de más de 5 caracteres")
+                .link("https://una-imagen.com")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(imagenUnica)
+                .build();
+
+        when(experienciaService.saveExperiencia(any(ExperienciaDto.class))).thenReturn(experienciaDtoConUnaImagen);
+
+        // Act
+        ResponseEntity<ExperienciaDto> response = experienciaController.saveExperiencia(experienciaDtoConUnaImagen);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertNotNull(response.getBody().getImagenes(), "Las imágenes no deberían ser nulas");
+        assertEquals(1, response.getBody().getImagenes().size(), "Debería tener 1 imagen");
+        assertEquals("https://ejemplo.com/imagen-principal.jpg",
+                response.getBody().getImagenes().get(0).getUrl());
+
+        verify(experienciaService, times(1)).saveExperiencia(experienciaDtoConUnaImagen);
+    }
+
+    @Test
+    @DisplayName("POST /auth/guardar/experiencia - Debería manejar experiencia con múltiples imágenes")
+    void saveExperiencia_ShouldHandleExperienciaWithMultipleImages() {
+        // Arrange
+        List<ImagenDto> imagenesMultiples = Arrays.asList(
+                ImagenDto.builder().url("https://ejemplo.com/img1.jpg").alt("Imagen 1").build(),
+                ImagenDto.builder().url("https://ejemplo.com/img2.jpg").alt("Imagen 2").build(),
+                ImagenDto.builder().url("https://ejemplo.com/img3.jpg").alt("Imagen 3").build()
+        );
+
+        ExperienciaDto experienciaDtoMultiplesImagenes = ExperienciaDto.builder()
+                .titulo("Proyecto con múltiples imágenes")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 3, 1))
+                .descripcion("Descripción válida de más de 5 caracteres")
+                .link("https://multiples-imagenes.com")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT))
+                .imagenes(imagenesMultiples)
+                .build();
+
+        when(experienciaService.saveExperiencia(any(ExperienciaDto.class))).thenReturn(experienciaDtoMultiplesImagenes);
+
+        // Act
+        ResponseEntity<ExperienciaDto> response = experienciaController.saveExperiencia(experienciaDtoMultiplesImagenes);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertNotNull(response.getBody().getImagenes(), "Las imágenes no deberían ser nulas");
+        assertEquals(3, response.getBody().getImagenes().size(), "Debería tener 3 imágenes");
+        assertEquals("https://ejemplo.com/img1.jpg", response.getBody().getImagenes().get(0).getUrl());
+        assertEquals("https://ejemplo.com/img2.jpg", response.getBody().getImagenes().get(1).getUrl());
+        assertEquals("https://ejemplo.com/img3.jpg", response.getBody().getImagenes().get(2).getUrl());
+
+        verify(experienciaService, times(1)).saveExperiencia(experienciaDtoMultiplesImagenes);
     }
 
     @Test
@@ -279,6 +379,12 @@ class ExperienciaControllerTest {
     void updateExperiencia_ShouldUpdateExperienciaAndReturnOk() {
         // Arrange
         Integer id = 1;
+
+        List<ImagenDto> imagenesActualizadas = Arrays.asList(
+                ImagenDto.builder().id(3).url("https://ejemplo.com/updated-1.jpg").alt("Imagen actualizada 1").build(),
+                ImagenDto.builder().id(4).url("https://ejemplo.com/updated-2.jpg").alt("Imagen actualizada 2").build()
+        );
+
         ExperienciaDto experienciaDtoActualizada = ExperienciaDto.builder()
                 .id(id)
                 .titulo("Proyecto Full Stack Actualizado")
@@ -287,8 +393,8 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción actualizada del proyecto con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-actualizado")
                 .tipoExperiencia(TipoExperiencia.PRACTICA_PROFESIONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
-                .imagen(imagenDto)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT))
+                .imagenes(imagenesActualizadas) // 🔥 Lista de imágenes actualizadas
                 .build();
 
         when(experienciaService.actualizarExperienciaPorId(eq(id), any(ExperienciaDto.class)))
@@ -304,8 +410,46 @@ class ExperienciaControllerTest {
         assertEquals(id, response.getBody().getId(), "El ID debería coincidir");
         assertEquals("Proyecto Full Stack Actualizado", response.getBody().getTitulo());
         assertEquals(TipoExperiencia.PRACTICA_PROFESIONAL, response.getBody().getTipoExperiencia());
-        assertTrue(response.getBody().getTecnologiasUsadas().contains(TecnologiaUsada.REACT)); // 🔥 Cambiado a contains
-        assertTrue(response.getBody().getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT)); // 🔥 Cambiado a contains
+        assertTrue(response.getBody().getTecnologiasUsadas().contains(TecnologiaUsada.REACT));
+        assertTrue(response.getBody().getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT));
+
+        // Verificar imágenes actualizadas
+        assertNotNull(response.getBody().getImagenes(), "Las imágenes no deberían ser nulas");
+        assertEquals(2, response.getBody().getImagenes().size(), "Debería tener 2 imágenes");
+        assertEquals("https://ejemplo.com/updated-1.jpg", response.getBody().getImagenes().get(0).getUrl());
+
+        verify(experienciaService, times(1)).actualizarExperienciaPorId(eq(id), any(ExperienciaDto.class));
+    }
+
+    @Test
+    @DisplayName("PUT /auth/modificar/experiencia/{id} - Debería actualizar experiencia eliminando imágenes")
+    void updateExperiencia_ShouldUpdateExperienciaRemovingImages() {
+        // Arrange
+        Integer id = 1;
+
+        ExperienciaDto experienciaDtoSinImagenes = ExperienciaDto.builder()
+                .id(id)
+                .titulo("Proyecto Sin Imágenes")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 8, 31))
+                .descripcion("Descripción actualizada sin imágenes")
+                .link("https://github.com/usuario/sin-imagenes")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(null) // Sin imágenes
+                .build();
+
+        when(experienciaService.actualizarExperienciaPorId(eq(id), any(ExperienciaDto.class)))
+                .thenReturn(experienciaDtoSinImagenes);
+
+        // Act
+        ResponseEntity<ExperienciaDto> response = experienciaController.updateExperiencia(id, experienciaDtoSinImagenes);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertNull(response.getBody().getImagenes(), "Las imágenes deberían ser nulas");
 
         verify(experienciaService, times(1)).actualizarExperienciaPorId(eq(id), any(ExperienciaDto.class));
     }
@@ -463,7 +607,8 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://valid.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(listaImagenes)
                 .build();
 
         // Act
@@ -487,7 +632,8 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://valid.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(listaImagenes)
                 .build();
 
         // Act
@@ -510,7 +656,8 @@ class ExperienciaControllerTest {
                 .descripcion("Desc") // Menos de 5 caracteres
                 .link("https://valid.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(listaImagenes)
                 .build();
 
         // Act
@@ -534,7 +681,8 @@ class ExperienciaControllerTest {
                 .descripcion(descripcionLarga)
                 .link("https://valid.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(listaImagenes)
                 .build();
 
         // Act
@@ -557,7 +705,8 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("htt") // Menos de 5 caracteres
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(listaImagenes)
                 .build();
 
         // Act
@@ -581,7 +730,8 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link(linkLargo)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(listaImagenes)
                 .build();
 
         // Act
@@ -591,6 +741,32 @@ class ExperienciaControllerTest {
         assertFalse(violations.isEmpty(), "Debería haber violaciones de validación");
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("link")),
                 "Debería haber una violación en el campo link");
+    }
+
+    @Test
+    @DisplayName("Validación - Imagen con URL nula debería ser válida (no tiene validación)")
+    void validation_ShouldPass_WhenImagenUrlIsNull() {
+        // Arrange
+        List<ImagenDto> imagenesConUrlNula = List.of(
+                ImagenDto.builder().url(null).alt("Imagen sin URL").build()
+        );
+
+        ExperienciaDto dto = ExperienciaDto.builder()
+                .titulo("Título Válido")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 30))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://valid.com")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(imagenesConUrlNula)
+                .build();
+
+        // Act
+        var violations = validator.validate(dto);
+
+        // Assert - Nota: La validación de URL no está en el DTO
+        assertTrue(violations.isEmpty(), "No debería haber violaciones de validación para la URL de imagen");
     }
 
     // ==================== TESTS DE CASOS BORDE ====================
@@ -638,10 +814,11 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://valid.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(listaImagenes)
                 .build();
 
-        // Act - Nota: La validación de fechas no está en el DTO, pero podemos verificar que no hay violaciones
+        // Act - Nota: La validación de fechas no está en el DTO
         var violations = validator.validate(dtoConFechasInvalidas);
 
         // Assert - Las fechas no tienen validaciones específicas en el DTO
@@ -660,7 +837,8 @@ class ExperienciaControllerTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://valid.com")
                     .tipoExperiencia(tipo)
-                    .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                    .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                    .imagenes(listaImagenes)
                     .build();
 
             // Assert
@@ -681,7 +859,8 @@ class ExperienciaControllerTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://valid.com")
                     .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                    .tecnologiasUsadas(List.of(tecnologia)) // 🔥 Cambiado a lista con un elemento
+                    .tecnologiasUsadas(List.of(tecnologia))
+                    .imagenes(listaImagenes)
                     .build();
 
             // Assert
@@ -697,11 +876,34 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://valid.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(Arrays.asList(TecnologiaUsada.JAVA, TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.REACT)) // 🔥 Cambiado a lista múltiple
+                .tecnologiasUsadas(Arrays.asList(TecnologiaUsada.JAVA, TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.REACT))
+                .imagenes(listaImagenes)
                 .build();
 
         var violationsMultiples = validator.validate(dtoMultiples);
         assertTrue(violationsMultiples.isEmpty(), "Lista con múltiples tecnologías debería ser válida");
+    }
+
+    @Test
+    @DisplayName("Validación - Lista de imágenes vacía debería ser válida")
+    void validation_ShouldPass_WhenImagenesListIsEmpty() {
+        // Arrange
+        ExperienciaDto dto = ExperienciaDto.builder()
+                .titulo("Título Válido")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 30))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://valid.com")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(Collections.emptyList()) // Lista vacía
+                .build();
+
+        // Act
+        var violations = validator.validate(dto);
+
+        // Assert
+        assertTrue(violations.isEmpty(), "Lista de imágenes vacía debería ser válida");
     }
 
     // ==================== TESTS DE VERIFICACIÓN DE INTERACCIONES ====================
@@ -740,6 +942,11 @@ class ExperienciaControllerTest {
     @DisplayName("Comparar objeto ExperienciaDto - Debería ser igual cuando los valores son iguales")
     void experienciaDtoEquals_ShouldBeEqual_WhenSameValues() {
         // Arrange
+        List<ImagenDto> imagenes = Arrays.asList(
+                ImagenDto.builder().id(1).url("https://test.com/img1.jpg").alt("Img 1").build(),
+                ImagenDto.builder().id(2).url("https://test.com/img2.jpg").alt("Img 2").build()
+        );
+
         ExperienciaDto dto1 = ExperienciaDto.builder()
                 .id(1)
                 .titulo("Proyecto Test")
@@ -748,7 +955,8 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción del proyecto de prueba con más de 5 caracteres")
                 .link("https://test.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(imagenes)
                 .build();
 
         ExperienciaDto dto2 = ExperienciaDto.builder()
@@ -759,7 +967,8 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción del proyecto de prueba con más de 5 caracteres")
                 .link("https://test.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(imagenes)
                 .build();
 
         // Act & Assert
@@ -772,6 +981,14 @@ class ExperienciaControllerTest {
     @DisplayName("Comparar objeto ExperienciaDto - No debería ser igual cuando los valores son diferentes")
     void experienciaDtoEquals_ShouldNotBeEqual_WhenDifferentValues() {
         // Arrange
+        List<ImagenDto> imagenes1 = List.of(
+                ImagenDto.builder().id(1).url("https://test.com/img1.jpg").alt("Img 1").build()
+        );
+
+        List<ImagenDto> imagenes2 = List.of(
+                ImagenDto.builder().id(2).url("https://test.com/img2.jpg").alt("Img 2").build()
+        );
+
         ExperienciaDto dto1 = ExperienciaDto.builder()
                 .id(1)
                 .titulo("Proyecto Test")
@@ -780,7 +997,8 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción del proyecto de prueba con más de 5 caracteres")
                 .link("https://test.com")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(imagenes1)
                 .build();
 
         ExperienciaDto dto2 = ExperienciaDto.builder()
@@ -791,7 +1009,8 @@ class ExperienciaControllerTest {
                 .descripcion("Otra descripción del proyecto con más de 5 caracteres")
                 .link("https://otro.com")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT))
+                .imagenes(imagenes2)
                 .build();
 
         // Act & Assert
@@ -812,13 +1031,19 @@ class ExperienciaControllerTest {
         assertTrue(toStringResult.contains("Proyecto Full Stack"), "toString debería contener el título");
         assertTrue(toStringResult.contains("SPRINGBOOT"), "toString debería contener la tecnología usada");
         assertTrue(toStringResult.contains("PROYECTO_PERSONAL"), "toString debería contener el tipo de experiencia");
-        assertTrue(toStringResult.contains("link"), "toString debería contener el campo link");
+        assertTrue(toStringResult.contains("imagenes"), "toString debería contener el campo imagenes");
+        assertTrue(toStringResult.contains("imagen-principal"), "toString debería contener la URL de la imagen");
     }
 
     @Test
     @DisplayName("Builder de ExperienciaDto debería crear objetos correctamente")
     void experienciaDtoBuilder_ShouldCreateCorrectly() {
         // Arrange & Act
+        List<ImagenDto> imagenesBuilder = Arrays.asList(
+                ImagenDto.builder().id(5).url("https://builder.com/img1.jpg").alt("Builder img 1").build(),
+                ImagenDto.builder().id(6).url("https://builder.com/img2.jpg").alt("Builder img 2").build()
+        );
+
         ExperienciaDto dto = ExperienciaDto.builder()
                 .id(10)
                 .titulo("Builder Test")
@@ -827,8 +1052,8 @@ class ExperienciaControllerTest {
                 .descripcion("Descripción del builder con más de 5 caracteres")
                 .link("https://builder.com")
                 .tipoExperiencia(TipoExperiencia.APORTE_CODIGO_ABIERTO)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
-                .imagen(imagenDto)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.TYPESCRIPT))
+                .imagenes(imagenesBuilder)
                 .build();
 
         // Assert
@@ -840,8 +1065,39 @@ class ExperienciaControllerTest {
         assertEquals("Descripción del builder con más de 5 caracteres", dto.getDescripcion());
         assertEquals("https://builder.com", dto.getLink());
         assertEquals(TipoExperiencia.APORTE_CODIGO_ABIERTO, dto.getTipoExperiencia());
-        assertTrue(dto.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT)); // 🔥 Cambiado a contains
-        assertNotNull(dto.getImagen(), "La imagen no debería ser nula");
-        assertEquals(1, dto.getImagen().getId());
+        assertTrue(dto.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT));
+        assertNotNull(dto.getImagenes(), "Las imágenes no deberían ser nulas");
+        assertEquals(2, dto.getImagenes().size(), "Debería tener 2 imágenes");
+        assertEquals(5, dto.getImagenes().get(0).getId());
+        assertEquals("https://builder.com/img1.jpg", dto.getImagenes().get(0).getUrl());
+    }
+
+    @Test
+    @DisplayName("ExperienciaDto con lista de imágenes - Debería manejar lista con elementos nulos")
+    void experienciaDto_ShouldHandleListWithNullElements() {
+        // Arrange
+        List<ImagenDto> imagenesConNull = Arrays.asList(
+                imagenDto1,
+                null,
+                imagenDto2
+        );
+
+        ExperienciaDto dto = ExperienciaDto.builder()
+                .id(1)
+                .titulo("Proyecto Test")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 30))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://test.com")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(imagenesConNull)
+                .build();
+
+        // Act & Assert - No debería lanzar excepción
+        assertNotNull(dto, "El objeto no debería ser nulo");
+        assertNotNull(dto.getImagenes(), "Las imágenes no deberían ser nulas");
+        assertEquals(3, dto.getImagenes().size(), "Debería tener 3 elementos");
+        assertNull(dto.getImagenes().get(1), "El segundo elemento debería ser nulo");
     }
 }

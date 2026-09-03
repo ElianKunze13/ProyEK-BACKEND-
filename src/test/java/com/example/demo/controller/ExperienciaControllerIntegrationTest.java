@@ -7,6 +7,7 @@ import com.example.demo.enums.TipoExperiencia;
 import com.example.demo.model.Experiencia;
 import com.example.demo.model.Imagen;
 import com.example.demo.repository.ExperienciaRepository;
+import com.example.demo.repository.ImagenRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,10 @@ class ExperienciaControllerIntegrationTest {
     @Autowired
     private ExperienciaRepository experienciaRepository;
 
-    // 🔥 Método actualizado para crear ExperienciaDto con lista de tecnologías
+    @Autowired
+    private ImagenRepository imagenRepository;
+
+    // Helper methods actualizadas para trabajar con lista de imágenes
     private ExperienciaDto crearExperienciaDto(String titulo, LocalDate fechaInicio, LocalDate fechaFin,
                                                String descripcion, String link, TipoExperiencia tipo,
                                                TecnologiaUsada... tecnologias) {
@@ -52,34 +56,39 @@ class ExperienciaControllerIntegrationTest {
                 .descripcion(descripcion)
                 .link(link)
                 .tipoExperiencia(tipo)
-                .tecnologiasUsadas(Arrays.asList(tecnologias)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(Arrays.asList(tecnologias))
                 .build();
     }
 
-    // 🔥 Método actualizado para crear ExperienciaDto con imagen y lista de tecnologías
-    private ExperienciaDto crearExperienciaDtoConImagen(String titulo, LocalDate fechaInicio, LocalDate fechaFin,
-                                                        String descripcion, String link, TipoExperiencia tipo,
-                                                        String url, String alt, TecnologiaUsada... tecnologias) {
+    private ExperienciaDto crearExperienciaDtoConImagenes(String titulo, LocalDate fechaInicio, LocalDate fechaFin,
+                                                          String descripcion, String link, TipoExperiencia tipo,
+                                                          List<ImagenDto> imagenes, TecnologiaUsada... tecnologias) {
         ExperienciaDto dto = crearExperienciaDto(titulo, fechaInicio, fechaFin, descripcion, link, tipo, tecnologias);
-        if (url != null) {
-            ImagenDto imagen = ImagenDto.builder()
-                    .url(url)
-                    .alt(alt)
-                    .build();
-            dto.setImagen(imagen);
+        if (imagenes != null && !imagenes.isEmpty()) {
+            dto.setImagenes(imagenes);
         }
         return dto;
+    }
+
+    private ImagenDto crearImagenDto(String url, String alt) {
+        return ImagenDto.builder()
+                .url(url)
+                .alt(alt)
+                .build();
     }
 
     @BeforeEach
     void setUp() {
         // Limpiar datos antes de cada prueba
+        imagenRepository.deleteAll();
         experienciaRepository.deleteAll();
     }
 
+    // ==================== TESTS DE GUARDADO ====================
+
     @Test
-    void saveExperiencia_conDatosValidos_debeRetornarExperienciaCreada() throws Exception {
-        // ARRANGE - contexto: experiencia con datos válidos
+    void saveExperiencia_conDatosValidosSinImagenes_debeRetornarExperienciaCreada() throws Exception {
+        // ARRANGE - contexto: experiencia con datos válidos sin imágenes
         ExperienciaDto experienciaDto = crearExperienciaDto(
                 "Portfolio Personal",
                 LocalDate.of(2024, 1, 15),
@@ -88,7 +97,7 @@ class ExperienciaControllerIntegrationTest {
                 "https://github.com/mi-portfolio",
                 TipoExperiencia.PROYECTO_PERSONAL,
                 TecnologiaUsada.ANGULAR,
-                TecnologiaUsada.SPRINGBOOT // 🔥 Segunda tecnología
+                TecnologiaUsada.SPRINGBOOT
         );
 
         // ACT - acción: guardar experiencia a través del endpoint
@@ -100,45 +109,91 @@ class ExperienciaControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        // ASSERT - validaciones: verificar que la experiencia fue guardada en BD
+        // ASSERT - validaciones
         ExperienciaDto responseDto = objectMapper.readValue(responseJson, ExperienciaDto.class);
 
         assertAll(
                 () -> assertNotNull(responseDto.getId(), "ID debe ser generado automáticamente"),
                 () -> assertEquals("Portfolio Personal", responseDto.getTitulo(), "Título debe coincidir"),
-                () -> assertEquals(LocalDate.of(2024, 1, 15), responseDto.getFechaInicioProyecto(),
-                        "Fecha de inicio debe coincidir"),
-                () -> assertEquals(LocalDate.of(2024, 6, 30), responseDto.getFechaFinProyecto(),
-                        "Fecha de fin debe coincidir"),
+                () -> assertEquals(LocalDate.of(2024, 1, 15), responseDto.getFechaInicioProyecto()),
+                () -> assertEquals(LocalDate.of(2024, 6, 30), responseDto.getFechaFinProyecto()),
                 () -> assertEquals("Desarrollo de portfolio personal con Angular y Spring Boot",
-                        responseDto.getDescripcion(), "Descripción debe coincidir"),
-                () -> assertEquals("https://github.com/mi-portfolio", responseDto.getLink(),
-                        "Link debe coincidir"),
-                () -> assertEquals(TipoExperiencia.PROYECTO_PERSONAL, responseDto.getTipoExperiencia(),
-                        "Tipo de experiencia debe coincidir"),
-                // 🔥 Verificar lista de tecnologías
-                () -> assertNotNull(responseDto.getTecnologiasUsadas(), "Tecnologías usadas no deben ser nulas"),
-                () -> assertEquals(2, responseDto.getTecnologiasUsadas().size(),
-                        "Debe tener 2 tecnologías"),
-                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.ANGULAR),
-                        "Debe contener ANGULAR"),
-                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT),
-                        "Debe contener SPRINGBOOT"),
-                () -> assertTrue(experienciaRepository.existsById(responseDto.getId()),
-                        "Experiencia debe existir en la base de datos")
+                        responseDto.getDescripcion()),
+                () -> assertEquals("https://github.com/mi-portfolio", responseDto.getLink()),
+                () -> assertEquals(TipoExperiencia.PROYECTO_PERSONAL, responseDto.getTipoExperiencia()),
+                () -> assertNotNull(responseDto.getTecnologiasUsadas()),
+                () -> assertEquals(2, responseDto.getTecnologiasUsadas().size()),
+                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.ANGULAR)),
+                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT)),
+                // Verificar que no hay imágenes
+                () -> assertNull(responseDto.getImagenes(), "No debe haber imágenes"),
+                () -> assertTrue(experienciaRepository.existsById(responseDto.getId()))
         );
     }
 
     @Test
-    void saveExperiencia_conProyectoEnCurso_fechaFinNull_debeGuardarCorrectamente() throws Exception {
-        // ARRANGE - contexto: experiencia con fecha de fin null (proyecto en curso)
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                "Proyecto en Curso",
-                LocalDate.of(2024, 1, 15),
-                null, // Proyecto en curso
-                "Descripción del proyecto en curso",
-                "https://github.com/proyecto-curso",
+    void saveExperiencia_conUnaImagen_debeRetornarExperienciaConImagen() throws Exception {
+        // ARRANGE - contexto: experiencia con una imagen
+        List<ImagenDto> imagenes = List.of(
+                crearImagenDto("https://example.com/app-tareas.jpg", "Captura de la aplicación de tareas")
+        );
+
+        ExperienciaDto experienciaDto = crearExperienciaDtoConImagenes(
+                "App de Tareas",
+                LocalDate.of(2024, 2, 1),
+                LocalDate.of(2024, 4, 30),
+                "Aplicación de gestión de tareas con React y Node.js",
+                "https://github.com/app-tareas",
                 TipoExperiencia.PROYECTO_PERSONAL,
+                imagenes,
+                TecnologiaUsada.REACT,
+                TecnologiaUsada.TYPESCRIPT
+        );
+
+        // ACT - acción: guardar experiencia
+        String responseJson = mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(experienciaDto)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // ASSERT - validaciones
+        ExperienciaDto responseDto = objectMapper.readValue(responseJson, ExperienciaDto.class);
+
+        assertAll(
+                () -> assertNotNull(responseDto.getId()),
+                () -> assertNotNull(responseDto.getImagenes(), "Imágenes deben estar presentes"),
+                () -> assertEquals(1, responseDto.getImagenes().size(), "Debe tener 1 imagen"),
+                () -> assertEquals("https://example.com/app-tareas.jpg",
+                        responseDto.getImagenes().get(0).getUrl()),
+                () -> assertEquals("Captura de la aplicación de tareas",
+                        responseDto.getImagenes().get(0).getAlt()),
+                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.REACT)),
+                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT))
+        );
+    }
+
+    @Test
+    void saveExperiencia_conMultiplesImagenes_debeRetornarExperienciaConTodasLasImagenes() throws Exception {
+        // ARRANGE - contexto: experiencia con múltiples imágenes
+        List<ImagenDto> imagenes = Arrays.asList(
+                crearImagenDto("https://example.com/proyecto-1.jpg", "Vista principal del proyecto"),
+                crearImagenDto("https://example.com/proyecto-2.jpg", "Vista detallada del proyecto"),
+                crearImagenDto("https://example.com/proyecto-3.jpg", "Arquitectura del proyecto")
+        );
+
+        ExperienciaDto experienciaDto = crearExperienciaDtoConImagenes(
+                "Proyecto Full Stack",
+                LocalDate.of(2024, 3, 1),
+                LocalDate.of(2024, 5, 31),
+                "Proyecto completo con múltiples capturas",
+                "https://github.com/fullstack-project",
+                TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO,
+                imagenes,
+                TecnologiaUsada.JAVA,
+                TecnologiaUsada.SPRINGBOOT,
                 TecnologiaUsada.REACT
         );
 
@@ -151,37 +206,34 @@ class ExperienciaControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        // ASSERT - validaciones: verificar que se guardó con fecha fin null
+        // ASSERT - validaciones
         ExperienciaDto responseDto = objectMapper.readValue(responseJson, ExperienciaDto.class);
 
         assertAll(
-                () -> assertNotNull(responseDto.getId(), "ID debe ser generado"),
-                () -> assertEquals("Proyecto en Curso", responseDto.getTitulo(), "Título debe coincidir"),
-                () -> assertNull(responseDto.getFechaFinProyecto(), "Fecha de fin debe ser null"),
-                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.REACT),
-                        "Debe contener REACT"),
-                () -> assertTrue(experienciaRepository.existsById(responseDto.getId()),
-                        "Experiencia debe existir en la BD")
+                () -> assertNotNull(responseDto.getId()),
+                () -> assertNotNull(responseDto.getImagenes()),
+                () -> assertEquals(3, responseDto.getImagenes().size(), "Debe tener 3 imágenes"),
+                () -> assertEquals("https://example.com/proyecto-1.jpg", responseDto.getImagenes().get(0).getUrl()),
+                () -> assertEquals("https://example.com/proyecto-2.jpg", responseDto.getImagenes().get(1).getUrl()),
+                () -> assertEquals("https://example.com/proyecto-3.jpg", responseDto.getImagenes().get(2).getUrl()),
+                () -> assertEquals(3, responseDto.getTecnologiasUsadas().size())
         );
     }
 
     @Test
-    void saveExperiencia_conImagen_debeRetornarExperienciaConImagen() throws Exception {
-        // ARRANGE - contexto: experiencia con imagen
-        ExperienciaDto experienciaDto = crearExperienciaDtoConImagen(
-                "App de Tareas",
-                LocalDate.of(2024, 2, 1),
-                LocalDate.of(2024, 4, 30),
-                "Aplicación de gestión de tareas con React y Node.js",
-                "https://github.com/app-tareas",
+    void saveExperiencia_conProyectoEnCurso_fechaFinNull_debeGuardarCorrectamente() throws Exception {
+        // ARRANGE
+        ExperienciaDto experienciaDto = crearExperienciaDto(
+                "Proyecto en Curso",
+                LocalDate.of(2024, 1, 15),
+                null,
+                "Descripción del proyecto en curso",
+                "https://github.com/proyecto-curso",
                 TipoExperiencia.PROYECTO_PERSONAL,
-                "https://example.com/app-tareas.jpg",
-                "Captura de la aplicación de tareas",
-                TecnologiaUsada.REACT,
-                TecnologiaUsada.TYPESCRIPT // 🔥 Segunda tecnología
+                TecnologiaUsada.REACT
         );
 
-        // ACT - acción: guardar experiencia
+        // ACT
         String responseJson = mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDto)))
@@ -190,26 +242,24 @@ class ExperienciaControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        // ASSERT - validaciones: verificar que la imagen fue guardada
+        // ASSERT
         ExperienciaDto responseDto = objectMapper.readValue(responseJson, ExperienciaDto.class);
 
         assertAll(
-                () -> assertNotNull(responseDto.getId(), "ID debe ser generado"),
-                () -> assertNotNull(responseDto.getImagen(), "Imagen debe estar presente"),
-                () -> assertEquals("https://example.com/app-tareas.jpg",
-                        responseDto.getImagen().getUrl(), "URL de la imagen debe coincidir"),
-                () -> assertEquals("Captura de la aplicación de tareas",
-                        responseDto.getImagen().getAlt(), "Alt de la imagen debe coincidir"),
-                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.REACT),
-                        "Debe contener REACT"),
-                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT),
-                        "Debe contener TYPESCRIPT")
+                () -> assertNotNull(responseDto.getId()),
+                () -> assertEquals("Proyecto en Curso", responseDto.getTitulo()),
+                () -> assertNull(responseDto.getFechaFinProyecto()),
+                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.REACT)),
+                () -> assertNull(responseDto.getImagenes(), "No debe haber imágenes"),
+                () -> assertTrue(experienciaRepository.existsById(responseDto.getId()))
         );
     }
 
+    // ==================== TESTS DE VALIDACIÓN (ERRORES) ====================
+
     @Test
     void saveExperiencia_conTituloNulo_debeRetornarError() throws Exception {
-        // ARRANGE - contexto: experiencia con título nulo
+        // ARRANGE
         ExperienciaDto experienciaDto = ExperienciaDto.builder()
                 .titulo(null)
                 .fechaInicioProyecto(LocalDate.now())
@@ -217,10 +267,10 @@ class ExperienciaControllerIntegrationTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .build();
 
-        // ACT & ASSERT - acción y validación: debe retornar error
+        // ACT & ASSERT
         mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDto)))
@@ -229,7 +279,7 @@ class ExperienciaControllerIntegrationTest {
 
     @Test
     void saveExperiencia_conTituloVacio_debeRetornarError() throws Exception {
-        // ARRANGE - contexto: experiencia con título vacío
+        // ARRANGE
         ExperienciaDto experienciaDto = crearExperienciaDto(
                 "",
                 LocalDate.now(),
@@ -240,7 +290,7 @@ class ExperienciaControllerIntegrationTest {
                 TecnologiaUsada.JAVA
         );
 
-        // ACT & ASSERT - acción y validación: debe retornar error
+        // ACT & ASSERT
         mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDto)))
@@ -249,7 +299,7 @@ class ExperienciaControllerIntegrationTest {
 
     @Test
     void saveExperiencia_conFechaInicioNula_debeRetornarError() throws Exception {
-        // ARRANGE - contexto: experiencia con fecha de inicio nula
+        // ARRANGE
         ExperienciaDto experienciaDto = ExperienciaDto.builder()
                 .titulo("Proyecto Test")
                 .fechaInicioProyecto(null)
@@ -257,10 +307,10 @@ class ExperienciaControllerIntegrationTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .build();
 
-        // ACT & ASSERT - acción y validación: debe retornar error
+        // ACT & ASSERT
         mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDto)))
@@ -269,7 +319,7 @@ class ExperienciaControllerIntegrationTest {
 
     @Test
     void saveExperiencia_conDescripcionNula_debeRetornarError() throws Exception {
-        // ARRANGE - contexto: experiencia con descripción nula
+        // ARRANGE
         ExperienciaDto experienciaDto = ExperienciaDto.builder()
                 .titulo("Proyecto Test")
                 .fechaInicioProyecto(LocalDate.now())
@@ -277,10 +327,10 @@ class ExperienciaControllerIntegrationTest {
                 .descripcion(null)
                 .link("https://github.com/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .build();
 
-        // ACT & ASSERT - acción y validación: debe retornar error
+        // ACT & ASSERT
         mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDto)))
@@ -289,7 +339,7 @@ class ExperienciaControllerIntegrationTest {
 
     @Test
     void saveExperiencia_conDescripcionVacia_debeRetornarError() throws Exception {
-        // ARRANGE - contexto: experiencia con descripción vacía
+        // ARRANGE
         ExperienciaDto experienciaDto = crearExperienciaDto(
                 "Proyecto Test",
                 LocalDate.now(),
@@ -300,7 +350,7 @@ class ExperienciaControllerIntegrationTest {
                 TecnologiaUsada.JAVA
         );
 
-        // ACT & ASSERT - acción y validación: debe retornar error
+        // ACT & ASSERT
         mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDto)))
@@ -309,7 +359,7 @@ class ExperienciaControllerIntegrationTest {
 
     @Test
     void saveExperiencia_conLinkNulo_debeRetornarError() throws Exception {
-        // ARRANGE - contexto: experiencia con link nulo
+        // ARRANGE
         ExperienciaDto experienciaDto = ExperienciaDto.builder()
                 .titulo("Proyecto Test")
                 .fechaInicioProyecto(LocalDate.now())
@@ -317,10 +367,10 @@ class ExperienciaControllerIntegrationTest {
                 .descripcion("Descripción válida")
                 .link(null)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .build();
 
-        // ACT & ASSERT - acción y validación: debe retornar error
+        // ACT & ASSERT
         mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDto)))
@@ -329,7 +379,7 @@ class ExperienciaControllerIntegrationTest {
 
     @Test
     void saveExperiencia_conLinkVacio_debeRetornarError() throws Exception {
-        // ARRANGE - contexto: experiencia con link vacío
+        // ARRANGE
         ExperienciaDto experienciaDto = crearExperienciaDto(
                 "Proyecto Test",
                 LocalDate.now(),
@@ -340,7 +390,7 @@ class ExperienciaControllerIntegrationTest {
                 TecnologiaUsada.JAVA
         );
 
-        // ACT & ASSERT - acción y validación: debe retornar error
+        // ACT & ASSERT
         mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDto)))
@@ -349,7 +399,7 @@ class ExperienciaControllerIntegrationTest {
 
     @Test
     void saveExperiencia_conTipoExperienciaNulo_debeRetornarError() throws Exception {
-        // ARRANGE - contexto: experiencia con tipo de experiencia nulo
+        // ARRANGE
         ExperienciaDto experienciaDto = ExperienciaDto.builder()
                 .titulo("Proyecto Test")
                 .fechaInicioProyecto(LocalDate.now())
@@ -357,10 +407,10 @@ class ExperienciaControllerIntegrationTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/test")
                 .tipoExperiencia(null)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .build();
 
-        // ACT & ASSERT - acción y validación: debe retornar error
+        // ACT & ASSERT
         mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDto)))
@@ -369,7 +419,7 @@ class ExperienciaControllerIntegrationTest {
 
     @Test
     void saveExperiencia_conTecnologiasNulas_debeRetornarError() throws Exception {
-        // ARRANGE - contexto: experiencia con tecnologías nulas
+        // ARRANGE
         ExperienciaDto experienciaDto = ExperienciaDto.builder()
                 .titulo("Proyecto Test")
                 .fechaInicioProyecto(LocalDate.now())
@@ -377,10 +427,10 @@ class ExperienciaControllerIntegrationTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(null) // 🔥 Cambiado a null
+                .tecnologiasUsadas(null)
                 .build();
 
-        // ACT & ASSERT - acción y validación: debe retornar error
+        // ACT & ASSERT
         mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDto)))
@@ -389,7 +439,7 @@ class ExperienciaControllerIntegrationTest {
 
     @Test
     void saveExperiencia_conListaVaciaDeTecnologias_debeRetornarError() throws Exception {
-        // ARRANGE - contexto: experiencia con lista vacía de tecnologías
+        // ARRANGE
         ExperienciaDto experienciaDto = ExperienciaDto.builder()
                 .titulo("Proyecto Test")
                 .fechaInicioProyecto(LocalDate.now())
@@ -397,19 +447,21 @@ class ExperienciaControllerIntegrationTest {
                 .descripcion("Descripción válida")
                 .link("https://github.com/test")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of()) // 🔥 Lista vacía
+                .tecnologiasUsadas(List.of())
                 .build();
 
-        // ACT & ASSERT - acción y validación: debe retornar error (porque @NotNull)
+        // ACT & ASSERT
         mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDto)))
                 .andExpect(status().is4xxClientError());
     }
 
+    // ==================== TESTS DE OBTENCIÓN ====================
+
     @Test
     void getAllExperiencias_debeRetornarTodasLasExperiencias() throws Exception {
-        // ARRANGE - contexto: crear y guardar experiencias
+        // ARRANGE - crear y guardar experiencias
         Experiencia experiencia1 = Experiencia.builder()
                 .titulo("Portfolio Personal")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 15))
@@ -417,7 +469,7 @@ class ExperienciaControllerIntegrationTest {
                 .descripcion("Desarrollo de portfolio personal")
                 .link("https://github.com/portfolio1")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR, TecnologiaUsada.SPRINGBOOT)) // 🔥 Lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR, TecnologiaUsada.SPRINGBOOT))
                 .build();
 
         Experiencia experiencia2 = Experiencia.builder()
@@ -427,13 +479,13 @@ class ExperienciaControllerIntegrationTest {
                 .descripcion("Aplicación de gestión de tareas")
                 .link("https://github.com/app-tareas")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT)) // 🔥 Lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT))
                 .build();
 
         experienciaRepository.save(experiencia1);
         experienciaRepository.save(experiencia2);
 
-        // ACT - acción: obtener todas las experiencias
+        // ACT
         String responseJson = mockMvc.perform(get("/api/v1/todas/experiencias")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -441,17 +493,14 @@ class ExperienciaControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        // ASSERT - validaciones: verificar que retorna todas las experiencias
+        // ASSERT
         ExperienciaDto[] experiencias = objectMapper.readValue(responseJson, ExperienciaDto[].class);
 
         assertAll(
-                () -> assertNotNull(experiencias, "Lista no debe ser null"),
-                () -> assertTrue(experiencias.length >= 2, "Debe contener al menos 2 experiencias"),
-                () -> assertTrue(List.of(experiencias).stream().anyMatch(e -> e.getTitulo().equals("Portfolio Personal")),
-                        "Debe contener Portfolio Personal"),
-                () -> assertTrue(List.of(experiencias).stream().anyMatch(e -> e.getTitulo().equals("App de Tareas")),
-                        "Debe contener App de Tareas"),
-                // 🔥 Verificar tecnologías de la primera experiencia
+                () -> assertNotNull(experiencias),
+                () -> assertTrue(experiencias.length >= 2),
+                () -> assertTrue(List.of(experiencias).stream().anyMatch(e -> e.getTitulo().equals("Portfolio Personal"))),
+                () -> assertTrue(List.of(experiencias).stream().anyMatch(e -> e.getTitulo().equals("App de Tareas"))),
                 () -> {
                     ExperienciaDto found = List.of(experiencias).stream()
                             .filter(e -> e.getTitulo().equals("Portfolio Personal"))
@@ -466,10 +515,10 @@ class ExperienciaControllerIntegrationTest {
 
     @Test
     void getAllExperiencias_sinExperiencias_debeRetornarListaVacia() throws Exception {
-        // ARRANGE - contexto: no hay experiencias en la base de datos
-        assertEquals(0, experienciaRepository.count(), "No debería haber experiencias inicialmente");
+        // ARRANGE - no hay experiencias
+        assertEquals(0, experienciaRepository.count());
 
-        // ACT - acción: obtener todas las experiencias
+        // ACT
         String responseJson = mockMvc.perform(get("/api/v1/todas/experiencias")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -477,34 +526,41 @@ class ExperienciaControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        // ASSERT - validaciones: debe retornar lista vacía
+        // ASSERT
         ExperienciaDto[] experiencias = objectMapper.readValue(responseJson, ExperienciaDto[].class);
-        assertEquals(0, experiencias.length, "Lista debe estar vacía");
+        assertEquals(0, experiencias.length);
     }
 
     @Test
     void getAllExperiencias_conImagenes_debeRetornarExperienciasConImagenes() throws Exception {
-        // ARRANGE - contexto: crear experiencia con imagen
+        // ARRANGE - crear experiencia con imágenes
         Experiencia experiencia = Experiencia.builder()
-                .titulo("Proyecto con Imagen")
+                .titulo("Proyecto con Imágenes")
                 .fechaInicioProyecto(LocalDate.of(2024, 3, 1))
                 .fechaFinProyecto(LocalDate.of(2024, 5, 15))
-                .descripcion("Proyecto con imagen representativa")
-                .link("https://github.com/proyecto-imagen")
+                .descripcion("Proyecto con múltiples imágenes representativas")
+                .link("https://github.com/proyecto-imagenes")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA))
                 .build();
 
-        Imagen imagen = Imagen.builder()
-                .url("https://example.com/proyecto.jpg")
-                .alt("Imagen del proyecto")
+        // Crear imágenes
+        Imagen imagen1 = Imagen.builder()
+                .url("https://example.com/proyecto-1.jpg")
+                .alt("Imagen principal del proyecto")
                 .experiencia(experiencia)
                 .build();
-        experiencia.setImagen(imagen);
 
+        Imagen imagen2 = Imagen.builder()
+                .url("https://example.com/proyecto-2.jpg")
+                .alt("Imagen secundaria del proyecto")
+                .experiencia(experiencia)
+                .build();
+
+        experiencia.setImagenes(Arrays.asList(imagen1, imagen2));
         experienciaRepository.save(experiencia);
 
-        // ACT - acción: obtener todas las experiencias
+        // ACT
         String responseJson = mockMvc.perform(get("/api/v1/todas/experiencias")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -512,24 +568,27 @@ class ExperienciaControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        // ASSERT - validaciones: verificar que la imagen está presente
+        // ASSERT
         ExperienciaDto[] experiencias = objectMapper.readValue(responseJson, ExperienciaDto[].class);
 
         assertAll(
-                () -> assertFalse(experiencias.length == 0, "Lista no debe estar vacía"),
-                () -> assertNotNull(experiencias[0].getImagen(), "Imagen debe estar presente"),
-                () -> assertEquals("https://example.com/proyecto.jpg",
-                        experiencias[0].getImagen().getUrl(), "URL de imagen debe coincidir"),
-                () -> assertTrue(experiencias[0].getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT),
-                        "Debe contener SPRINGBOOT"),
-                () -> assertTrue(experiencias[0].getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
-                        "Debe contener JAVA")
+                () -> assertFalse(experiencias.length == 0),
+                () -> assertNotNull(experiencias[0].getImagenes()),
+                () -> assertEquals(2, experiencias[0].getImagenes().size()),
+                () -> assertEquals("https://example.com/proyecto-1.jpg",
+                        experiencias[0].getImagenes().get(0).getUrl()),
+                () -> assertEquals("https://example.com/proyecto-2.jpg",
+                        experiencias[0].getImagenes().get(1).getUrl()),
+                () -> assertTrue(experiencias[0].getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT)),
+                () -> assertTrue(experiencias[0].getTecnologiasUsadas().contains(TecnologiaUsada.JAVA))
         );
     }
 
+    // ==================== TESTS DE ACTUALIZACIÓN ====================
+
     @Test
-    void updateExperiencia_conDatosValidos_debeActualizarCorrectamente() throws Exception {
-        // ARRANGE - contexto: crear y guardar experiencia
+    void updateExperiencia_conDatosValidosSinImagenes_debeActualizarCorrectamente() throws Exception {
+        // ARRANGE - crear experiencia inicial
         Experiencia experiencia = Experiencia.builder()
                 .titulo("Proyecto Original")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
@@ -537,7 +596,7 @@ class ExperienciaControllerIntegrationTest {
                 .descripcion("Descripción original")
                 .link("https://github.com/original")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .build();
 
         Experiencia guardado = experienciaRepository.save(experiencia);
@@ -551,10 +610,10 @@ class ExperienciaControllerIntegrationTest {
                 "https://github.com/actualizado",
                 TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO,
                 TecnologiaUsada.SPRINGBOOT,
-                TecnologiaUsada.REACT // 🔥 Múltiples tecnologías
+                TecnologiaUsada.REACT
         );
 
-        // ACT - acción: actualizar experiencia
+        // ACT
         String responseJson = mockMvc.perform(put("/api/v1/auth/modificar/experiencia/{id}", guardado.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDtoActualizado)))
@@ -563,38 +622,225 @@ class ExperienciaControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        // ASSERT - validaciones: debe actualizar correctamente
+        // ASSERT
         ExperienciaDto experienciaActualizada = objectMapper.readValue(responseJson, ExperienciaDto.class);
 
         assertAll(
-                () -> assertEquals(guardado.getId(), experienciaActualizada.getId(), "ID debe mantenerse"),
-                () -> assertEquals("Proyecto Actualizado", experienciaActualizada.getTitulo(),
-                        "Título debe estar actualizado"),
-                () -> assertEquals(LocalDate.of(2024, 2, 1), experienciaActualizada.getFechaInicioProyecto(),
-                        "Fecha de inicio debe estar actualizada"),
-                () -> assertEquals(LocalDate.of(2024, 5, 31), experienciaActualizada.getFechaFinProyecto(),
-                        "Fecha de fin debe estar actualizada"),
-                () -> assertEquals("Descripción actualizada del proyecto", experienciaActualizada.getDescripcion(),
-                        "Descripción debe estar actualizada"),
-                () -> assertEquals("https://github.com/actualizado", experienciaActualizada.getLink(),
-                        "Link debe estar actualizado"),
+                () -> assertEquals(guardado.getId(), experienciaActualizada.getId()),
+                () -> assertEquals("Proyecto Actualizado", experienciaActualizada.getTitulo()),
+                () -> assertEquals(LocalDate.of(2024, 2, 1), experienciaActualizada.getFechaInicioProyecto()),
+                () -> assertEquals(LocalDate.of(2024, 5, 31), experienciaActualizada.getFechaFinProyecto()),
+                () -> assertEquals("Descripción actualizada del proyecto", experienciaActualizada.getDescripcion()),
+                () -> assertEquals("https://github.com/actualizado", experienciaActualizada.getLink()),
                 () -> assertEquals(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO,
-                        experienciaActualizada.getTipoExperiencia(), "Tipo de experiencia debe estar actualizado"),
-                // 🔥 Verificar tecnologías actualizadas
-                () -> assertNotNull(experienciaActualizada.getTecnologiasUsadas(),
-                        "Tecnologías usadas no deben ser nulas"),
-                () -> assertEquals(2, experienciaActualizada.getTecnologiasUsadas().size(),
-                        "Debe tener 2 tecnologías"),
-                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT),
-                        "Debe contener SPRINGBOOT"),
-                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.REACT),
-                        "Debe contener REACT")
+                        experienciaActualizada.getTipoExperiencia()),
+                () -> assertNotNull(experienciaActualizada.getTecnologiasUsadas()),
+                () -> assertEquals(2, experienciaActualizada.getTecnologiasUsadas().size()),
+                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT)),
+                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.REACT)),
+                () -> assertNull(experienciaActualizada.getImagenes(), "No debe haber imágenes")
+        );
+    }
+
+    @Test
+    void updateExperiencia_agregarImagenes_debeActualizarCorrectamente() throws Exception {
+        // ARRANGE - crear experiencia sin imágenes
+        Experiencia experiencia = Experiencia.builder()
+                .titulo("Proyecto Sin Imágenes")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 3, 31))
+                .descripcion("Descripción del proyecto")
+                .link("https://github.com/sin-imagenes")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .build();
+
+        Experiencia guardado = experienciaRepository.save(experiencia);
+
+        // Preparar datos con imágenes
+        List<ImagenDto> imagenes = Arrays.asList(
+                crearImagenDto("https://example.com/nueva-1.jpg", "Nueva imagen 1"),
+                crearImagenDto("https://example.com/nueva-2.jpg", "Nueva imagen 2")
+        );
+
+        ExperienciaDto experienciaDtoActualizado = crearExperienciaDtoConImagenes(
+                "Proyecto Sin Imágenes",
+                LocalDate.of(2024, 1, 1),
+                LocalDate.of(2024, 3, 31),
+                "Descripción del proyecto",
+                "https://github.com/sin-imagenes",
+                TipoExperiencia.PROYECTO_PERSONAL,
+                imagenes,
+                TecnologiaUsada.JAVA
+        );
+
+        // ACT
+        String responseJson = mockMvc.perform(put("/api/v1/auth/modificar/experiencia/{id}", guardado.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(experienciaDtoActualizado)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // ASSERT
+        ExperienciaDto experienciaActualizada = objectMapper.readValue(responseJson, ExperienciaDto.class);
+
+        assertAll(
+                () -> assertEquals(guardado.getId(), experienciaActualizada.getId()),
+                () -> assertNotNull(experienciaActualizada.getImagenes()),
+                () -> assertEquals(2, experienciaActualizada.getImagenes().size()),
+                () -> assertEquals("https://example.com/nueva-1.jpg",
+                        experienciaActualizada.getImagenes().get(0).getUrl()),
+                () -> assertEquals("https://example.com/nueva-2.jpg",
+                        experienciaActualizada.getImagenes().get(1).getUrl()),
+                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA))
+        );
+    }
+
+    @Test
+    void updateExperiencia_modificarImagenes_debeActualizarCorrectamente() throws Exception {
+        // ARRANGE - crear experiencia con imágenes existentes
+        Experiencia experiencia = Experiencia.builder()
+                .titulo("Proyecto con Imágenes")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 3, 31))
+                .descripcion("Descripción del proyecto")
+                .link("https://github.com/con-imagenes")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .build();
+
+        Imagen imagen1 = Imagen.builder()
+                .url("https://example.com/antigua-1.jpg")
+                .alt("Imagen antigua 1")
+                .experiencia(experiencia)
+                .build();
+
+        Imagen imagen2 = Imagen.builder()
+                .url("https://example.com/antigua-2.jpg")
+                .alt("Imagen antigua 2")
+                .experiencia(experiencia)
+                .build();
+
+        experiencia.setImagenes(Arrays.asList(imagen1, imagen2));
+        Experiencia guardado = experienciaRepository.save(experiencia);
+
+        // Preparar datos con nuevas imágenes (reemplazar todas)
+        List<ImagenDto> imagenesNuevas = Arrays.asList(
+                crearImagenDto("https://example.com/nueva-1.jpg", "Nueva imagen 1"),
+                crearImagenDto("https://example.com/nueva-2.jpg", "Nueva imagen 2"),
+                crearImagenDto("https://example.com/nueva-3.jpg", "Nueva imagen 3")
+        );
+
+        ExperienciaDto experienciaDtoActualizado = crearExperienciaDtoConImagenes(
+                "Proyecto con Imágenes",
+                LocalDate.of(2024, 1, 1),
+                LocalDate.of(2024, 3, 31),
+                "Descripción del proyecto",
+                "https://github.com/con-imagenes",
+                TipoExperiencia.PROYECTO_PERSONAL,
+                imagenesNuevas,
+                TecnologiaUsada.JAVA,
+                TecnologiaUsada.SPRINGBOOT
+        );
+
+        // ACT
+        String responseJson = mockMvc.perform(put("/api/v1/auth/modificar/experiencia/{id}", guardado.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(experienciaDtoActualizado)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // ASSERT
+        ExperienciaDto experienciaActualizada = objectMapper.readValue(responseJson, ExperienciaDto.class);
+
+        assertAll(
+                () -> assertEquals(guardado.getId(), experienciaActualizada.getId()),
+                () -> assertNotNull(experienciaActualizada.getImagenes()),
+                () -> assertEquals(3, experienciaActualizada.getImagenes().size(),
+                        "Debe tener 3 imágenes nuevas"),
+                () -> assertEquals("https://example.com/nueva-1.jpg",
+                        experienciaActualizada.getImagenes().get(0).getUrl()),
+                () -> assertEquals("https://example.com/nueva-2.jpg",
+                        experienciaActualizada.getImagenes().get(1).getUrl()),
+                () -> assertEquals("https://example.com/nueva-3.jpg",
+                        experienciaActualizada.getImagenes().get(2).getUrl()),
+                // Verificar que las imágenes antiguas fueron reemplazadas
+                () -> assertFalse(experienciaActualizada.getImagenes().stream()
+                        .anyMatch(img -> img.getUrl().contains("antigua"))),
+                () -> assertEquals(2, experienciaActualizada.getTecnologiasUsadas().size()),
+                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA)),
+                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT))
+        );
+    }
+
+    @Test
+    void updateExperiencia_eliminarImagenes_debeActualizarCorrectamente() throws Exception {
+        // ARRANGE - crear experiencia con imágenes
+        Experiencia experiencia = Experiencia.builder()
+                .titulo("Proyecto a Eliminar Imágenes")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 3, 31))
+                .descripcion("Descripción del proyecto")
+                .link("https://github.com/eliminar-imagenes")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .build();
+
+        Imagen imagen1 = Imagen.builder()
+                .url("https://example.com/eliminar-1.jpg")
+                .alt("Imagen a eliminar 1")
+                .experiencia(experiencia)
+                .build();
+
+        Imagen imagen2 = Imagen.builder()
+                .url("https://example.com/eliminar-2.jpg")
+                .alt("Imagen a eliminar 2")
+                .experiencia(experiencia)
+                .build();
+
+        experiencia.setImagenes(Arrays.asList(imagen1, imagen2));
+        Experiencia guardado = experienciaRepository.save(experiencia);
+
+        // Verificar que hay imágenes
+        assertFalse(experienciaRepository.findById(guardado.getId()).get().getImagenes().isEmpty());
+
+        // Preparar datos sin imágenes
+        ExperienciaDto experienciaDtoActualizado = crearExperienciaDto(
+                "Proyecto a Eliminar Imágenes",
+                LocalDate.of(2024, 1, 1),
+                LocalDate.of(2024, 3, 31),
+                "Descripción del proyecto",
+                "https://github.com/eliminar-imagenes",
+                TipoExperiencia.PROYECTO_PERSONAL,
+                TecnologiaUsada.JAVA
+        );
+
+        // ACT
+        String responseJson = mockMvc.perform(put("/api/v1/auth/modificar/experiencia/{id}", guardado.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(experienciaDtoActualizado)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // ASSERT
+        ExperienciaDto experienciaActualizada = objectMapper.readValue(responseJson, ExperienciaDto.class);
+
+        assertAll(
+                () -> assertEquals(guardado.getId(), experienciaActualizada.getId()),
+                () -> assertNull(experienciaActualizada.getImagenes(), "No debe haber imágenes"),
+                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA))
         );
     }
 
     @Test
     void updateExperiencia_conIdInexistente_debeRetornarNotFound() throws Exception {
-        // ARRANGE - contexto: ID que no existe
+        // ARRANGE
         Integer idInexistente = 9999;
         ExperienciaDto experienciaDto = crearExperienciaDto(
                 "Proyecto Actualizado",
@@ -606,7 +852,7 @@ class ExperienciaControllerIntegrationTest {
                 TecnologiaUsada.JAVA
         );
 
-        // ACT & ASSERT - acción y validación: debe retornar 404 Not Found
+        // ACT & ASSERT
         mockMvc.perform(put("/api/v1/auth/modificar/experiencia/{id}", idInexistente)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDto)))
@@ -614,8 +860,8 @@ class ExperienciaControllerIntegrationTest {
     }
 
     @Test
-    void updateExperiencia_cambiarTipoYTecnologias_debeActualizarCorrectamente() throws Exception {
-        // ARRANGE - contexto: crear y guardar experiencia
+    void updateExperiencia_cambiarTipoYTecnologias_conImagenes_debeActualizarCorrectamente() throws Exception {
+        // ARRANGE
         Experiencia experiencia = Experiencia.builder()
                 .titulo("Proyecto Original")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
@@ -623,25 +869,30 @@ class ExperienciaControllerIntegrationTest {
                 .descripcion("Descripción original")
                 .link("https://github.com/original")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .build();
 
         Experiencia guardado = experienciaRepository.save(experiencia);
 
-        // Preparar datos cambiando tipo y tecnologías
-        ExperienciaDto experienciaDtoActualizado = crearExperienciaDto(
+        // Preparar datos cambiando tipo y tecnologías con imágenes
+        List<ImagenDto> imagenes = List.of(
+                crearImagenDto("https://example.com/proyecto-updated.jpg", "Imagen actualizada")
+        );
+
+        ExperienciaDto experienciaDtoActualizado = crearExperienciaDtoConImagenes(
                 "Proyecto Original",
                 LocalDate.of(2024, 1, 1),
                 LocalDate.of(2024, 3, 31),
                 "Descripción original",
                 "https://github.com/original",
                 TipoExperiencia.TRABAJO_LABORAL_FREELANCE,
+                imagenes,
                 TecnologiaUsada.PYTHON,
                 TecnologiaUsada.DJANGO,
-                TecnologiaUsada.POSTGRESQL // 🔥 Múltiples tecnologías
+                TecnologiaUsada.POSTGRESQL
         );
 
-        // ACT - acción: actualizar experiencia
+        // ACT
         String responseJson = mockMvc.perform(put("/api/v1/auth/modificar/experiencia/{id}", guardado.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDtoActualizado)))
@@ -650,31 +901,72 @@ class ExperienciaControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        // ASSERT - validaciones: verificar que tipo y tecnologías fueron cambiados
+        // ASSERT
         ExperienciaDto experienciaActualizada = objectMapper.readValue(responseJson, ExperienciaDto.class);
 
         assertAll(
-                () -> assertEquals(guardado.getId(), experienciaActualizada.getId(), "ID debe mantenerse"),
+                () -> assertEquals(guardado.getId(), experienciaActualizada.getId()),
                 () -> assertEquals(TipoExperiencia.TRABAJO_LABORAL_FREELANCE,
-                        experienciaActualizada.getTipoExperiencia(), "Tipo debe ser actualizado"),
-                // 🔥 Verificar nuevas tecnologías
+                        experienciaActualizada.getTipoExperiencia()),
                 () -> assertNotNull(experienciaActualizada.getTecnologiasUsadas()),
-                () -> assertEquals(3, experienciaActualizada.getTecnologiasUsadas().size(),
-                        "Debe tener 3 tecnologías"),
-                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON),
-                        "Debe contener PYTHON"),
-                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.DJANGO),
-                        "Debe contener DJANGO"),
-                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.POSTGRESQL),
-                        "Debe contener POSTGRESQL"),
-                () -> assertFalse(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
-                        "No debe contener JAVA")
+                () -> assertEquals(3, experienciaActualizada.getTecnologiasUsadas().size()),
+                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON)),
+                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.DJANGO)),
+                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.POSTGRESQL)),
+                () -> assertFalse(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA)),
+                () -> assertNotNull(experienciaActualizada.getImagenes()),
+                () -> assertEquals(1, experienciaActualizada.getImagenes().size()),
+                () -> assertEquals("https://example.com/proyecto-updated.jpg",
+                        experienciaActualizada.getImagenes().get(0).getUrl())
         );
     }
 
     @Test
-    void deleteExperienciaById_conIdExistente_debeEliminarExperiencia() throws Exception {
-        // ARRANGE - contexto: crear y guardar experiencia
+    void updateExperiencia_convertirAProyectoEnCurso_fechaFinNull() throws Exception {
+        // ARRANGE
+        Experiencia experiencia = Experiencia.builder()
+                .titulo("Proyecto Original")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 3, 31))
+                .descripcion("Descripción original")
+                .link("https://github.com/original")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .build();
+
+        Experiencia guardado = experienciaRepository.save(experiencia);
+
+        // Preparar datos con fecha fin null
+        ExperienciaDto experienciaDtoActualizado = crearExperienciaDto(
+                "Proyecto Original",
+                LocalDate.of(2024, 1, 1),
+                null,
+                "Descripción original",
+                "https://github.com/original",
+                TipoExperiencia.PROYECTO_PERSONAL,
+                TecnologiaUsada.JAVA
+        );
+
+        // ACT
+        String responseJson = mockMvc.perform(put("/api/v1/auth/modificar/experiencia/{id}", guardado.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(experienciaDtoActualizado)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // ASSERT
+        ExperienciaDto experienciaActualizada = objectMapper.readValue(responseJson, ExperienciaDto.class);
+        assertNull(experienciaActualizada.getFechaFinProyecto());
+        assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA));
+    }
+
+    // ==================== TESTS DE ELIMINACIÓN ====================
+
+    @Test
+    void deleteExperienciaById_conIdExistenteSinImagenes_debeEliminarExperiencia() throws Exception {
+        // ARRANGE
         Experiencia experiencia = Experiencia.builder()
                 .titulo("Proyecto a Eliminar")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
@@ -682,37 +974,203 @@ class ExperienciaControllerIntegrationTest {
                 .descripcion("Proyecto para eliminar")
                 .link("https://github.com/eliminar")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Lista
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
                 .build();
 
         Experiencia guardado = experienciaRepository.save(experiencia);
-        assertTrue(experienciaRepository.existsById(guardado.getId()),
-                "Experiencia debe existir antes de eliminar");
+        assertTrue(experienciaRepository.existsById(guardado.getId()));
 
-        // ACT - acción: eliminar experiencia
+        // ACT
         mockMvc.perform(delete("/api/v1/borrar/experiencia/{id}", guardado.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
-        // ASSERT - validaciones: experiencia debe ser eliminada
-        assertFalse(experienciaRepository.existsById(guardado.getId()),
-                "Experiencia no debe existir después de eliminar");
+        // ASSERT
+        assertFalse(experienciaRepository.existsById(guardado.getId()));
+    }
+
+    @Test
+    void deleteExperienciaById_conIdExistenteConImagenes_debeEliminarExperienciaYImagenes() throws Exception {
+        // ARRANGE - crear experiencia con imágenes
+        Experiencia experiencia = Experiencia.builder()
+                .titulo("Proyecto con Imágenes a Eliminar")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 3, 31))
+                .descripcion("Proyecto para eliminar con imágenes")
+                .link("https://github.com/eliminar-imagenes")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .build();
+
+        Imagen imagen1 = Imagen.builder()
+                .url("https://example.com/eliminar-1.jpg")
+                .alt("Imagen a eliminar 1")
+                .experiencia(experiencia)
+                .build();
+
+        Imagen imagen2 = Imagen.builder()
+                .url("https://example.com/eliminar-2.jpg")
+                .alt("Imagen a eliminar 2")
+                .experiencia(experiencia)
+                .build();
+
+        experiencia.setImagenes(Arrays.asList(imagen1, imagen2));
+        Experiencia guardado = experienciaRepository.save(experiencia);
+
+        // Verificar que existen imágenes
+        assertEquals(2, imagenRepository.count());
+
+        // ACT
+        mockMvc.perform(delete("/api/v1/borrar/experiencia/{id}", guardado.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        // ASSERT - verificar que la experiencia y sus imágenes fueron eliminadas
+        assertAll(
+                () -> assertFalse(experienciaRepository.existsById(guardado.getId())),
+                () -> assertEquals(0, imagenRepository.count(),
+                        "Todas las imágenes deben ser eliminadas")
+        );
     }
 
     @Test
     void deleteExperienciaById_conIdInexistente_debeLanzarExcepcion() throws Exception {
-        // ARRANGE - contexto: ID que no existe
+        // ARRANGE
         Integer idInexistente = 9999;
 
-        // ACT & ASSERT - acción y validación: debe lanzar excepción
+        // ACT & ASSERT
         mockMvc.perform(delete("/api/v1/borrar/experiencia/{id}", idInexistente)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is5xxServerError());
     }
 
+    // ==================== TESTS DE CASOS BORDE ====================
+
+    @Test
+    void saveExperiencia_conTituloExactamenteDeLongitudMaxima_debeGuardarCorrectamente() throws Exception {
+        // ARRANGE
+        String titulo = "a".repeat(145);
+        ExperienciaDto experienciaDto = crearExperienciaDto(
+                titulo,
+                LocalDate.now(),
+                LocalDate.now().plusMonths(3),
+                "Descripción válida",
+                "https://github.com/test",
+                TipoExperiencia.PROYECTO_PERSONAL,
+                TecnologiaUsada.JAVA
+        );
+
+        // ACT
+        String responseJson = mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(experienciaDto)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // ASSERT
+        ExperienciaDto responseDto = objectMapper.readValue(responseJson, ExperienciaDto.class);
+        assertEquals(titulo, responseDto.getTitulo());
+        assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA));
+    }
+
+    @Test
+    void saveExperiencia_conTituloConCaracteresEspeciales_debeGuardarCorrectamente() throws Exception {
+        // ARRANGE
+        List<ImagenDto> imagenes = List.of(
+                crearImagenDto("https://example.com/especial.jpg", "Imagen especial")
+        );
+
+        ExperienciaDto experienciaDto = crearExperienciaDtoConImagenes(
+                "Proyecto: Desarrollo Web (Full-Stack) & Más!",
+                LocalDate.now(),
+                LocalDate.now().plusMonths(3),
+                "Descripción del proyecto con caracteres especiales",
+                "https://github.com/proyecto-especial",
+                TipoExperiencia.PROYECTO_PERSONAL,
+                imagenes,
+                TecnologiaUsada.JAVASCRIPT,
+                TecnologiaUsada.TYPESCRIPT
+        );
+
+        // ACT
+        String responseJson = mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(experienciaDto)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // ASSERT
+        ExperienciaDto responseDto = objectMapper.readValue(responseJson, ExperienciaDto.class);
+
+        assertAll(
+                () -> assertNotNull(responseDto.getId()),
+                () -> assertEquals("Proyecto: Desarrollo Web (Full-Stack) & Más!", responseDto.getTitulo()),
+                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.JAVASCRIPT)),
+                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT)),
+                () -> assertNotNull(responseDto.getImagenes()),
+                () -> assertEquals(1, responseDto.getImagenes().size()),
+                () -> assertTrue(experienciaRepository.existsById(responseDto.getId()))
+        );
+    }
+
+    @Test
+    void saveExperiencia_conMultiplesTecnologiasYMultiplesImagenes_debeGuardarCorrectamente() throws Exception {
+        // ARRANGE
+        List<ImagenDto> imagenes = Arrays.asList(
+                crearImagenDto("https://example.com/img1.jpg", "Imagen 1"),
+                crearImagenDto("https://example.com/img2.jpg", "Imagen 2"),
+                crearImagenDto("https://example.com/img3.jpg", "Imagen 3")
+        );
+
+        ExperienciaDto experienciaDto = crearExperienciaDtoConImagenes(
+                "Proyecto Full Stack con múltiples tecnologías e imágenes",
+                LocalDate.of(2024, 1, 1),
+                LocalDate.of(2024, 6, 30),
+                "Proyecto que utiliza múltiples tecnologías y tiene múltiples imágenes",
+                "https://github.com/multi-tecnologias-imagenes",
+                TipoExperiencia.PROYECTO_PERSONAL,
+                imagenes,
+                TecnologiaUsada.JAVA,
+                TecnologiaUsada.SPRINGBOOT,
+                TecnologiaUsada.REACT,
+                TecnologiaUsada.TYPESCRIPT,
+                TecnologiaUsada.MYSQL
+        );
+
+        // ACT
+        String responseJson = mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(experienciaDto)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // ASSERT
+        ExperienciaDto responseDto = objectMapper.readValue(responseJson, ExperienciaDto.class);
+
+        assertAll(
+                () -> assertNotNull(responseDto.getId()),
+                () -> assertNotNull(responseDto.getTecnologiasUsadas()),
+                () -> assertEquals(5, responseDto.getTecnologiasUsadas().size()),
+                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA)),
+                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT)),
+                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.REACT)),
+                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT)),
+                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.MYSQL)),
+                () -> assertNotNull(responseDto.getImagenes()),
+                () -> assertEquals(3, responseDto.getImagenes().size()),
+                () -> assertTrue(experienciaRepository.existsById(responseDto.getId()))
+        );
+    }
+
     @Test
     void saveExperiencia_conTodasLasTecnologias_debeGuardarCorrectamente() throws Exception {
-        // ARRANGE - contexto: probar diferentes tecnologías
+        // ARRANGE
         TecnologiaUsada[] tecnologias = TecnologiaUsada.values();
 
         for (TecnologiaUsada tecnologia : tecnologias) {
@@ -726,21 +1184,20 @@ class ExperienciaControllerIntegrationTest {
                     tecnologia
             );
 
-            // ACT - acción: guardar experiencia
+            // ACT & ASSERT
             mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(experienciaDto)))
                     .andExpect(status().isCreated());
         }
 
-        // ASSERT - validaciones: verificar que todas fueron guardadas
-        assertEquals(tecnologias.length, experienciaRepository.count(),
-                "Debe haber " + tecnologias.length + " experiencias en la BD");
+        // ASSERT - verificar que todas fueron guardadas
+        assertEquals(tecnologias.length, experienciaRepository.count());
     }
 
     @Test
     void saveExperiencia_conTodosLosTipos_debeGuardarCorrectamente() throws Exception {
-        // ARRANGE - contexto: probar todos los tipos de experiencia
+        // ARRANGE
         ExperienciaDto experienciaPersonal = crearExperienciaDto(
                 "Proyecto Personal", LocalDate.now(), LocalDate.now().plusMonths(1),
                 "Descripción proyecto personal", "https://github.com/personal",
@@ -766,7 +1223,7 @@ class ExperienciaControllerIntegrationTest {
                 "Descripción trabajo freelance", "https://github.com/freelance",
                 TipoExperiencia.TRABAJO_LABORAL_FREELANCE, TecnologiaUsada.REACT);
 
-        // ACT & ASSERT - acción y validación: guardar todos los tipos y verificar
+        // ACT
         mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaPersonal)))
@@ -792,204 +1249,63 @@ class ExperienciaControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(experienciaFreelance)))
                 .andExpect(status().isCreated());
 
-        // ASSERT - validaciones: verificar que todos fueron guardados
-        assertEquals(5, experienciaRepository.count(), "Debe haber 5 experiencias en la BD");
+        // ASSERT
+        assertEquals(5, experienciaRepository.count());
     }
 
     @Test
-    void updateExperiencia_convertirAProyectoEnCurso_fechaFinNull() throws Exception {
-        // ARRANGE - contexto: crear y guardar experiencia con fecha de fin
+    void updateExperiencia_agregarYQuitarTecnologias_conImagenes_debeActualizarCorrectamente() throws Exception {
+        // ARRANGE
+        List<ImagenDto> imagenesIniciales = Arrays.asList(
+                crearImagenDto("https://example.com/inicial-1.jpg", "Imagen inicial 1"),
+                crearImagenDto("https://example.com/inicial-2.jpg", "Imagen inicial 2")
+        );
+
         Experiencia experiencia = Experiencia.builder()
-                .titulo("Proyecto Original")
-                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
-                .fechaFinProyecto(LocalDate.of(2024, 3, 31))
-                .descripcion("Descripción original")
-                .link("https://github.com/original")
-                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Lista
-                .build();
-
-        Experiencia guardado = experienciaRepository.save(experiencia);
-
-        // Preparar datos con fecha fin null (proyecto en curso)
-        ExperienciaDto experienciaDtoActualizado = crearExperienciaDto(
-                "Proyecto Original",
-                LocalDate.of(2024, 1, 1),
-                null, // Proyecto en curso
-                "Descripción original",
-                "https://github.com/original",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVA
-        );
-
-        // ACT - acción: actualizar experiencia a proyecto en curso
-        String responseJson = mockMvc.perform(put("/api/v1/auth/modificar/experiencia/{id}", guardado.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(experienciaDtoActualizado)))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        // ASSERT - validaciones: verificar que fecha fin es null
-        ExperienciaDto experienciaActualizada = objectMapper.readValue(responseJson, ExperienciaDto.class);
-        assertNull(experienciaActualizada.getFechaFinProyecto(), "Fecha de fin debe ser null para proyecto en curso");
-        assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
-                "Debe contener JAVA");
-    }
-
-    @Test
-    void saveExperiencia_conTituloConCaracteresEspeciales_debeGuardarCorrectamente() throws Exception {
-        // ARRANGE - contexto: título con caracteres especiales
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                "Proyecto: Desarrollo Web (Full-Stack)",
-                LocalDate.now(),
-                LocalDate.now().plusMonths(3),
-                "Descripción del proyecto con caracteres especiales",
-                "https://github.com/proyecto-especial",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVASCRIPT,
-                TecnologiaUsada.TYPESCRIPT // 🔥 Segunda tecnología
-        );
-
-        // ACT - acción: guardar experiencia
-        String responseJson = mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(experienciaDto)))
-                .andExpect(status().isCreated())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        // ASSERT - validaciones: debe guardar correctamente
-        ExperienciaDto responseDto = objectMapper.readValue(responseJson, ExperienciaDto.class);
-
-        assertAll(
-                () -> assertNotNull(responseDto.getId(), "ID debe ser generado"),
-                () -> assertEquals("Proyecto: Desarrollo Web (Full-Stack)", responseDto.getTitulo(),
-                        "Título con caracteres especiales debe coincidir"),
-                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.JAVASCRIPT),
-                        "Debe contener JAVASCRIPT"),
-                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT),
-                        "Debe contener TYPESCRIPT"),
-                () -> assertTrue(experienciaRepository.existsById(responseDto.getId()),
-                        "Experiencia debe existir en la BD")
-        );
-    }
-
-    @Test
-    void saveExperiencia_conTituloExactamenteDeLongitudMaxima_debeGuardarCorrectamente() throws Exception {
-        // ARRANGE - contexto: título exactamente de 145 caracteres
-        String titulo = "a".repeat(145);
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                titulo,
-                LocalDate.now(),
-                LocalDate.now().plusMonths(3),
-                "Descripción válida",
-                "https://github.com/test",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVA
-        );
-
-        // ACT - acción: guardar experiencia
-        String responseJson = mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(experienciaDto)))
-                .andExpect(status().isCreated())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        // ASSERT - validaciones: debe guardar correctamente
-        ExperienciaDto responseDto = objectMapper.readValue(responseJson, ExperienciaDto.class);
-        assertEquals(titulo, responseDto.getTitulo(), "Título debe coincidir");
-        assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
-                "Debe contener JAVA");
-    }
-
-    // 🔥 NUEVO TEST: Guardar experiencia con múltiples tecnologías
-    @Test
-    void saveExperiencia_conMultiplesTecnologias_debeGuardarCorrectamente() throws Exception {
-        // ARRANGE - contexto: experiencia con múltiples tecnologías
-        ExperienciaDto experienciaDto = crearExperienciaDto(
-                "Proyecto Full Stack con múltiples tecnologías",
-                LocalDate.of(2024, 1, 1),
-                LocalDate.of(2024, 6, 30),
-                "Proyecto que utiliza múltiples tecnologías en el stack completo",
-                "https://github.com/multi-tecnologias",
-                TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.JAVA,
-                TecnologiaUsada.SPRINGBOOT,
-                TecnologiaUsada.REACT,
-                TecnologiaUsada.TYPESCRIPT,
-                TecnologiaUsada.MYSQL
-        );
-
-        // ACT - acción: guardar experiencia
-        String responseJson = mockMvc.perform(post("/api/v1/auth/guardar/experiencia")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(experienciaDto)))
-                .andExpect(status().isCreated())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        // ASSERT - validaciones: verificar que todas las tecnologías fueron guardadas
-        ExperienciaDto responseDto = objectMapper.readValue(responseJson, ExperienciaDto.class);
-
-        assertAll(
-                () -> assertNotNull(responseDto.getId(), "ID debe ser generado"),
-                () -> assertEquals("Proyecto Full Stack con múltiples tecnologías", responseDto.getTitulo(),
-                        "Título debe coincidir"),
-                () -> assertNotNull(responseDto.getTecnologiasUsadas(),
-                        "Tecnologías usadas no deben ser nulas"),
-                () -> assertEquals(5, responseDto.getTecnologiasUsadas().size(),
-                        "Debe tener 5 tecnologías"),
-                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
-                        "Debe contener JAVA"),
-                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT),
-                        "Debe contener SPRINGBOOT"),
-                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.REACT),
-                        "Debe contener REACT"),
-                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT),
-                        "Debe contener TYPESCRIPT"),
-                () -> assertTrue(responseDto.getTecnologiasUsadas().contains(TecnologiaUsada.MYSQL),
-                        "Debe contener MYSQL"),
-                () -> assertTrue(experienciaRepository.existsById(responseDto.getId()),
-                        "Experiencia debe existir en la BD")
-        );
-    }
-
-    // 🔥 NUEVO TEST: Actualizar experiencia agregando y quitando tecnologías
-    @Test
-    void updateExperiencia_agregarYQuitarTecnologias_debeActualizarCorrectamente() throws Exception {
-        // ARRANGE - contexto: crear y guardar experiencia con tecnologías iniciales
-        Experiencia experiencia = Experiencia.builder()
-                .titulo("Proyecto para actualizar tecnologías")
+                .titulo("Proyecto para actualizar tecnologías e imágenes")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
                 .fechaFinProyecto(LocalDate.of(2024, 3, 31))
                 .descripcion("Descripción del proyecto")
-                .link("https://github.com/actualizar-tecnologias")
+                .link("https://github.com/actualizar-todo")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA, TecnologiaUsada.SPRINGBOOT)) // Tecnologías iniciales
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA, TecnologiaUsada.SPRINGBOOT))
                 .build();
 
+        // Crear y asociar imágenes
+        Imagen img1 = Imagen.builder()
+                .url("https://example.com/inicial-1.jpg")
+                .alt("Imagen inicial 1")
+                .experiencia(experiencia)
+                .build();
+
+        Imagen img2 = Imagen.builder()
+                .url("https://example.com/inicial-2.jpg")
+                .alt("Imagen inicial 2")
+                .experiencia(experiencia)
+                .build();
+
+        experiencia.setImagenes(Arrays.asList(img1, img2));
         Experiencia guardado = experienciaRepository.save(experiencia);
 
-        // Preparar datos con nuevas tecnologías (reemplazar algunas y agregar otras)
-        ExperienciaDto experienciaDtoActualizado = crearExperienciaDto(
-                "Proyecto para actualizar tecnologías",
+        // Preparar datos con nuevas tecnologías e imágenes
+        List<ImagenDto> imagenesNuevas = List.of(
+                crearImagenDto("https://example.com/nueva-1.jpg", "Nueva imagen única")
+        );
+
+        ExperienciaDto experienciaDtoActualizado = crearExperienciaDtoConImagenes(
+                "Proyecto para actualizar tecnologías e imágenes",
                 LocalDate.of(2024, 1, 1),
                 LocalDate.of(2024, 3, 31),
                 "Descripción del proyecto",
-                "https://github.com/actualizar-tecnologias",
+                "https://github.com/actualizar-todo",
                 TipoExperiencia.PROYECTO_PERSONAL,
-                TecnologiaUsada.REACT,      // Nueva tecnología
-                TecnologiaUsada.TYPESCRIPT, // Nueva tecnología
-                TecnologiaUsada.PYTHON      // Nueva tecnología
+                imagenesNuevas,
+                TecnologiaUsada.REACT,
+                TecnologiaUsada.TYPESCRIPT,
+                TecnologiaUsada.PYTHON
         );
 
-        // ACT - acción: actualizar experiencia
+        // ACT
         String responseJson = mockMvc.perform(put("/api/v1/auth/modificar/experiencia/{id}", guardado.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experienciaDtoActualizado)))
@@ -998,27 +1314,25 @@ class ExperienciaControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        // ASSERT - validaciones: verificar que las tecnologías fueron actualizadas
+        // ASSERT
         ExperienciaDto experienciaActualizada = objectMapper.readValue(responseJson, ExperienciaDto.class);
 
         assertAll(
-                () -> assertEquals(guardado.getId(), experienciaActualizada.getId(), "ID debe mantenerse"),
-                () -> assertNotNull(experienciaActualizada.getTecnologiasUsadas(),
-                        "Tecnologías usadas no deben ser nulas"),
-                () -> assertEquals(3, experienciaActualizada.getTecnologiasUsadas().size(),
-                        "Debe tener 3 tecnologías (las nuevas)"),
-                // Verificar nuevas tecnologías
-                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.REACT),
-                        "Debe contener REACT"),
-                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT),
-                        "Debe contener TYPESCRIPT"),
-                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON),
-                        "Debe contener PYTHON"),
-                // Verificar que las antiguas tecnologías fueron removidas
-                () -> assertFalse(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
-                        "No debe contener JAVA"),
-                () -> assertFalse(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT),
-                        "No debe contener SPRINGBOOT")
+                () -> assertEquals(guardado.getId(), experienciaActualizada.getId()),
+                () -> assertNotNull(experienciaActualizada.getTecnologiasUsadas()),
+                () -> assertEquals(3, experienciaActualizada.getTecnologiasUsadas().size()),
+                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.REACT)),
+                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT)),
+                () -> assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON)),
+                () -> assertFalse(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA)),
+                () -> assertFalse(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT)),
+                () -> assertNotNull(experienciaActualizada.getImagenes()),
+                () -> assertEquals(1, experienciaActualizada.getImagenes().size()),
+                () -> assertEquals("https://example.com/nueva-1.jpg",
+                        experienciaActualizada.getImagenes().get(0).getUrl()),
+                // Verificar que las imágenes antiguas fueron eliminadas
+                () -> assertFalse(experienciaActualizada.getImagenes().stream()
+                        .anyMatch(img -> img.getUrl().contains("inicial")))
         );
     }
 }
