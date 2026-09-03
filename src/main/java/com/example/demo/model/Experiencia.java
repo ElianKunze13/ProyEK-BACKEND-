@@ -48,7 +48,6 @@ public class Experiencia {
     @Enumerated(EnumType.STRING)
     private TipoExperiencia tipoExperiencia;
 
-    // 🔥 CAMBIO PRINCIPAL: de Enum a List<Enum>
     @NotNull
     @ElementCollection(targetClass = TecnologiaUsada.class)
     @CollectionTable(name = "experiencia_tecnologias",
@@ -57,6 +56,7 @@ public class Experiencia {
     @Column(name = "tecnologia")
     private List<TecnologiaUsada> tecnologiasUsadas;
 
+    // CAMBIAR de imagen a List<imagenes>
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "imagen_id", referencedColumnName = "id")
     @JsonManagedReference

@@ -20,9 +20,9 @@ public class ExperienciaDto {
     private LocalDate fechaFinProyecto;
     private String descripcion;
     private String link;
+
+    // CAMBIAR de imagen a List<imagenes>
     private ImagenDto imagen;
     private TipoExperiencia tipoExperiencia;
-
-    // 🔥 CAMBIO PRINCIPAL: de Enum a List<Enum>
     private List<TecnologiaUsada> tecnologiasUsadas;
 }
