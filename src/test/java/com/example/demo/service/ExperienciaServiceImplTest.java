@@ -9,14 +9,12 @@ import com.example.demo.model.Experiencia;
 import com.example.demo.model.Imagen;
 import com.example.demo.model.Usuario;
 import com.example.demo.repository.ExperienciaRepository;
+import com.example.demo.repository.ImagenRepository;
 import com.example.demo.service.Impl.ExperienciaServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -43,6 +41,9 @@ class ExperienciaServiceImplTest {
     private ExperienciaRepository experienciaRepository;
 
     @Mock
+    private ImagenRepository imagenRepository;
+
+    @Mock
     private ExperienciaMapper experienciaMapper;
 
     @InjectMocks
@@ -52,26 +53,46 @@ class ExperienciaServiceImplTest {
     private ExperienciaDto experienciaDtoValido;
     private Experiencia experienciaEnCurso;
     private ExperienciaDto experienciaDtoEnCurso;
-    private Imagen imagen;
-    private ImagenDto imagenDto;
+    private Imagen imagen1;
+    private Imagen imagen2;
+    private ImagenDto imagenDto1;
+    private ImagenDto imagenDto2;
+    private List<Imagen> listaImagenes;
+    private List<ImagenDto> listaImagenesDto;
     private Usuario usuario;
 
     @BeforeEach
     void setUp() {
         // Arrange - Configuración inicial para cada test
 
-        // Crear imagen
-        imagen = Imagen.builder()
+        // Crear imágenes
+        imagen1 = Imagen.builder()
                 .id(1)
-                .url("proyecto.jpg")
-                .alt("Captura del proyecto")
+                .url("proyecto-principal.jpg")
+                .alt("Captura principal del proyecto")
                 .build();
 
-        imagenDto = ImagenDto.builder()
-                .id(1)
-                .url("proyecto.jpg")
-                .alt("Captura del proyecto")
+        imagen2 = Imagen.builder()
+                .id(2)
+                .url("proyecto-detalle.jpg")
+                .alt("Detalle del proyecto")
                 .build();
+
+        listaImagenes = Arrays.asList(imagen1, imagen2);
+
+        imagenDto1 = ImagenDto.builder()
+                .id(1)
+                .url("proyecto-principal.jpg")
+                .alt("Captura principal del proyecto")
+                .build();
+
+        imagenDto2 = ImagenDto.builder()
+                .id(2)
+                .url("proyecto-detalle.jpg")
+                .alt("Detalle del proyecto")
+                .build();
+
+        listaImagenesDto = Arrays.asList(imagenDto1, imagenDto2);
 
         // Crear usuario
         usuario = Usuario.builder()
@@ -83,7 +104,7 @@ class ExperienciaServiceImplTest {
                 .descripcion("Apasionado por la tecnología y el desarrollo de software.")
                 .build();
 
-        // 🔥 Crear experiencia válida con lista de tecnologías
+        // Crear experiencia válida con lista de imágenes y tecnologías
         experienciaValida = Experiencia.builder()
                 .id(1)
                 .titulo("Sistema de Gestión de Usuarios")
@@ -92,12 +113,12 @@ class ExperienciaServiceImplTest {
                 .descripcion("Desarrollo de API REST con Spring Boot y JWT para gestión de usuarios")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA))
+                .imagenes(listaImagenes) // 🔥 Cambiado a lista de imágenes
                 .usuario(usuario)
                 .build();
 
-        // 🔥 Crear ExperienciaDto válido con lista de tecnologías
+        // Crear ExperienciaDto válido con lista de imágenes y tecnologías
         experienciaDtoValido = ExperienciaDto.builder()
                 .id(1)
                 .titulo("Sistema de Gestión de Usuarios")
@@ -106,11 +127,11 @@ class ExperienciaServiceImplTest {
                 .descripcion("Desarrollo de API REST con Spring Boot y JWT para gestión de usuarios")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
-                .imagen(imagenDto)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA))
+                .imagenes(listaImagenesDto) // 🔥 Cambiado a lista de imágenes
                 .build();
 
-        // 🔥 Crear experiencia en curso (con fechaFinProyecto nula)
+        // Crear experiencia en curso (con fechaFinProyecto nula)
         experienciaEnCurso = Experiencia.builder()
                 .id(2)
                 .titulo("Proyecto en Desarrollo")
@@ -119,12 +140,12 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción del proyecto en desarrollo con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
-                .imagen(null)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(Collections.emptyList()) // Lista vacía
                 .usuario(usuario)
                 .build();
 
-        // 🔥 Crear ExperienciaDto en curso
+        // Crear ExperienciaDto en curso
         experienciaDtoEnCurso = ExperienciaDto.builder()
                 .id(2)
                 .titulo("Proyecto en Desarrollo")
@@ -133,8 +154,8 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción del proyecto en desarrollo con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
-                .imagen(null)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(null) // Sin imágenes
                 .build();
     }
 
@@ -151,8 +172,8 @@ class ExperienciaServiceImplTest {
                 .descripcion("Desarrollo de API REST con Spring Boot y JWT para gestión de usuarios")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA))
+                .imagenes(listaImagenes) // 🔥 Cambiado a lista
                 .usuario(usuario)
                 .build();
 
@@ -164,8 +185,8 @@ class ExperienciaServiceImplTest {
                 .descripcion("Desarrollo de API REST con Spring Boot y JWT para gestión de usuarios")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA))
+                .imagenes(listaImagenes)
                 .usuario(usuario)
                 .build();
 
@@ -184,7 +205,7 @@ class ExperienciaServiceImplTest {
         assertEquals(TipoExperiencia.PROYECTO_PERSONAL, resultado.getTipoExperiencia(),
                 "El tipo de experiencia debería ser PROYECTO_PERSONAL");
 
-        // 🔥 Verificar lista de tecnologías
+        // Verificar lista de tecnologías
         assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
         assertEquals(2, resultado.getTecnologiasUsadas().size(), "Debería tener 2 tecnologías");
         assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.SPRINGBOOT),
@@ -192,70 +213,135 @@ class ExperienciaServiceImplTest {
         assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
                 "Debería contener JAVA");
 
+        // 🔥 Verificar lista de imágenes
+        assertNotNull(resultado.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(2, resultado.getImagenes().size(), "Debería tener 2 imágenes");
+        assertEquals("proyecto-principal.jpg", resultado.getImagenes().get(0).getUrl(),
+                "La URL de la primera imagen debería coincidir");
+        assertEquals("proyecto-detalle.jpg", resultado.getImagenes().get(1).getUrl(),
+                "La URL de la segunda imagen debería coincidir");
+
         verify(experienciaMapper, times(1)).toExperiencia(experienciaDtoValido);
         verify(experienciaRepository, times(1)).save(experienciaParaGuardar);
         verify(experienciaMapper, times(1)).toExperienciaDto(experienciaGuardada);
     }
 
     @Test
-    @DisplayName("saveExperiencia - Debería guardar una experiencia sin imagen correctamente")
-    void saveExperiencia_ShouldSaveExperienciaWithoutImageCorrectly() {
+    @DisplayName("saveExperiencia - Debería guardar una experiencia sin imágenes correctamente")
+    void saveExperiencia_ShouldSaveExperienciaWithoutImagesCorrectly() {
         // Arrange
-        ExperienciaDto experienciaDtoSinImagen = ExperienciaDto.builder()
-                .titulo("Proyecto sin Imagen")
+        ExperienciaDto experienciaDtoSinImagenes = ExperienciaDto.builder()
+                .titulo("Proyecto sin Imágenes")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
                 .fechaFinProyecto(LocalDate.of(2024, 6, 1))
-                .descripcion("Descripción del proyecto sin imagen con más de 5 caracteres")
-                .link("https://github.com/usuario/proyecto-sin-imagen")
+                .descripcion("Descripción del proyecto sin imágenes con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-sin-imagenes")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
-                .imagen(null)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON))
+                .imagenes(null) // Sin imágenes
                 .build();
 
-        Experiencia experienciaSinImagen = Experiencia.builder()
-                .titulo("Proyecto sin Imagen")
+        Experiencia experienciaSinImagenes = Experiencia.builder()
+                .titulo("Proyecto sin Imágenes")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
                 .fechaFinProyecto(LocalDate.of(2024, 6, 1))
-                .descripcion("Descripción del proyecto sin imagen con más de 5 caracteres")
-                .link("https://github.com/usuario/proyecto-sin-imagen")
+                .descripcion("Descripción del proyecto sin imágenes con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-sin-imagenes")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
-                .imagen(null)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON))
+                .imagenes(null)
                 .usuario(null)
                 .build();
 
         Experiencia experienciaGuardada = Experiencia.builder()
                 .id(3)
-                .titulo("Proyecto sin Imagen")
+                .titulo("Proyecto sin Imágenes")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
                 .fechaFinProyecto(LocalDate.of(2024, 6, 1))
-                .descripcion("Descripción del proyecto sin imagen con más de 5 caracteres")
-                .link("https://github.com/usuario/proyecto-sin-imagen")
+                .descripcion("Descripción del proyecto sin imágenes con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-sin-imagenes")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
-                .imagen(null)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON))
+                .imagenes(null)
                 .usuario(null)
                 .build();
 
-        when(experienciaMapper.toExperiencia(experienciaDtoSinImagen)).thenReturn(experienciaSinImagen);
-        when(experienciaRepository.save(experienciaSinImagen)).thenReturn(experienciaGuardada);
-        when(experienciaMapper.toExperienciaDto(experienciaGuardada)).thenReturn(experienciaDtoSinImagen);
+        when(experienciaMapper.toExperiencia(experienciaDtoSinImagenes)).thenReturn(experienciaSinImagenes);
+        when(experienciaRepository.save(experienciaSinImagenes)).thenReturn(experienciaGuardada);
+        when(experienciaMapper.toExperienciaDto(experienciaGuardada)).thenReturn(experienciaDtoSinImagenes);
 
         // Act
-        ExperienciaDto resultado = experienciaService.saveExperiencia(experienciaDtoSinImagen);
+        ExperienciaDto resultado = experienciaService.saveExperiencia(experienciaDtoSinImagenes);
 
         // Assert
         assertNotNull(resultado, "El resultado no debería ser nulo");
-        assertNull(resultado.getImagen(), "La imagen debería ser nula");
-        assertEquals("Proyecto sin Imagen", resultado.getTitulo(), "El título debería coincidir");
+        assertNull(resultado.getImagenes(), "La lista de imágenes debería ser nula");
+        assertEquals("Proyecto sin Imágenes", resultado.getTitulo(), "El título debería coincidir");
 
-        // 🔥 Verificar tecnologías
+        // Verificar tecnologías
         assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
         assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON),
                 "Debería contener PYTHON");
 
-        verify(experienciaMapper, times(1)).toExperiencia(experienciaDtoSinImagen);
-        verify(experienciaRepository, times(1)).save(experienciaSinImagen);
+        verify(experienciaMapper, times(1)).toExperiencia(experienciaDtoSinImagenes);
+        verify(experienciaRepository, times(1)).save(experienciaSinImagenes);
+        verify(experienciaMapper, times(1)).toExperienciaDto(experienciaGuardada);
+    }
+
+    @Test
+    @DisplayName("saveExperiencia - Debería guardar una experiencia con lista vacía de imágenes")
+    void saveExperiencia_ShouldSaveExperienciaWithEmptyImagesList() {
+        // Arrange
+        ExperienciaDto experienciaDtoListaVacia = ExperienciaDto.builder()
+                .titulo("Proyecto con lista vacía de imágenes")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto con lista vacía de imágenes con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-lista-vacia")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(Collections.emptyList()) // Lista vacía
+                .build();
+
+        Experiencia experienciaListaVacia = Experiencia.builder()
+                .titulo("Proyecto con lista vacía de imágenes")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto con lista vacía de imágenes con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-lista-vacia")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(Collections.emptyList())
+                .usuario(null)
+                .build();
+
+        Experiencia experienciaGuardada = Experiencia.builder()
+                .id(4)
+                .titulo("Proyecto con lista vacía de imágenes")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto con lista vacía de imágenes con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-lista-vacia")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(Collections.emptyList())
+                .usuario(null)
+                .build();
+
+        when(experienciaMapper.toExperiencia(experienciaDtoListaVacia)).thenReturn(experienciaListaVacia);
+        when(experienciaRepository.save(experienciaListaVacia)).thenReturn(experienciaGuardada);
+        when(experienciaMapper.toExperienciaDto(experienciaGuardada)).thenReturn(experienciaDtoListaVacia);
+
+        // Act
+        ExperienciaDto resultado = experienciaService.saveExperiencia(experienciaDtoListaVacia);
+
+        // Assert
+        assertNotNull(resultado, "El resultado no debería ser nulo");
+        assertNotNull(resultado.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertTrue(resultado.getImagenes().isEmpty(), "La lista de imágenes debería estar vacía");
+
+        verify(experienciaMapper, times(1)).toExperiencia(experienciaDtoListaVacia);
+        verify(experienciaRepository, times(1)).save(experienciaListaVacia);
         verify(experienciaMapper, times(1)).toExperienciaDto(experienciaGuardada);
     }
 
@@ -270,8 +356,8 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción del proyecto en desarrollo con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
-                .imagen(null)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(null)
                 .usuario(null)
                 .build();
 
@@ -283,8 +369,8 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción del proyecto en desarrollo con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
-                .imagen(null)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(null)
                 .usuario(null)
                 .build();
 
@@ -300,7 +386,7 @@ class ExperienciaServiceImplTest {
         assertNull(resultado.getFechaFinProyecto(), "La fecha de fin debería ser nula para proyecto en curso");
         assertEquals("Proyecto en Desarrollo", resultado.getTitulo(), "El título debería coincidir");
 
-        // 🔥 Verificar tecnologías
+        // Verificar tecnologías
         assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
         assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
                 "Debería contener JAVA");
@@ -321,6 +407,8 @@ class ExperienciaServiceImplTest {
                 TecnologiaUsada.TYPESCRIPT
         );
 
+        List<ImagenDto> imagenesDto = List.of(imagenDto1);
+
         ExperienciaDto experienciaDtoMultiples = ExperienciaDto.builder()
                 .titulo("Proyecto con múltiples tecnologías")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
@@ -329,7 +417,7 @@ class ExperienciaServiceImplTest {
                 .link("https://github.com/usuario/proyecto-multiples")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(tecnologiasMultiples)
-                .imagen(imagenDto)
+                .imagenes(imagenesDto)
                 .build();
 
         Experiencia experienciaMultiples = Experiencia.builder()
@@ -340,7 +428,7 @@ class ExperienciaServiceImplTest {
                 .link("https://github.com/usuario/proyecto-multiples")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(tecnologiasMultiples)
-                .imagen(imagen)
+                .imagenes(List.of(imagen1))
                 .usuario(null)
                 .build();
 
@@ -353,7 +441,7 @@ class ExperienciaServiceImplTest {
                 .link("https://github.com/usuario/proyecto-multiples")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(tecnologiasMultiples)
-                .imagen(imagen)
+                .imagenes(List.of(imagen1))
                 .usuario(null)
                 .build();
 
@@ -388,7 +476,7 @@ class ExperienciaServiceImplTest {
                 .link("https://github.com/usuario/proyecto-sin-tecnologias")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of()) // Lista vacía
-                .imagen(imagenDto)
+                .imagenes(listaImagenesDto)
                 .build();
 
         Experiencia experienciaSinTecnologias = Experiencia.builder()
@@ -399,7 +487,7 @@ class ExperienciaServiceImplTest {
                 .link("https://github.com/usuario/proyecto-sin-tecnologias")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of())
-                .imagen(imagen)
+                .imagenes(listaImagenes)
                 .usuario(null)
                 .build();
 
@@ -412,7 +500,7 @@ class ExperienciaServiceImplTest {
                 .link("https://github.com/usuario/proyecto-sin-tecnologias")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of())
-                .imagen(imagen)
+                .imagenes(listaImagenes)
                 .usuario(null)
                 .build();
 
@@ -455,6 +543,12 @@ class ExperienciaServiceImplTest {
     void actualizarExperienciaPorId_ShouldUpdateExperienciaCorrectly() {
         // Arrange
         Integer id = 1;
+
+        List<ImagenDto> imagenesActualizadas = Arrays.asList(
+                ImagenDto.builder().id(3).url("updated-1.jpg").alt("Imagen actualizada 1").build(),
+                ImagenDto.builder().id(4).url("updated-2.jpg").alt("Imagen actualizada 2").build()
+        );
+
         ExperienciaDto experienciaDtoActualizado = ExperienciaDto.builder()
                 .id(id)
                 .titulo("Sistema de Gestión de Usuarios Actualizado")
@@ -463,8 +557,8 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción actualizada con más de 5 caracteres para prueba")
                 .link("https://github.com/usuario/proyecto-actualizado")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_FREELANCE)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
-                .imagen(imagenDto)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR, TecnologiaUsada.TYPESCRIPT))
+                .imagenes(imagenesActualizadas)
                 .build();
 
         Experiencia experienciaActualizada = Experiencia.builder()
@@ -475,8 +569,11 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción actualizada con más de 5 caracteres para prueba")
                 .link("https://github.com/usuario/proyecto-actualizado")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_FREELANCE)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR, TecnologiaUsada.TYPESCRIPT))
+                .imagenes(Arrays.asList(
+                        Imagen.builder().id(3).url("updated-1.jpg").alt("Imagen actualizada 1").build(),
+                        Imagen.builder().id(4).url("updated-2.jpg").alt("Imagen actualizada 2").build()
+                ))
                 .usuario(usuario)
                 .build();
 
@@ -499,13 +596,19 @@ class ExperienciaServiceImplTest {
         assertEquals(TipoExperiencia.TRABAJO_LABORAL_FREELANCE, resultado.getTipoExperiencia(),
                 "El tipo de experiencia debería estar actualizado");
 
-        // 🔥 Verificar tecnologías actualizadas
+        // Verificar tecnologías actualizadas
         assertNotNull(resultado.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
         assertEquals(2, resultado.getTecnologiasUsadas().size(), "Debería tener 2 tecnologías");
         assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.ANGULAR),
                 "Debería contener ANGULAR");
         assertTrue(resultado.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT),
                 "Debería contener TYPESCRIPT");
+
+        // 🔥 Verificar lista de imágenes actualizadas
+        assertNotNull(resultado.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(2, resultado.getImagenes().size(), "Debería tener 2 imágenes");
+        assertEquals("updated-1.jpg", resultado.getImagenes().get(0).getUrl());
+        assertEquals("updated-2.jpg", resultado.getImagenes().get(1).getUrl());
 
         // Verificar que se actualizaron los campos en la entidad existente
         assertEquals("Sistema de Gestión de Usuarios Actualizado", experienciaValida.getTitulo(),
@@ -531,8 +634,8 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                .imagen(imagenDto)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(listaImagenesDto)
                 .build();
 
         when(experienciaRepository.findById(id)).thenReturn(Optional.of(experienciaValida));
@@ -555,6 +658,10 @@ class ExperienciaServiceImplTest {
     void actualizarExperienciaPorId_ShouldUpdateOnlyAllowedFields() {
         // Arrange
         Integer id = 1;
+        List<ImagenDto> nuevasImagenes = List.of(
+                ImagenDto.builder().id(5).url("nueva-imagen.jpg").alt("Nueva imagen").build()
+        );
+
         ExperienciaDto experienciaDtoActualizado = ExperienciaDto.builder()
                 .id(id)
                 .titulo("Nuevo Título")
@@ -563,8 +670,8 @@ class ExperienciaServiceImplTest {
                 .descripcion("Nueva descripción con más de 5 caracteres")
                 .link("https://github.com/usuario/nuevo-link")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
-                .imagen(imagenDto)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT))
+                .imagenes(nuevasImagenes)
                 .build();
 
         when(experienciaRepository.findById(id)).thenReturn(Optional.of(experienciaValida));
@@ -585,7 +692,7 @@ class ExperienciaServiceImplTest {
         assertEquals(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO, experienciaValida.getTipoExperiencia(),
                 "El tipo de experiencia debería estar actualizado");
 
-        // 🔥 Verificar tecnologías actualizadas
+        // Verificar tecnologías actualizadas
         assertNotNull(experienciaValida.getTecnologiasUsadas(),
                 "Las tecnologías usadas no deberían ser nulas");
         assertEquals(2, experienciaValida.getTecnologiasUsadas().size(),
@@ -597,6 +704,47 @@ class ExperienciaServiceImplTest {
 
         // Verificar que el ID no se modifica
         assertEquals(1, experienciaValida.getId(), "El ID no debería cambiar");
+
+        verify(experienciaRepository, times(1)).findById(id);
+        verify(experienciaRepository, times(1)).save(experienciaValida);
+    }
+
+    @Test
+    @DisplayName("actualizarExperienciaPorId - Debería actualizar la lista de imágenes correctamente")
+    void actualizarExperienciaPorId_ShouldUpdateImagenesCorrectly() {
+        // Arrange
+        Integer id = 1;
+        List<ImagenDto> nuevasImagenes = Arrays.asList(
+                ImagenDto.builder().id(6).url("img-nueva-1.jpg").alt("Imagen nueva 1").build(),
+                ImagenDto.builder().id(7).url("img-nueva-2.jpg").alt("Imagen nueva 2").build(),
+                ImagenDto.builder().id(8).url("img-nueva-3.jpg").alt("Imagen nueva 3").build()
+        );
+
+        ExperienciaDto experienciaDtoActualizado = ExperienciaDto.builder()
+                .id(id)
+                .titulo("Sistema de Gestión de Usuarios")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 15))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 30))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(nuevasImagenes)
+                .build();
+
+        when(experienciaRepository.findById(id)).thenReturn(Optional.of(experienciaValida));
+        when(experienciaRepository.save(any(Experiencia.class))).thenReturn(experienciaValida);
+        when(experienciaMapper.toExperienciaDto(any(Experiencia.class))).thenReturn(experienciaDtoActualizado);
+
+        // Act
+        experienciaService.actualizarExperienciaPorId(id, experienciaDtoActualizado);
+
+        // Assert - Verificar que las imágenes se actualizaron
+        assertNotNull(experienciaValida.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(3, experienciaValida.getImagenes().size(), "Debería tener 3 imágenes");
+        assertEquals("img-nueva-1.jpg", experienciaValida.getImagenes().get(0).getUrl());
+        assertEquals("img-nueva-2.jpg", experienciaValida.getImagenes().get(1).getUrl());
+        assertEquals("img-nueva-3.jpg", experienciaValida.getImagenes().get(2).getUrl());
 
         verify(experienciaRepository, times(1)).findById(id);
         verify(experienciaRepository, times(1)).save(experienciaValida);
@@ -622,7 +770,7 @@ class ExperienciaServiceImplTest {
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(nuevasTecnologias)
-                .imagen(imagenDto)
+                .imagenes(listaImagenesDto)
                 .build();
 
         when(experienciaRepository.findById(id)).thenReturn(Optional.of(experienciaValida));
@@ -643,6 +791,37 @@ class ExperienciaServiceImplTest {
                 "SPRINGBOOT ya no debería estar en la lista");
         assertFalse(experienciaValida.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
                 "JAVA ya no debería estar en la lista");
+
+        verify(experienciaRepository, times(1)).findById(id);
+        verify(experienciaRepository, times(1)).save(experienciaValida);
+    }
+
+    @Test
+    @DisplayName("actualizarExperienciaPorId - Debería eliminar todas las imágenes de una experiencia")
+    void actualizarExperienciaPorId_ShouldRemoveAllImagenesFromExperiencia() {
+        // Arrange
+        Integer id = 1;
+        ExperienciaDto experienciaDtoSinImagenes = ExperienciaDto.builder()
+                .id(id)
+                .titulo("Sistema de Gestión de Usuarios")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 15))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 30))
+                .descripcion("Descripción válida con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(null) // Sin imágenes
+                .build();
+
+        when(experienciaRepository.findById(id)).thenReturn(Optional.of(experienciaValida));
+        when(experienciaRepository.save(any(Experiencia.class))).thenReturn(experienciaValida);
+        when(experienciaMapper.toExperienciaDto(any(Experiencia.class))).thenReturn(experienciaDtoSinImagenes);
+
+        // Act
+        experienciaService.actualizarExperienciaPorId(id, experienciaDtoSinImagenes);
+
+        // Assert
+        assertNull(experienciaValida.getImagenes(), "La lista de imágenes debería ser nula");
 
         verify(experienciaRepository, times(1)).findById(id);
         verify(experienciaRepository, times(1)).save(experienciaValida);
@@ -782,7 +961,7 @@ class ExperienciaServiceImplTest {
         assertEquals(experienciaDtoEnCurso.getTitulo(), resultado.get(1).getTitulo(),
                 "El título del segundo elemento debería coincidir");
 
-        // 🔥 Verificar tecnologías del primer elemento
+        // Verificar tecnologías del primer elemento
         assertNotNull(resultado.get(0).getTecnologiasUsadas(),
                 "Las tecnologías usadas no deberían ser nulas");
         assertEquals(2, resultado.get(0).getTecnologiasUsadas().size(),
@@ -815,40 +994,40 @@ class ExperienciaServiceImplTest {
     }
 
     @Test
-    @DisplayName("getAllExperiencias - Debería manejar experiencias con imagen nula correctamente")
-    void getAllExperiencias_ShouldHandleExperienciasWithNullImage() {
+    @DisplayName("getAllExperiencias - Debería manejar experiencias con lista de imágenes nula correctamente")
+    void getAllExperiencias_ShouldHandleExperienciasWithNullImages() {
         // Arrange
-        Experiencia experienciaSinImagen = Experiencia.builder()
+        Experiencia experienciaSinImagenes = Experiencia.builder()
                 .id(3)
-                .titulo("Proyecto sin Imagen")
+                .titulo("Proyecto sin Imágenes")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
                 .fechaFinProyecto(LocalDate.of(2024, 6, 1))
-                .descripcion("Descripción del proyecto sin imagen con más de 5 caracteres")
-                .link("https://github.com/usuario/proyecto-sin-imagen")
+                .descripcion("Descripción del proyecto sin imágenes con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-sin-imagenes")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
-                .imagen(null)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON))
+                .imagenes(null)
                 .usuario(null)
                 .build();
 
-        ExperienciaDto experienciaDtoSinImagen = ExperienciaDto.builder()
+        ExperienciaDto experienciaDtoSinImagenes = ExperienciaDto.builder()
                 .id(3)
-                .titulo("Proyecto sin Imagen")
+                .titulo("Proyecto sin Imágenes")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
                 .fechaFinProyecto(LocalDate.of(2024, 6, 1))
-                .descripcion("Descripción del proyecto sin imagen con más de 5 caracteres")
-                .link("https://github.com/usuario/proyecto-sin-imagen")
+                .descripcion("Descripción del proyecto sin imágenes con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-sin-imagenes")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
-                .imagen(null)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON))
+                .imagenes(null)
                 .build();
 
-        List<Experiencia> experiencias = Arrays.asList(experienciaValida, experienciaSinImagen);
-        List<ExperienciaDto> experienciasDto = Arrays.asList(experienciaDtoValido, experienciaDtoSinImagen);
+        List<Experiencia> experiencias = Arrays.asList(experienciaValida, experienciaSinImagenes);
+        List<ExperienciaDto> experienciasDto = Arrays.asList(experienciaDtoValido, experienciaDtoSinImagenes);
 
         when(experienciaRepository.findAll()).thenReturn(experiencias);
         when(experienciaMapper.toExperienciaDto(experienciaValida)).thenReturn(experienciaDtoValido);
-        when(experienciaMapper.toExperienciaDto(experienciaSinImagen)).thenReturn(experienciaDtoSinImagen);
+        when(experienciaMapper.toExperienciaDto(experienciaSinImagenes)).thenReturn(experienciaDtoSinImagenes);
 
         // Act
         List<ExperienciaDto> resultado = experienciaService.getAllExperiencias();
@@ -856,9 +1035,9 @@ class ExperienciaServiceImplTest {
         // Assert
         assertNotNull(resultado, "El resultado no debería ser nulo");
         assertEquals(2, resultado.size(), "Debería haber 2 experiencias");
-        assertNull(resultado.get(1).getImagen(), "La imagen del segundo elemento debería ser nula");
+        assertNull(resultado.get(1).getImagenes(), "La lista de imágenes del segundo elemento debería ser nula");
 
-        // 🔥 Verificar tecnologías del segundo elemento
+        // Verificar tecnologías del segundo elemento
         assertNotNull(resultado.get(1).getTecnologiasUsadas(),
                 "Las tecnologías usadas no deberían ser nulas");
         assertTrue(resultado.get(1).getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON),
@@ -866,7 +1045,7 @@ class ExperienciaServiceImplTest {
 
         verify(experienciaRepository, times(1)).findAll();
         verify(experienciaMapper, times(1)).toExperienciaDto(experienciaValida);
-        verify(experienciaMapper, times(1)).toExperienciaDto(experienciaSinImagen);
+        verify(experienciaMapper, times(1)).toExperienciaDto(experienciaSinImagenes);
     }
 
     // ==================== TESTS DE CASOS BORDE ====================
@@ -883,8 +1062,8 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-largo")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                .imagen(imagenDto)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(listaImagenesDto)
                 .build();
 
         Experiencia experienciaTituloLargo = Experiencia.builder()
@@ -894,8 +1073,8 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-largo")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(listaImagenes)
                 .usuario(null)
                 .build();
 
@@ -928,8 +1107,8 @@ class ExperienciaServiceImplTest {
                 .descripcion(descripcionLarga)
                 .link("https://github.com/usuario/proyecto-descripcion-larga")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                .imagen(imagenDto)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(listaImagenesDto)
                 .build();
 
         Experiencia experienciaDescripcionLarga = Experiencia.builder()
@@ -939,8 +1118,8 @@ class ExperienciaServiceImplTest {
                 .descripcion(descripcionLarga)
                 .link("https://github.com/usuario/proyecto-descripcion-larga")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(listaImagenes)
                 .usuario(null)
                 .build();
 
@@ -973,8 +1152,8 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link(linkLargo)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                .imagen(imagenDto)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(listaImagenesDto)
                 .build();
 
         Experiencia experienciaLinkLargo = Experiencia.builder()
@@ -984,8 +1163,8 @@ class ExperienciaServiceImplTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link(linkLargo)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(listaImagenes)
                 .usuario(null)
                 .build();
 
@@ -1014,6 +1193,7 @@ class ExperienciaServiceImplTest {
 
         // Assert - Verificar que no hay interacciones con los mocks
         verifyNoInteractions(experienciaRepository);
+        verifyNoInteractions(imagenRepository);
         verifyNoInteractions(experienciaMapper);
     }
 
@@ -1129,8 +1309,8 @@ class ExperienciaServiceImplTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/proyecto")
                     .tipoExperiencia(tipo)
-                    .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                    .imagen(imagenDto)
+                    .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                    .imagenes(listaImagenesDto)
                     .build();
 
             Experiencia experiencia = Experiencia.builder()
@@ -1140,8 +1320,8 @@ class ExperienciaServiceImplTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/proyecto")
                     .tipoExperiencia(tipo)
-                    .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                    .imagen(imagen)
+                    .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                    .imagenes(listaImagenes)
                     .usuario(null)
                     .build();
 
@@ -1173,8 +1353,8 @@ class ExperienciaServiceImplTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/proyecto")
                     .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                    .tecnologiasUsadas(List.of(tecnologia)) // 🔥 Cambiado a lista
-                    .imagen(imagenDto)
+                    .tecnologiasUsadas(List.of(tecnologia))
+                    .imagenes(listaImagenesDto)
                     .build();
 
             Experiencia experiencia = Experiencia.builder()
@@ -1184,8 +1364,8 @@ class ExperienciaServiceImplTest {
                     .descripcion("Descripción válida con más de 5 caracteres")
                     .link("https://github.com/usuario/proyecto")
                     .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                    .tecnologiasUsadas(List.of(tecnologia)) // 🔥 Cambiado a lista
-                    .imagen(imagen)
+                    .tecnologiasUsadas(List.of(tecnologia))
+                    .imagenes(listaImagenes)
                     .usuario(null)
                     .build();
 
@@ -1223,7 +1403,7 @@ class ExperienciaServiceImplTest {
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(tecnologiasMultiples)
-                .imagen(imagenDto)
+                .imagenes(listaImagenesDto)
                 .build();
 
         Experiencia experiencia = Experiencia.builder()
@@ -1234,7 +1414,7 @@ class ExperienciaServiceImplTest {
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(tecnologiasMultiples)
-                .imagen(imagen)
+                .imagenes(listaImagenes)
                 .usuario(null)
                 .build();
 
