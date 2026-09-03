@@ -2,7 +2,7 @@ package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity(name = "Imagen")
@@ -25,21 +25,19 @@ public class Imagen {
     @OneToOne(mappedBy = "imagen", fetch = FetchType.LAZY)
     @JoinColumn(name = "conocimiento_id")
     @JsonBackReference("imagen-conocimiento")
-    @JsonIgnore  // Evita que se serialice (al crear conocimiento nuevo, atributo img conecte con
-    // otros modelos que tambien poseen una imagen y por ende genera error de referencia circular)
+    @JsonIgnore
     private Conocimiento conocimiento;
 
-
-
-   @OneToOne(mappedBy = "imagen", fetch = FetchType.LAZY)
-   @JoinColumn(name = "educacion_id")
-    @JsonIgnore  // Evita que se serialice educacion
+    @OneToOne(mappedBy = "imagen", fetch = FetchType.LAZY)
+    @JoinColumn(name = "educacion_id")
+    @JsonIgnore
     @JsonBackReference("imagen-educacion")
     private Educacion educacion;
 
-    @OneToOne(mappedBy = "imagen", fetch = FetchType.LAZY)
+    // CAMBIADO: de OneToOne a ManyToOne para permitir múltiples imágenes por experiencia
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "experiencia_id")
-    @JsonIgnore  // Evita que se serialice educacion
+    @JsonIgnore
     @JsonBackReference("imagen-experiencia")
     private Experiencia experiencia;
 
@@ -48,8 +46,6 @@ public class Imagen {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonBackReference("imagen-usuario")
-    @JsonIgnore  // Evita que se serialice usuario
+    @JsonIgnore
     private Usuario usuario;
-
-
 }

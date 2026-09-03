@@ -21,8 +21,8 @@ public class ExperienciaDto {
     private String descripcion;
     private String link;
 
-    // CAMBIAR de imagen a List<imagenes>
-    private ImagenDto imagen;
+    // CAMBIADO: de ImagenDto a List<ImagenDto>
+    private List<ImagenDto> imagenes;
     private TipoExperiencia tipoExperiencia;
     private List<TecnologiaUsada> tecnologiasUsadas;
 }

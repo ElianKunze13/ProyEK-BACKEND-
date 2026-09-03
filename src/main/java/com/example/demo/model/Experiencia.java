@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "Experiencia")
@@ -56,11 +57,12 @@ public class Experiencia {
     @Column(name = "tecnologia")
     private List<TecnologiaUsada> tecnologiasUsadas;
 
-    // CAMBIAR de imagen a List<imagenes>
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "imagen_id", referencedColumnName = "id")
-    @JsonManagedReference
-    private Imagen imagen;
+    // CAMBIADO: de OneToOne a OneToMany para lista de imágenes
+    @OneToMany(mappedBy = "experiencia", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonManagedReference("imagen-experiencia")
+    private List<Imagen> imagenes = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
