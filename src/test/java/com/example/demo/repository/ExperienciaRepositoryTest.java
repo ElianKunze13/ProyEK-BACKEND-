@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +42,9 @@ class ExperienciaRepositoryTest {
     private Experiencia experienciaValida;
     private Experiencia experienciaEnCurso;
     private Experiencia experienciaColaborativa;
-    private Imagen imagen;
+    private List<Imagen> listaImagenes;
+    private Imagen imagen1;
+    private Imagen imagen2;
     private Usuario usuario;
 
     @BeforeEach
@@ -58,13 +61,20 @@ class ExperienciaRepositoryTest {
                 .active(true)
                 .build();
 
-        // Crear imagen para las experiencias
-        imagen = Imagen.builder()
-                .url("proyecto.jpg")
-                .alt("Captura del proyecto")
+        // Crear imágenes para las experiencias
+        imagen1 = Imagen.builder()
+                .url("proyecto-principal.jpg")
+                .alt("Captura principal del proyecto")
                 .build();
 
-        // 🔥 Crear experiencia válida con lista de tecnologías
+        imagen2 = Imagen.builder()
+                .url("proyecto-detalle.jpg")
+                .alt("Detalle del proyecto")
+                .build();
+
+        listaImagenes = Arrays.asList(imagen1, imagen2);
+
+        // Crear experiencia válida con lista de imágenes y tecnologías
         experienciaValida = Experiencia.builder()
                 .titulo("Sistema de Gestión de Usuarios")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 15))
@@ -72,12 +82,12 @@ class ExperienciaRepositoryTest {
                 .descripcion("Desarrollo de API REST con Spring Boot y JWT para gestión de usuarios")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT, TecnologiaUsada.JAVA))
+                .imagenes(listaImagenes) // 🔥 Cambiado a lista de imágenes
                 .usuario(usuario)
                 .build();
 
-        // 🔥 Crear experiencia en curso (con fechaFinProyecto nula)
+        // Crear experiencia en curso (con fechaFinProyecto nula)
         experienciaEnCurso = Experiencia.builder()
                 .titulo("Proyecto en Desarrollo")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
@@ -85,12 +95,12 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción del proyecto en desarrollo con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-en-curso")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
-                .imagen(null)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(Collections.emptyList()) // Lista vacía de imágenes
                 .usuario(usuario)
                 .build();
 
-        // 🔥 Crear experiencia colaborativa con lista de tecnologías
+        // Crear experiencia colaborativa con lista de imágenes y tecnologías
         experienciaColaborativa = Experiencia.builder()
                 .titulo("App de E-commerce Colaborativa")
                 .fechaInicioProyecto(LocalDate.of(2024, 2, 1))
@@ -98,8 +108,8 @@ class ExperienciaRepositoryTest {
                 .descripcion("Desarrollo colaborativo de tienda online con carrito de compras")
                 .link("https://github.com/usuario/ecommerce-colaborativo")
                 .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT, TecnologiaUsada.TYPESCRIPT))
+                .imagenes(List.of(imagen1)) // Solo una imagen
                 .usuario(usuario)
                 .build();
 
@@ -132,7 +142,7 @@ class ExperienciaRepositoryTest {
         assertEquals(TipoExperiencia.PROYECTO_PERSONAL, experienciaGuardada.getTipoExperiencia(),
                 "El tipo de experiencia debería ser PROYECTO_PERSONAL");
 
-        // 🔥 Verificar lista de tecnologías
+        // Verificar lista de tecnologías
         assertNotNull(experienciaGuardada.getTecnologiasUsadas(),
                 "Las tecnologías usadas no deberían ser nulas");
         assertEquals(2, experienciaGuardada.getTecnologiasUsadas().size(),
@@ -142,7 +152,14 @@ class ExperienciaRepositoryTest {
         assertTrue(experienciaGuardada.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
                 "Debería contener JAVA");
 
-        assertNotNull(experienciaGuardada.getImagen(), "La imagen no debería ser nula");
+        // 🔥 Verificar lista de imágenes
+        assertNotNull(experienciaGuardada.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(2, experienciaGuardada.getImagenes().size(), "Debería tener 2 imágenes");
+        assertEquals("proyecto-principal.jpg", experienciaGuardada.getImagenes().get(0).getUrl(),
+                "La URL de la primera imagen debería coincidir");
+        assertEquals("proyecto-detalle.jpg", experienciaGuardada.getImagenes().get(1).getUrl(),
+                "La URL de la segunda imagen debería coincidir");
+
         assertNotNull(experienciaGuardada.getUsuario(), "El usuario no debería ser nulo");
 
         // Verificar que se guardó en la base de datos
@@ -150,34 +167,36 @@ class ExperienciaRepositoryTest {
         assertNotNull(experienciaEncontrada, "La experiencia debería existir en la base de datos");
         assertEquals(experienciaGuardada.getTitulo(), experienciaEncontrada.getTitulo(),
                 "El título debería coincidir en la BD");
+        assertNotNull(experienciaEncontrada.getImagenes(), "La lista de imágenes en la BD no debería ser nula");
+        assertEquals(2, experienciaEncontrada.getImagenes().size(), "Debería tener 2 imágenes en la BD");
     }
 
     @Test
-    @DisplayName("save - Debería guardar una experiencia sin imagen correctamente")
-    void save_ShouldSaveExperienciaWithoutImageCorrectly() {
-        // Arrange - Experiencia sin imagen
-        Experiencia experienciaSinImagen = Experiencia.builder()
-                .titulo("Proyecto sin Imagen")
+    @DisplayName("save - Debería guardar una experiencia sin imágenes correctamente")
+    void save_ShouldSaveExperienciaWithoutImagesCorrectly() {
+        // Arrange - Experiencia sin imágenes
+        Experiencia experienciaSinImagenes = Experiencia.builder()
+                .titulo("Proyecto sin Imágenes")
                 .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
                 .fechaFinProyecto(LocalDate.of(2024, 6, 1))
-                .descripcion("Descripción del proyecto sin imagen con más de 5 caracteres")
-                .link("https://github.com/usuario/proyecto-sin-imagen")
+                .descripcion("Descripción del proyecto sin imágenes con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-sin-imagenes")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
-                .imagen(null)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON))
+                .imagenes(null) // Sin imágenes
                 .usuario(usuario)
                 .build();
 
         // Act
-        Experiencia experienciaGuardada = experienciaRepository.save(experienciaSinImagen);
+        Experiencia experienciaGuardada = experienciaRepository.save(experienciaSinImagenes);
 
         // Assert
         assertNotNull(experienciaGuardada, "La experiencia guardada no debería ser nula");
         assertNotNull(experienciaGuardada.getId(), "El ID de la experiencia guardada no debería ser nulo");
-        assertNull(experienciaGuardada.getImagen(), "La imagen debería ser nula");
+        assertNull(experienciaGuardada.getImagenes(), "La lista de imágenes debería ser nula");
         assertNotNull(experienciaGuardada.getUsuario(), "El usuario no debería ser nulo");
 
-        // 🔥 Verificar tecnologías
+        // Verificar tecnologías
         assertNotNull(experienciaGuardada.getTecnologiasUsadas(),
                 "Las tecnologías usadas no deberían ser nulas");
         assertTrue(experienciaGuardada.getTecnologiasUsadas().contains(TecnologiaUsada.PYTHON),
@@ -186,7 +205,39 @@ class ExperienciaRepositoryTest {
         // Verificar que se guardó en la base de datos
         Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
         assertNotNull(experienciaEncontrada, "La experiencia debería existir en la BD");
-        assertNull(experienciaEncontrada.getImagen(), "La imagen en la BD debería ser nula");
+        assertNull(experienciaEncontrada.getImagenes(), "La lista de imágenes en la BD debería ser nula");
+    }
+
+    @Test
+    @DisplayName("save - Debería guardar una experiencia con lista vacía de imágenes")
+    void save_ShouldSaveExperienciaWithEmptyImagesList() {
+        // Arrange - Experiencia con lista vacía de imágenes
+        Experiencia experienciaConListaVacia = Experiencia.builder()
+                .titulo("Proyecto con Lista Vacía de Imágenes")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 6, 1))
+                .descripcion("Descripción del proyecto con lista vacía de imágenes con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-lista-vacia")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(Collections.emptyList()) // Lista vacía
+                .usuario(usuario)
+                .build();
+
+        // Act
+        Experiencia experienciaGuardada = experienciaRepository.save(experienciaConListaVacia);
+
+        // Assert
+        assertNotNull(experienciaGuardada, "La experiencia guardada no debería ser nula");
+        assertNotNull(experienciaGuardada.getId(), "El ID de la experiencia guardada no debería ser nulo");
+        assertNotNull(experienciaGuardada.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertTrue(experienciaGuardada.getImagenes().isEmpty(), "La lista de imágenes debería estar vacía");
+
+        // Verificar en la base de datos
+        Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
+        assertNotNull(experienciaEncontrada, "La experiencia debería existir en la BD");
+        assertNotNull(experienciaEncontrada.getImagenes(), "La lista de imágenes en la BD no debería ser nula");
+        assertTrue(experienciaEncontrada.getImagenes().isEmpty(), "La lista de imágenes en la BD debería estar vacía");
     }
 
     @Test
@@ -203,11 +254,15 @@ class ExperienciaRepositoryTest {
         assertEquals("Proyecto en Desarrollo", experienciaGuardada.getTitulo(),
                 "El título debería coincidir");
 
-        // 🔥 Verificar tecnologías
+        // Verificar tecnologías
         assertNotNull(experienciaGuardada.getTecnologiasUsadas(),
                 "Las tecnologías usadas no deberían ser nulas");
         assertTrue(experienciaGuardada.getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
                 "Debería contener JAVA");
+
+        // Verificar que la lista de imágenes está vacía
+        assertNotNull(experienciaGuardada.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertTrue(experienciaGuardada.getImagenes().isEmpty(), "La lista de imágenes debería estar vacía");
 
         // Verificar que se guardó en la base de datos
         Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
@@ -226,8 +281,8 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción del proyecto independiente con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-independiente")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVASCRIPT, TecnologiaUsada.TYPESCRIPT)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVASCRIPT, TecnologiaUsada.TYPESCRIPT))
+                .imagenes(listaImagenes)
                 .usuario(null)
                 .build();
 
@@ -238,9 +293,10 @@ class ExperienciaRepositoryTest {
         assertNotNull(experienciaGuardada, "La experiencia guardada no debería ser nula");
         assertNotNull(experienciaGuardada.getId(), "El ID de la experiencia guardada no debería ser nulo");
         assertNull(experienciaGuardada.getUsuario(), "El usuario debería ser nulo");
-        assertNotNull(experienciaGuardada.getImagen(), "La imagen no debería ser nula");
+        assertNotNull(experienciaGuardada.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(2, experienciaGuardada.getImagenes().size(), "Debería tener 2 imágenes");
 
-        // 🔥 Verificar tecnologías
+        // Verificar tecnologías
         assertNotNull(experienciaGuardada.getTecnologiasUsadas(),
                 "Las tecnologías usadas no deberían ser nulas");
         assertEquals(2, experienciaGuardada.getTecnologiasUsadas().size(),
@@ -267,7 +323,7 @@ class ExperienciaRepositoryTest {
                 .link("https://github.com/usuario/proyecto-sin-tecnologias")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(List.of()) // Lista vacía
-                .imagen(imagen)
+                .imagenes(listaImagenes)
                 .usuario(usuario)
                 .build();
 
@@ -312,12 +368,22 @@ class ExperienciaRepositoryTest {
         assertEquals(experienciaGuardada.getLink(), experienciaEncontrada.get().getLink(),
                 "El link debería coincidir");
 
-        // 🔥 Verificar tecnologías
+        // Verificar tecnologías
         assertNotNull(experienciaEncontrada.get().getTecnologiasUsadas(),
                 "Las tecnologías usadas no deberían ser nulas");
         assertTrue(experienciaEncontrada.get().getTecnologiasUsadas().containsAll(
                         experienciaGuardada.getTecnologiasUsadas()),
                 "Las tecnologías usadas deberían coincidir");
+
+        // 🔥 Verificar lista de imágenes
+        assertNotNull(experienciaEncontrada.get().getImagenes(),
+                "La lista de imágenes no debería ser nula");
+        assertEquals(experienciaGuardada.getImagenes().size(),
+                experienciaEncontrada.get().getImagenes().size(),
+                "El tamaño de la lista de imágenes debería coincidir");
+        assertEquals(experienciaGuardada.getImagenes().get(0).getUrl(),
+                experienciaEncontrada.get().getImagenes().get(0).getUrl(),
+                "La URL de la primera imagen debería coincidir");
     }
 
     @Test
@@ -347,11 +413,17 @@ class ExperienciaRepositoryTest {
         assertEquals(experienciaGuardada.getTitulo(), experienciaEncontrada.get().getTitulo(),
                 "El título debería coincidir");
 
-        // 🔥 Verificar tecnologías
+        // Verificar tecnologías
         assertNotNull(experienciaEncontrada.get().getTecnologiasUsadas(),
                 "Las tecnologías usadas no deberían ser nulas");
         assertTrue(experienciaEncontrada.get().getTecnologiasUsadas().contains(TecnologiaUsada.JAVA),
                 "Debería contener JAVA");
+
+        // Verificar lista de imágenes vacía
+        assertNotNull(experienciaEncontrada.get().getImagenes(),
+                "La lista de imágenes no debería ser nula");
+        assertTrue(experienciaEncontrada.get().getImagenes().isEmpty(),
+                "La lista de imágenes debería estar vacía");
     }
 
     @Test
@@ -382,7 +454,7 @@ class ExperienciaRepositoryTest {
         assertTrue(foundProyectoEnCurso, "La experiencia en curso debería estar en la lista");
         assertTrue(foundProyectoColaborativo, "La experiencia colaborativa debería estar en la lista");
 
-        // 🔥 Verificar que las tecnologías se guardaron correctamente
+        // Verificar que las tecnologías se guardaron correctamente
         experiencias.stream()
                 .filter(e -> e.getTitulo().equals("Sistema de Gestión de Usuarios"))
                 .findFirst()
@@ -405,6 +477,23 @@ class ExperienciaRepositoryTest {
                             "Debería contener REACT");
                     assertTrue(e.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT),
                             "Debería contener TYPESCRIPT");
+                });
+
+        // 🔥 Verificar que las imágenes se guardaron correctamente
+        experiencias.stream()
+                .filter(e -> e.getTitulo().equals("Sistema de Gestión de Usuarios"))
+                .findFirst()
+                .ifPresent(e -> {
+                    assertNotNull(e.getImagenes(), "La lista de imágenes no debería ser nula");
+                    assertEquals(2, e.getImagenes().size(), "Debería tener 2 imágenes");
+                });
+
+        experiencias.stream()
+                .filter(e -> e.getTitulo().equals("App de E-commerce Colaborativa"))
+                .findFirst()
+                .ifPresent(e -> {
+                    assertNotNull(e.getImagenes(), "La lista de imágenes no debería ser nula");
+                    assertEquals(1, e.getImagenes().size(), "Debería tener 1 imagen");
                 });
     }
 
@@ -435,6 +524,13 @@ class ExperienciaRepositoryTest {
         experienciaGuardada.setTipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_FREELANCE);
         experienciaGuardada.setTecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR, TecnologiaUsada.TYPESCRIPT));
 
+        // Actualizar lista de imágenes
+        Imagen nuevaImagen = Imagen.builder()
+                .url("nueva-imagen.jpg")
+                .alt("Nueva imagen del proyecto")
+                .build();
+        experienciaGuardada.setImagenes(List.of(nuevaImagen));
+
         Experiencia experienciaActualizada = experienciaRepository.save(experienciaGuardada);
 
         // Assert
@@ -449,7 +545,7 @@ class ExperienciaRepositoryTest {
         assertEquals(TipoExperiencia.TRABAJO_LABORAL_FREELANCE, experienciaActualizada.getTipoExperiencia(),
                 "El tipo de experiencia debería estar actualizado");
 
-        // 🔥 Verificar tecnologías actualizadas
+        // Verificar tecnologías actualizadas
         assertNotNull(experienciaActualizada.getTecnologiasUsadas(),
                 "Las tecnologías usadas no deberían ser nulas");
         assertEquals(2, experienciaActualizada.getTecnologiasUsadas().size(),
@@ -458,6 +554,12 @@ class ExperienciaRepositoryTest {
                 "Debería contener ANGULAR");
         assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.TYPESCRIPT),
                 "Debería contener TYPESCRIPT");
+
+        // Verificar imágenes actualizadas
+        assertNotNull(experienciaActualizada.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(1, experienciaActualizada.getImagenes().size(), "Debería tener 1 imagen");
+        assertEquals("nueva-imagen.jpg", experienciaActualizada.getImagenes().get(0).getUrl(),
+                "La URL de la imagen debería estar actualizada");
 
         // Verificar en la base de datos
         Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
@@ -498,56 +600,104 @@ class ExperienciaRepositoryTest {
     }
 
     @Test
-    @DisplayName("save - Debería actualizar la imagen de una experiencia")
-    void save_ShouldUpdateImagenOfExperiencia() {
+    @DisplayName("save - Debería actualizar la lista de imágenes de una experiencia")
+    void save_ShouldUpdateImagenesOfExperiencia() {
         // Arrange - Guardar experiencia en la base de datos
         Experiencia experienciaGuardada = entityManager.persist(experienciaValida);
         entityManager.flush();
 
-        // Crear nueva imagen
-        Imagen nuevaImagen = Imagen.builder()
-                .url("nuevo-proyecto.jpg")
-                .alt("Nueva captura del proyecto")
+        // Verificar imágenes iniciales
+        assertNotNull(experienciaGuardada.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(2, experienciaGuardada.getImagenes().size(), "Debería tener 2 imágenes inicialmente");
+
+        // Crear nuevas imágenes
+        Imagen nuevaImagen1 = Imagen.builder()
+                .url("nuevo-proyecto-1.jpg")
+                .alt("Nueva captura 1 del proyecto")
                 .build();
 
-        // Act - Actualizar imagen
-        experienciaGuardada.setImagen(nuevaImagen);
+        Imagen nuevaImagen2 = Imagen.builder()
+                .url("nuevo-proyecto-2.jpg")
+                .alt("Nueva captura 2 del proyecto")
+                .build();
+
+        Imagen nuevaImagen3 = Imagen.builder()
+                .url("nuevo-proyecto-3.jpg")
+                .alt("Nueva captura 3 del proyecto")
+                .build();
+
+        List<Imagen> nuevasImagenes = Arrays.asList(nuevaImagen1, nuevaImagen2, nuevaImagen3);
+
+        // Act - Actualizar imágenes
+        experienciaGuardada.setImagenes(nuevasImagenes);
         Experiencia experienciaActualizada = experienciaRepository.save(experienciaGuardada);
 
         // Assert
-        assertNotNull(experienciaActualizada.getImagen(), "La imagen no debería ser nula");
-        assertEquals("nuevo-proyecto.jpg", experienciaActualizada.getImagen().getUrl(),
-                "La URL de la imagen debería estar actualizada");
-        assertEquals("Nueva captura del proyecto", experienciaActualizada.getImagen().getAlt(),
-                "El alt de la imagen debería estar actualizado");
+        assertNotNull(experienciaActualizada.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(3, experienciaActualizada.getImagenes().size(), "Debería tener 3 imágenes");
+        assertEquals("nuevo-proyecto-1.jpg", experienciaActualizada.getImagenes().get(0).getUrl(),
+                "La URL de la primera imagen debería estar actualizada");
+        assertEquals("nuevo-proyecto-2.jpg", experienciaActualizada.getImagenes().get(1).getUrl(),
+                "La URL de la segunda imagen debería estar actualizada");
+        assertEquals("nuevo-proyecto-3.jpg", experienciaActualizada.getImagenes().get(2).getUrl(),
+                "La URL de la tercera imagen debería estar actualizada");
 
         // Verificar en la base de datos
         Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
-        assertNotNull(experienciaEncontrada.getImagen(), "La imagen en la BD no debería ser nula");
-        assertEquals("nuevo-proyecto.jpg", experienciaEncontrada.getImagen().getUrl(),
-                "La URL de la imagen en la BD debería estar actualizada");
+        assertNotNull(experienciaEncontrada.getImagenes(), "La lista de imágenes en la BD no debería ser nula");
+        assertEquals(3, experienciaEncontrada.getImagenes().size(),
+                "Debería tener 3 imágenes en la BD");
+        assertEquals("nuevo-proyecto-1.jpg", experienciaEncontrada.getImagenes().get(0).getUrl(),
+                "La URL de la primera imagen en la BD debería estar actualizada");
     }
 
     @Test
-    @DisplayName("save - Debería eliminar la imagen de una experiencia (establecer a null)")
-    void save_ShouldRemoveImagenFromExperiencia() {
+    @DisplayName("save - Debería eliminar todas las imágenes de una experiencia (establecer a null)")
+    void save_ShouldRemoveAllImagenesFromExperiencia() {
         // Arrange - Guardar experiencia en la base de datos
         Experiencia experienciaGuardada = entityManager.persist(experienciaValida);
         entityManager.flush();
 
-        // Verificar que la imagen existe inicialmente
-        assertNotNull(experienciaGuardada.getImagen(), "La imagen debería existir inicialmente");
+        // Verificar que las imágenes existen inicialmente
+        assertNotNull(experienciaGuardada.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertFalse(experienciaGuardada.getImagenes().isEmpty(), "La lista de imágenes no debería estar vacía");
 
-        // Act - Eliminar imagen
-        experienciaGuardada.setImagen(null);
+        // Act - Eliminar todas las imágenes
+        experienciaGuardada.setImagenes(null);
         Experiencia experienciaActualizada = experienciaRepository.save(experienciaGuardada);
 
         // Assert
-        assertNull(experienciaActualizada.getImagen(), "La imagen debería ser nula");
+        assertNull(experienciaActualizada.getImagenes(), "La lista de imágenes debería ser nula");
 
         // Verificar en la base de datos
         Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
-        assertNull(experienciaEncontrada.getImagen(), "La imagen en la BD debería ser nula");
+        assertNull(experienciaEncontrada.getImagenes(), "La lista de imágenes en la BD debería ser nula");
+    }
+
+    @Test
+    @DisplayName("save - Debería vaciar la lista de imágenes de una experiencia")
+    void save_ShouldClearImagenesListOfExperiencia() {
+        // Arrange - Guardar experiencia en la base de datos
+        Experiencia experienciaGuardada = entityManager.persist(experienciaValida);
+        entityManager.flush();
+
+        // Verificar que las imágenes existen inicialmente
+        assertNotNull(experienciaGuardada.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(2, experienciaGuardada.getImagenes().size(), "Debería tener 2 imágenes inicialmente");
+
+        // Act - Vaciar la lista de imágenes
+        experienciaGuardada.setImagenes(Collections.emptyList());
+        Experiencia experienciaActualizada = experienciaRepository.save(experienciaGuardada);
+
+        // Assert
+        assertNotNull(experienciaActualizada.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertTrue(experienciaActualizada.getImagenes().isEmpty(), "La lista de imágenes debería estar vacía");
+
+        // Verificar en la base de datos
+        Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
+        assertNotNull(experienciaEncontrada.getImagenes(), "La lista de imágenes en la BD no debería ser nula");
+        assertTrue(experienciaEncontrada.getImagenes().isEmpty(),
+                "La lista de imágenes en la BD debería estar vacía");
     }
 
     @Test
@@ -642,19 +792,22 @@ class ExperienciaRepositoryTest {
     }
 
     @Test
-    @DisplayName("delete - Debería eliminar experiencia en cascada con su imagen")
-    void delete_ShouldDeleteExperienciaAndCascadeImage() {
+    @DisplayName("delete - Debería eliminar experiencia en cascada con sus imágenes")
+    void delete_ShouldDeleteExperienciaAndCascadeImages() {
         // Arrange - Guardar experiencia en la base de datos
         Experiencia experienciaGuardada = entityManager.persist(experienciaValida);
         entityManager.flush();
         Integer idExperiencia = experienciaGuardada.getId();
-        Integer idImagen = experienciaGuardada.getImagen().getId();
+        Integer idImagen1 = experienciaGuardada.getImagenes().get(0).getId();
+        Integer idImagen2 = experienciaGuardada.getImagenes().get(1).getId();
 
         // Verificar que existen antes de eliminar
         assertNotNull(entityManager.find(Experiencia.class, idExperiencia),
                 "La experiencia debería existir");
-        assertNotNull(entityManager.find(Imagen.class, idImagen),
-                "La imagen debería existir");
+        assertNotNull(entityManager.find(Imagen.class, idImagen1),
+                "La primera imagen debería existir");
+        assertNotNull(entityManager.find(Imagen.class, idImagen2),
+                "La segunda imagen debería existir");
 
         // Act
         experienciaRepository.delete(experienciaGuardada);
@@ -662,8 +815,10 @@ class ExperienciaRepositoryTest {
         // Assert - Verificar que no existen
         assertNull(entityManager.find(Experiencia.class, idExperiencia),
                 "La experiencia no debería existir");
-        assertNull(entityManager.find(Imagen.class, idImagen),
-                "La imagen no debería existir");
+        assertNull(entityManager.find(Imagen.class, idImagen1),
+                "La primera imagen no debería existir");
+        assertNull(entityManager.find(Imagen.class, idImagen2),
+                "La segunda imagen no debería existir");
     }
 
     // ==================== TESTS DE CASOS BORDE ====================
@@ -680,8 +835,8 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto-largo")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .usuario(usuario)
                 .build();
 
@@ -714,8 +869,8 @@ class ExperienciaRepositoryTest {
                 .descripcion(descripcionLarga)
                 .link("https://github.com/usuario/proyecto-descripcion-larga")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .usuario(usuario)
                 .build();
 
@@ -749,8 +904,8 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link(linkLargo)
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .usuario(usuario)
                 .build();
 
@@ -780,8 +935,8 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción de proyecto personal con más de 5 caracteres")
                 .link("https://github.com/usuario/personal")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(Collections.emptyList())
                 .usuario(usuario)
                 .build();
 
@@ -792,8 +947,8 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción de contribución open source con más de 5 caracteres")
                 .link("https://github.com/usuario/open-source")
                 .tipoExperiencia(TipoExperiencia.APORTE_CODIGO_ABIERTO)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.PYTHON))
+                .imagenes(Collections.emptyList())
                 .usuario(usuario)
                 .build();
 
@@ -804,8 +959,8 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción de práctica profesional con más de 5 caracteres")
                 .link("https://github.com/usuario/practica")
                 .tipoExperiencia(TipoExperiencia.PRACTICA_PROFESIONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.REACT))
+                .imagenes(Collections.emptyList())
                 .usuario(usuario)
                 .build();
 
@@ -850,7 +1005,7 @@ class ExperienciaRepositoryTest {
                 .link("https://github.com/usuario/proyecto-1")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(tecnologias1)
-                .imagen(imagen)
+                .imagenes(Collections.emptyList())
                 .usuario(usuario)
                 .build();
 
@@ -862,7 +1017,7 @@ class ExperienciaRepositoryTest {
                 .link("https://github.com/usuario/proyecto-2")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(tecnologias2)
-                .imagen(imagen)
+                .imagenes(Collections.emptyList())
                 .usuario(usuario)
                 .build();
 
@@ -874,7 +1029,7 @@ class ExperienciaRepositoryTest {
                 .link("https://github.com/usuario/proyecto-3")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(tecnologias3)
-                .imagen(imagen)
+                .imagenes(Collections.emptyList())
                 .usuario(usuario)
                 .build();
 
@@ -922,7 +1077,7 @@ class ExperienciaRepositoryTest {
                 .link(null)
                 .tipoExperiencia(null)
                 .tecnologiasUsadas(null)
-                .imagen(null)
+                .imagenes(null)
                 .usuario(usuario)
                 .build();
 
@@ -953,8 +1108,8 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .usuario(usuario)
                 .build();
 
@@ -975,8 +1130,8 @@ class ExperienciaRepositoryTest {
                 .descripcion("")
                 .link("https://github.com/usuario/proyecto")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .usuario(usuario)
                 .build();
 
@@ -997,8 +1152,8 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .usuario(usuario)
                 .build();
 
@@ -1025,11 +1180,21 @@ class ExperienciaRepositoryTest {
         experienciaEncontrada.get().setTitulo("Título Actualizado");
         experienciaEncontrada.get().setDescripcion("Descripción actualizada con más de 5 caracteres");
         experienciaEncontrada.get().setTecnologiasUsadas(List.of(TecnologiaUsada.ANGULAR));
+
+        // Actualizar imágenes
+        Imagen nuevaImg = Imagen.builder()
+                .url("imagen-actualizada.jpg")
+                .alt("Imagen actualizada")
+                .build();
+        experienciaEncontrada.get().setImagenes(List.of(nuevaImg));
+
         Experiencia experienciaActualizada = experienciaRepository.save(experienciaEncontrada.get());
         assertEquals("Título Actualizado", experienciaActualizada.getTitulo(),
                 "El título debería estar actualizado");
         assertTrue(experienciaActualizada.getTecnologiasUsadas().contains(TecnologiaUsada.ANGULAR),
                 "Las tecnologías deberían estar actualizadas");
+        assertNotNull(experienciaActualizada.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(1, experienciaActualizada.getImagenes().size(), "Debería tener 1 imagen");
 
         // 4. Verificar actualización
         Optional<Experiencia> experienciaVerificada = experienciaRepository.findById(experienciaGuardada.getId());
@@ -1068,14 +1233,17 @@ class ExperienciaRepositoryTest {
                 .orElse(null);
 
         assertNotNull(experienciaEncontrada, "La experiencia debería ser encontrada en la lista");
-        assertNotNull(experienciaEncontrada.getImagen(), "La imagen no debería ser nula");
-        assertEquals(imagen.getUrl(), experienciaEncontrada.getImagen().getUrl(),
-                "La URL de la imagen debería coincidir");
+        assertNotNull(experienciaEncontrada.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(2, experienciaEncontrada.getImagenes().size(), "Debería tener 2 imágenes");
+        assertEquals(imagen1.getUrl(), experienciaEncontrada.getImagenes().get(0).getUrl(),
+                "La URL de la primera imagen debería coincidir");
+        assertEquals(imagen2.getUrl(), experienciaEncontrada.getImagenes().get(1).getUrl(),
+                "La URL de la segunda imagen debería coincidir");
         assertNotNull(experienciaEncontrada.getUsuario(), "El usuario no debería ser nulo");
         assertEquals(usuario.getNombre(), experienciaEncontrada.getUsuario().getNombre(),
                 "El nombre del usuario debería coincidir");
 
-        // 🔥 Verificar tecnologías
+        // Verificar tecnologías
         assertNotNull(experienciaEncontrada.getTecnologiasUsadas(),
                 "Las tecnologías usadas no deberían ser nulas");
         assertTrue(experienciaEncontrada.getTecnologiasUsadas().containsAll(
@@ -1100,8 +1268,8 @@ class ExperienciaRepositoryTest {
                         .descripcion("Descripción para enum test con más de 5 caracteres")
                         .link("https://github.com/usuario/enum-test")
                         .tipoExperiencia(tipo)
-                        .tecnologiasUsadas(List.of(tecnologia)) // 🔥 Cambiado a lista
-                        .imagen(imagen)
+                        .tecnologiasUsadas(List.of(tecnologia))
+                        .imagenes(Collections.emptyList())
                         .usuario(usuario)
                         .build();
 
@@ -1131,8 +1299,8 @@ class ExperienciaRepositoryTest {
                 .descripcion("Descripción válida con más de 5 caracteres")
                 .link("https://github.com/usuario/fechas-limite")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
-                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT)) // 🔥 Cambiado a lista
-                .imagen(imagen)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.SPRINGBOOT))
+                .imagenes(Collections.emptyList())
                 .usuario(usuario)
                 .build();
 
@@ -1176,7 +1344,7 @@ class ExperienciaRepositoryTest {
                 .link("https://github.com/usuario/proyecto-multiples")
                 .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
                 .tecnologiasUsadas(tecnologiasMultiples)
-                .imagen(imagen)
+                .imagenes(Collections.emptyList())
                 .usuario(usuario)
                 .build();
 
@@ -1202,5 +1370,111 @@ class ExperienciaRepositoryTest {
                 "Debería tener 5 tecnologías en la BD");
         assertTrue(experienciaEncontrada.getTecnologiasUsadas().containsAll(tecnologiasMultiples),
                 "Debería contener todas las tecnologías en la BD");
+    }
+
+    @Test
+    @DisplayName("save - Debería manejar múltiples imágenes correctamente")
+    void save_ShouldHandleMultipleImagenesCorrectly() {
+        // Arrange - Experiencia con múltiples imágenes
+        List<Imagen> imagenesMultiples = Arrays.asList(
+                Imagen.builder().url("img1.jpg").alt("Imagen 1").build(),
+                Imagen.builder().url("img2.jpg").alt("Imagen 2").build(),
+                Imagen.builder().url("img3.jpg").alt("Imagen 3").build(),
+                Imagen.builder().url("img4.jpg").alt("Imagen 4").build()
+        );
+
+        Experiencia experienciaMultiplesImagenes = Experiencia.builder()
+                .titulo("Proyecto con múltiples imágenes")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 12, 31))
+                .descripcion("Descripción del proyecto con múltiples imágenes con más de 5 caracteres")
+                .link("https://github.com/usuario/proyecto-multiples-imagenes")
+                .tipoExperiencia(TipoExperiencia.PROYECTO_PERSONAL)
+                .tecnologiasUsadas(List.of(TecnologiaUsada.JAVA))
+                .imagenes(imagenesMultiples)
+                .usuario(usuario)
+                .build();
+
+        // Act
+        Experiencia experienciaGuardada = experienciaRepository.save(experienciaMultiplesImagenes);
+
+        // Assert
+        assertNotNull(experienciaGuardada, "La experiencia guardada no debería ser nula");
+        assertNotNull(experienciaGuardada.getId(), "El ID no debería ser nulo");
+        assertNotNull(experienciaGuardada.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(4, experienciaGuardada.getImagenes().size(), "Debería tener 4 imágenes");
+        assertEquals("img1.jpg", experienciaGuardada.getImagenes().get(0).getUrl());
+        assertEquals("img2.jpg", experienciaGuardada.getImagenes().get(1).getUrl());
+        assertEquals("img3.jpg", experienciaGuardada.getImagenes().get(2).getUrl());
+        assertEquals("img4.jpg", experienciaGuardada.getImagenes().get(3).getUrl());
+
+        // Verificar en la base de datos
+        Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
+        assertNotNull(experienciaEncontrada, "La experiencia debería existir en la BD");
+        assertNotNull(experienciaEncontrada.getImagenes(), "La lista de imágenes en la BD no debería ser nula");
+        assertEquals(4, experienciaEncontrada.getImagenes().size(), "Debería tener 4 imágenes en la BD");
+        assertEquals("img1.jpg", experienciaEncontrada.getImagenes().get(0).getUrl());
+        assertEquals("img2.jpg", experienciaEncontrada.getImagenes().get(1).getUrl());
+        assertEquals("img3.jpg", experienciaEncontrada.getImagenes().get(2).getUrl());
+        assertEquals("img4.jpg", experienciaEncontrada.getImagenes().get(3).getUrl());
+    }
+
+    @Test
+    @DisplayName("save - Debería manejar experiencia con imágenes y tecnologías combinadas")
+    void save_ShouldHandleExperienciaWithCombinedImagenesAndTecnologias() {
+        // Arrange - Experiencia con múltiples imágenes y tecnologías
+        List<Imagen> imagenes = Arrays.asList(
+                Imagen.builder().url("proyecto-ui.jpg").alt("UI del proyecto").build(),
+                Imagen.builder().url("proyecto-backend.jpg").alt("Backend del proyecto").build()
+        );
+
+        List<TecnologiaUsada> tecnologias = Arrays.asList(
+                TecnologiaUsada.REACT,
+                TecnologiaUsada.SPRINGBOOT,
+                TecnologiaUsada.MYSQL
+        );
+
+        Experiencia experienciaCompleta = Experiencia.builder()
+                .titulo("Proyecto Full Stack Completo")
+                .fechaInicioProyecto(LocalDate.of(2024, 1, 1))
+                .fechaFinProyecto(LocalDate.of(2024, 12, 31))
+                .descripcion("Descripción del proyecto completo con más de 5 caracteres")
+                .link("https://github.com/usuario/fullstack-completo")
+                .tipoExperiencia(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO)
+                .tecnologiasUsadas(tecnologias)
+                .imagenes(imagenes)
+                .usuario(usuario)
+                .build();
+
+        // Act
+        Experiencia experienciaGuardada = experienciaRepository.save(experienciaCompleta);
+
+        // Assert
+        assertNotNull(experienciaGuardada, "La experiencia guardada no debería ser nula");
+        assertNotNull(experienciaGuardada.getId(), "El ID no debería ser nulo");
+
+        // Verificar imágenes
+        assertNotNull(experienciaGuardada.getImagenes(), "La lista de imágenes no debería ser nula");
+        assertEquals(2, experienciaGuardada.getImagenes().size(), "Debería tener 2 imágenes");
+        assertEquals("proyecto-ui.jpg", experienciaGuardada.getImagenes().get(0).getUrl());
+        assertEquals("proyecto-backend.jpg", experienciaGuardada.getImagenes().get(1).getUrl());
+
+        // Verificar tecnologías
+        assertNotNull(experienciaGuardada.getTecnologiasUsadas(), "Las tecnologías usadas no deberían ser nulas");
+        assertEquals(3, experienciaGuardada.getTecnologiasUsadas().size(), "Debería tener 3 tecnologías");
+        assertTrue(experienciaGuardada.getTecnologiasUsadas().containsAll(tecnologias),
+                "Debería contener todas las tecnologías");
+
+        // Verificar tipo de experiencia
+        assertEquals(TipoExperiencia.TRABAJO_LABORAL_COLABORATIVO, experienciaGuardada.getTipoExperiencia(),
+                "El tipo de experiencia debería ser TRABAJO_LABORAL_COLABORATIVO");
+
+        // Verificar en la base de datos
+        Experiencia experienciaEncontrada = entityManager.find(Experiencia.class, experienciaGuardada.getId());
+        assertNotNull(experienciaEncontrada, "La experiencia debería existir en la BD");
+        assertNotNull(experienciaEncontrada.getImagenes(), "La lista de imágenes en la BD no debería ser nula");
+        assertEquals(2, experienciaEncontrada.getImagenes().size(), "Debería tener 2 imágenes en la BD");
+        assertNotNull(experienciaEncontrada.getTecnologiasUsadas(), "Las tecnologías usadas en la BD no deberían ser nulas");
+        assertEquals(3, experienciaEncontrada.getTecnologiasUsadas().size(), "Debería tener 3 tecnologías en la BD");
     }
 }
