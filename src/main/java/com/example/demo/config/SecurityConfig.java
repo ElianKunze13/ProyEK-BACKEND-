@@ -40,6 +40,12 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
 
+
+    /**modificar white_list para:
+     * -evitar que usuarios se registren
+     * -metodos POST, PUT, DELETE deben estar autenticados para usarse
+     * (en caso que sean de mensajeController, verificar cada metodo)
+     * -*/
     private static final String[] WHITE_LIST = {
             "/api/v1/auth/**", "/api/v1/**", "/api/v1/test/**",
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
