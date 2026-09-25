@@ -70,11 +70,10 @@ public class Usuario implements UserDetails, Source {
     @JsonManagedReference
     private Imagen fotoPortada;
 
-///INCLUIR ATRIBUTO VIDEO
-/*@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-@JoinColumn(name = "video_presentacion_id", referencedColumnName = "id")
-@JsonManagedReference
-private Video videoPresentacion;*/
+/**INCLUIR ATRIBUTO VIDEO Y GUARDAR USANDO IMAGEKIT.IO*/
+//private Video videoPresentacion
+
+/**INCLUIR ATRIBUTO CURRICULO (TIPO PDF O IMAGEN DEFINIR LUEGO)*/
 
 
      private  boolean active=true;
